@@ -1,0 +1,21 @@
+[Unit]
+Description=d2dash - Discovery 2 Td5/SLABS dashboard
+After=network.target
+# restart forever: the ECU goes to sleep with the ignition and the USB cable can be unplugged
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+User=@USER@
+Group=dialout
+EnvironmentFile=/etc/d2dash/d2dash.env
+WorkingDirectory=@APP_DIR@
+ExecStart=@APP_DIR@/venv/bin/python -m d2dash
+Restart=always
+RestartSec=3
+# keep the SD card quiet: logs go to the journal (volatile) and session CSVs to /var/lib/d2dash
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

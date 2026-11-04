@@ -1,0 +1,391 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0b0d10">
+<title>Disco 2</title>
+<style>
+:root{
+  --bg:#0b0d10; --panel:#13171c; --panel2:#1a2027; --line:#242b34;
+  --fg:#e8ecf1; --dim:#8a96a3; --mute:#58636f;
+  --ok:#3fcf7f; --warn:#f2b534; --bad:#ef5350; --info:#4fa3f7;
+  --accent:#e0a33a;
+  --tap:48px;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--fg);
+  font:16px/1.35 -apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  -webkit-user-select:none;user-select:none;overscroll-behavior:none}
+body{display:flex;flex-direction:column;min-height:100vh;min-height:100dvh}
+
+header{display:flex;align-items:center;gap:12px;padding:10px 14px;background:var(--panel);
+  border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5}
+header h1{font-size:17px;margin:0;letter-spacing:.04em;font-weight:600}
+header .spacer{flex:1}
+.pill{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;
+  background:var(--panel2);color:var(--dim);font-size:13px;white-space:nowrap}
+.pill .dot{width:9px;height:9px;border-radius:50%;background:var(--mute)}
+.pill.connected .dot{background:var(--ok);box-shadow:0 0 8px var(--ok)}
+.pill.connecting .dot,.pill.switching .dot{background:var(--warn);animation:blink 1s infinite}
+.pill.error .dot{background:var(--bad)}
+@keyframes blink{50%{opacity:.25}}
+
+nav{display:flex;background:var(--panel);border-bottom:1px solid var(--line)}
+nav button{flex:1;min-height:var(--tap);background:none;border:0;color:var(--dim);
+  font-size:15px;font-weight:600;border-bottom:3px solid transparent;cursor:pointer}
+nav button.on{color:var(--fg);border-bottom-color:var(--accent)}
+nav button .badge{display:inline-block;min-width:20px;padding:1px 6px;margin-left:6px;
+  border-radius:999px;background:var(--bad);color:#fff;font-size:12px}
+nav button .badge:empty{display:none}
+
+main{flex:1;padding:12px;max-width:1100px;width:100%;margin:0 auto}
+section{display:none}section.on{display:block}
+
+.banner{padding:10px 14px;border-radius:10px;background:var(--panel2);color:var(--dim);
+  margin-bottom:12px;font-size:14px;display:none}
+.banner.show{display:block}
+.banner.bad{background:#3a1d1d;color:#ffb3b0}
+.banner.warn{background:#3a2f12;color:#ffd98a}
+
+/* gauges */
+.gauges{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+@media (min-width:700px){.gauges{grid-template-columns:repeat(3,1fr)}}
+@media (min-width:980px){.gauges{grid-template-columns:repeat(4,1fr)}}
+.gauge{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:10px 10px 8px;
+  display:flex;flex-direction:column;align-items:center;position:relative}
+.gauge svg{width:100%;max-width:190px;height:auto;display:block}
+.gauge .val{font-size:34px;font-weight:700;letter-spacing:-.02em;line-height:1;margin-top:-28px;
+  font-variant-numeric:tabular-nums}
+.gauge .unit{font-size:12px;color:var(--dim);margin-top:2px}
+.gauge .lbl{font-size:13px;color:var(--dim);margin-top:6px;text-transform:uppercase;letter-spacing:.08em}
+.gauge.high .val,.gauge.low .val{color:var(--bad)}
+.gauge.suspect .val{color:var(--warn)}
+.gauge .conf{position:absolute;top:8px;right:10px;font-size:10px;color:var(--mute);
+  text-transform:uppercase;letter-spacing:.08em}
+.arc-bg{stroke:var(--line);fill:none;stroke-width:12;stroke-linecap:round}
+.arc{fill:none;stroke-width:12;stroke-linecap:round;stroke:var(--info);transition:stroke-dashoffset .3s}
+.gauge.high .arc,.gauge.low .arc{stroke:var(--bad)}
+.gauge.suspect .arc{stroke:var(--warn)}
+
+/* tiles */
+.tiles{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:12px}
+@media (min-width:700px){.tiles{grid-template-columns:repeat(4,1fr)}}
+.tile{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 12px}
+.tile .k{font-size:12px;color:var(--dim);text-transform:uppercase;letter-spacing:.08em}
+.tile .v{font-size:22px;font-weight:600;margin-top:2px;font-variant-numeric:tabular-nums}
+.tile .v small{font-size:12px;color:var(--dim);font-weight:400;margin-left:4px}
+.tile.high .v,.tile.low .v{color:var(--bad)}.tile.suspect .v{color:var(--warn)}
+
+h2{font-size:14px;color:var(--dim);text-transform:uppercase;letter-spacing:.1em;margin:18px 0 8px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin-bottom:12px}
+.faults{list-style:none;margin:0;padding:0}
+.faults li{padding:10px 0;border-bottom:1px solid var(--line);display:flex;gap:10px;align-items:baseline}
+.faults li:last-child{border-bottom:0}
+.faults .tag{font-size:11px;padding:2px 7px;border-radius:6px;background:var(--panel2);color:var(--dim);
+  white-space:nowrap;text-transform:uppercase;letter-spacing:.06em}
+.faults .tag.cur{background:#3a1d1d;color:#ffb3b0}
+.faults .none{color:var(--ok);padding:10px 0}
+
+.btnrow{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+button.btn{min-height:var(--tap);padding:0 16px;border-radius:10px;border:1px solid var(--line);
+  background:var(--panel2);color:var(--fg);font-size:15px;font-weight:600;cursor:pointer}
+button.btn:active{transform:scale(.98)}
+button.btn.danger{border-color:#6a2a2a;color:#ffb3b0}
+button.btn.primary{background:var(--accent);color:#1a1200;border-color:var(--accent)}
+button.btn:disabled{opacity:.4}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:4px 14px;font-size:14px}
+.kv dt{color:var(--dim)}.kv dd{margin:0;font-variant-numeric:tabular-nums}
+
+/* slabs heights */
+.heights{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.hbar{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px;text-align:center}
+.hbar .track{height:160px;width:34px;margin:8px auto;background:var(--panel2);border-radius:8px;position:relative;overflow:hidden}
+.hbar .fill{position:absolute;left:0;right:0;bottom:0;background:var(--info);transition:height .4s}
+.hbar .band{position:absolute;left:0;right:0;background:rgba(63,207,127,.18);border-top:1px solid var(--ok);border-bottom:1px solid var(--ok)}
+.hbar .val{font-size:30px;font-weight:700}.hbar .lbl{font-size:12px;color:var(--dim);text-transform:uppercase;letter-spacing:.08em}
+
+table{width:100%;border-collapse:collapse;font-size:14px}
+td,th{padding:8px 6px;border-bottom:1px solid var(--line);text-align:left}
+th{color:var(--dim);font-weight:500;font-size:12px;text-transform:uppercase;letter-spacing:.06em}
+td.r{text-align:right;font-variant-numeric:tabular-nums}
+a{color:var(--info)}
+
+/* modal */
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.7);display:none;align-items:center;justify-content:center;z-index:20;padding:20px}
+.modal.show{display:flex}
+.modal .box{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:20px;max-width:420px;width:100%}
+.modal h3{margin:0 0 8px;font-size:18px}.modal p{color:var(--dim);margin:0 0 16px}
+.toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:var(--panel2);
+  border:1px solid var(--line);padding:10px 16px;border-radius:10px;font-size:14px;opacity:0;transition:opacity .2s;pointer-events:none;z-index:30}
+.toast.show{opacity:1}
+footer{padding:8px 14px;color:var(--mute);font-size:12px;text-align:center}
+</style>
+</head>
+<body>
+<header>
+  <h1>DISCO 2</h1>
+  <span id="modpill" class="pill"><span class="dot"></span><span id="modtxt">td5</span></span>
+  <span class="spacer"></span>
+  <span id="stat" class="pill"><span class="dot"></span><span id="stattxt">starting</span></span>
+</header>
+<nav>
+  <button data-tab="drive" class="on">Drive</button>
+  <button data-tab="engine">Engine<span id="bEng" class="badge"></span></button>
+  <button data-tab="slabs">SLABS<span id="bSlabs" class="badge"></span></button>
+  <button data-tab="more">More</button>
+</nav>
+<main>
+  <div id="banner" class="banner"></div>
+
+  <section id="tab-drive" class="on">
+    <div class="banner warn" id="driveNote">Engine is not the active module. <a href="#" onclick="switchModule('td5');return false">Connect engine</a></div>
+    <div class="gauges">
+      <div class="gauge" data-g="rpm"></div>
+      <div class="gauge" data-g="speed"></div>
+      <div class="gauge" data-g="coolant_temp"></div>
+      <div class="gauge" data-g="manifold_press"></div>
+      <div class="gauge" data-g="battery"></div>
+      <div class="gauge" data-g="air_temp"></div>
+    </div>
+    <div class="tiles" id="driveTiles"></div>
+  </section>
+
+  <section id="tab-engine">
+    <div class="card">
+      <h2 style="margin-top:0">Fault codes</h2>
+      <ul class="faults" id="engFaults"><li class="none">—</li></ul>
+      <div class="btnrow">
+        <button class="btn" onclick="switchModule('td5')">Connect engine</button>
+        <button class="btn danger" onclick="confirmCmd('td5','clear_faults','Clear engine fault codes?','This writes to the Td5 ECU. Logged faults are gone for good; note them down first.')">Clear faults</button>
+        <button class="btn" onclick="cmd('read_identity')">ECU identity</button>
+        <button class="btn" onclick="cmd('security_status')">Immobiliser</button>
+      </div>
+      <dl class="kv" id="engIdent" style="margin-top:12px"></dl>
+    </div>
+    <div class="card">
+      <h2 style="margin-top:0">All live values</h2>
+      <table><thead><tr><th>Signal</th><th>Value</th><th>Conf.</th></tr></thead><tbody id="engTable"></tbody></table>
+    </div>
+    <div class="card">
+      <h2 style="margin-top:0">Output tests</h2>
+      <p style="color:var(--dim);font-size:13px;margin:0 0 6px">Engine running, handbrake on. Each one actuates the real component.</p>
+      <div class="btnrow" id="engOutputs"></div>
+    </div>
+  </section>
+
+  <section id="tab-slabs">
+    <div class="banner warn show" id="slabsNote">Switching to SLABS releases the engine session and can take up to 30 seconds of bus silence. Ignition on, vehicle stationary.</div>
+    <div class="heights">
+      <div class="hbar"><div class="lbl">Left</div><div class="track"><div class="band" id="bandL"></div><div class="fill" id="fillL"></div></div><div class="val" id="hL">—</div><div class="lbl" id="hLmm"></div></div>
+      <div class="hbar"><div class="lbl">Right</div><div class="track"><div class="band" id="bandR"></div><div class="fill" id="fillR"></div></div><div class="val" id="hR">—</div><div class="lbl" id="hRmm"></div></div>
+    </div>
+    <div class="tiles" id="slabsTiles"></div>
+    <div class="card" style="margin-top:12px">
+      <h2 style="margin-top:0">Fault codes</h2>
+      <ul class="faults" id="slabsFaults"><li class="none">—</li></ul>
+      <div class="btnrow">
+        <button class="btn primary" onclick="switchModule('slabs')">Connect SLABS</button>
+        <button class="btn danger" onclick="confirmCmd('slabs','clear_faults','Clear SLABS fault codes?','Clears logged and current ABS / suspension faults in the SLABS ECU.')">Clear faults</button>
+      </div>
+    </div>
+    <div class="card">
+      <h2 style="margin-top:0">Air suspension</h2>
+      <div class="btnrow">
+        <button class="btn" onclick="confirmCmd('slabs','raise_left','Raise left?','Runs the compressor and opens the left valve.')">Raise L</button>
+        <button class="btn" onclick="confirmCmd('slabs','raise_right','Raise right?','Runs the compressor and opens the right valve.')">Raise R</button>
+        <button class="btn" onclick="confirmCmd('slabs','lower_left','Lower left?','Opens the left exhaust valve.')">Lower L</button>
+        <button class="btn" onclick="confirmCmd('slabs','lower_right','Lower right?','Opens the right exhaust valve.')">Lower R</button>
+        <button class="btn" onclick="confirmCmd('slabs','compressor','Run compressor?','Short compressor test.')">Compressor</button>
+        <button class="btn" onclick="confirmCmd('slabs','exhaust','Exhaust valve?','Short exhaust valve test.')">Exhaust valve</button>
+        <button class="btn" onclick="confirmCmd('slabs','buzzer','Sound buzzer?','The SLS buzzer in the cabin.')">Buzzer</button>
+      </div>
+    </div>
+    <div class="card">
+      <h2 style="margin-top:0">ABS</h2>
+      <p style="color:var(--dim);font-size:13px;margin:0 0 6px">Bleeding needs the brake system open and a helper on the pedal. Read the workshop procedure first.</p>
+      <div class="btnrow">
+        <button class="btn" onclick="confirmCmd('slabs','wheel_fl','Valve test FL?','Cycles the front-left ABS valve.')">Valve FL</button>
+        <button class="btn" onclick="confirmCmd('slabs','wheel_fr','Valve test FR?','Cycles the front-right ABS valve.')">Valve FR</button>
+        <button class="btn" onclick="confirmCmd('slabs','wheel_rl','Valve test RL?','Cycles the rear-left ABS valve.')">Valve RL</button>
+        <button class="btn" onclick="confirmCmd('slabs','wheel_rr','Valve test RR?','Cycles the rear-right ABS valve.')">Valve RR</button>
+        <button class="btn" onclick="confirmCmd('slabs','pump_on','ABS pump on?','Runs the ABS pump until you press pump off.')">Pump on</button>
+        <button class="btn" onclick="confirmCmd('slabs','pump_off','ABS pump off?','Stops the ABS pump.')">Pump off</button>
+        <button class="btn danger" onclick="confirmCmd('slabs','bleed_power_on','Start power bleed?','Starts the ABS power bleed routine.')">Power bleed start</button>
+        <button class="btn" onclick="confirmCmd('slabs','bleed_power_off','Stop power bleed?','Stops the ABS power bleed routine.')">Power bleed stop</button>
+        <button class="btn danger" onclick="confirmCmd('slabs','bleed_module','Module bleed sequence?','Runs the 4-step ABS modulator bleed. About 10 seconds.')">Module bleed</button>
+      </div>
+    </div>
+  </section>
+
+  <section id="tab-more">
+    <div class="card">
+      <h2 style="margin-top:0">Status</h2>
+      <dl class="kv" id="sysInfo"></dl>
+    </div>
+    <div class="card">
+      <h2 style="margin-top:0">Session logs</h2>
+      <p style="color:var(--dim);font-size:13px;margin:0 0 6px">One CSV per connection, every poll a row. Tap to download; long drives are a few MB.</p>
+      <table><thead><tr><th>File</th><th class="r">Size</th><th></th></tr></thead><tbody id="logTable"></tbody></table>
+      <div class="btnrow"><button class="btn" onclick="loadLogs()">Refresh</button></div>
+    </div>
+  </section>
+</main>
+<footer id="foot">d2dash</footer>
+
+<div class="modal" id="modal"><div class="box">
+  <h3 id="mTitle"></h3><p id="mText"></p>
+  <div class="btnrow"><button class="btn" onclick="closeModal()">Cancel</button><button class="btn danger" id="mGo">Confirm</button></div>
+</div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+// ---------- gauge definitions (drive tab) ----------
+const GAUGES = {
+  rpm:            {label:'RPM',       min:0,   max:5000, fmt:v=>Math.round(v),        warn:v=>v>4500},
+  speed:          {label:'Speed',     min:0,   max:160,  fmt:v=>Math.round(v)},
+  coolant_temp:   {label:'Coolant',   min:40,  max:130,  fmt:v=>Math.round(v),        warn:v=>v>102},
+  manifold_press: {label:'Boost',     min:0.8, max:2.4,  fmt:v=>v.toFixed(2)},
+  battery:        {label:'Battery',   min:10,  max:16,   fmt:v=>v.toFixed(1),         warn:v=>v<12.2||v>15},
+  air_temp:       {label:'Inlet air', min:0,   max:90,   fmt:v=>Math.round(v),        warn:v=>v>70},
+};
+const DRIVE_TILES = ['fuel_temp','maf_sensor','injection_qty','accel_pedal_pct','fuel_rate','economy','ambient_press_1','trip_economy'];
+const SLABS_TILES = ['battery','ecu_supply','brake_analog','any_door','diff_lock','transfer_low','reverse_gear','neutral_gear',
+                     'wheel_speed_fl','wheel_speed_fr','wheel_speed_rl','wheel_speed_rr'];
+const TD5_OUTPUTS = ['fuel_pump','mil_lamp','ac_clutch','ac_fan','glow_plugs','rev_counter','temp_gauge','egr_throttle','wastegate'];
+
+const $ = id => document.getElementById(id);
+const nice = k => k.replace(/_/g,' ');
+
+// ---------- build gauges ----------
+const R=64, C=2*Math.PI*R, SWEEP=0.75; // 270° arc
+document.querySelectorAll('.gauge').forEach(el=>{
+  const g = GAUGES[el.dataset.g];
+  el.innerHTML = `<span class="conf"></span>
+    <svg viewBox="0 0 160 150"><g transform="rotate(135 80 80)">
+      <circle class="arc-bg" cx="80" cy="80" r="${R}" stroke-dasharray="${C*SWEEP} ${C}"/>
+      <circle class="arc" cx="80" cy="80" r="${R}" stroke-dasharray="${C*SWEEP} ${C}" stroke-dashoffset="${C*SWEEP}"/>
+    </g></svg>
+    <div class="val">—</div><div class="unit"></div><div class="lbl">${g.label}</div>`;
+});
+function setGauge(el, sig){
+  const g = GAUGES[el.dataset.g];
+  if(!sig){ el.querySelector('.val').textContent='—'; el.className='gauge'; return; }
+  const v = sig.v, f = Math.min(1,Math.max(0,(v-g.min)/(g.max-g.min)));
+  el.querySelector('.arc').style.strokeDashoffset = C*SWEEP*(1-f);
+  el.querySelector('.val').textContent = g.fmt(v);
+  el.querySelector('.unit').textContent = sig.u||'';
+  el.querySelector('.conf').textContent = sig.c==='candidate'?'unverified':'';
+  let cls='gauge';
+  if(sig.s==='high'||sig.s==='low'||(g.warn&&g.warn(v))) cls+=' high';
+  else if(sig.s==='suspect') cls+=' suspect';
+  el.className=cls;
+}
+function tile(k,sig){
+  const cls = sig && (sig.s==='high'||sig.s==='low') ? 'tile '+sig.s : sig&&sig.s==='suspect'?'tile suspect':'tile';
+  const v = sig ? (Number.isInteger(sig.v)?sig.v:Number(sig.v).toFixed(1)) : '—';
+  return `<div class="${cls}"><div class="k">${nice(k)}</div><div class="v">${v}<small>${sig?sig.u||'':''}</small></div></div>`;
+}
+function faultList(ul, faults){
+  if(!faults||!faults.length){ ul.innerHTML='<li class="none">No faults stored</li>'; return; }
+  ul.innerHTML = faults.map(f=>{
+    const m = f.match(/^(.*?)\s*\((Current|Logged[^)]*)\)\s*$/);
+    const name = m?m[1]:f, tag = m?m[2]:'';
+    return `<li><span class="tag ${/Current/.test(tag)?'cur':''}">${tag||'fault'}</span><span>${name}</span></li>`;
+  }).join('');
+}
+
+// ---------- state ----------
+let snap=null, status=null, lastFaults={td5:[],slabs:[]};
+
+function render(s){
+  snap=s;
+  $('modtxt').textContent = s.module.toUpperCase();
+  $('modpill').className = 'pill '+s.status;
+  $('stat').className = 'pill '+s.status;
+  $('stattxt').textContent = s.status==='connected' ? (s.stale?'stale':`live · ${s.age??0}s`) : (s.progress||s.status);
+  const b=$('banner');
+  if(s.status==='error'){ b.className='banner bad show'; b.textContent='No ECU: '+(s.error||'retrying…')+' (ignition on? cable in?)'; }
+  else if(s.status!=='connected'){ b.className='banner warn show'; b.textContent=s.progress||s.status; }
+  else b.className='banner';
+
+  const sig = s.signals||{};
+  $('driveNote').classList.toggle('show', s.module!=='td5');
+  if(s.module==='td5'){
+    lastFaults.td5 = s.faults||[];
+    document.querySelectorAll('.gauge').forEach(el=>setGauge(el, sig[el.dataset.g]));
+    $('driveTiles').innerHTML = DRIVE_TILES.filter(k=>sig[k]).map(k=>tile(k,sig[k])).join('');
+    $('engTable').innerHTML = Object.keys(sig).sort().map(k=>`<tr><td>${nice(k)}</td><td class="r">${sig[k].v} ${sig[k].u||''}</td><td style="color:var(--mute)">${sig[k].c||''}</td></tr>`).join('');
+  } else if(s.module==='slabs'){
+    lastFaults.slabs = s.faults||[];
+    const L=sig.height_left, Rr=sig.height_right;
+    setHeight('L', L, sig.height_left_mm); setHeight('R', Rr, sig.height_right_mm);
+    $('slabsTiles').innerHTML = SLABS_TILES.filter(k=>sig[k]).map(k=>tile(k,sig[k])).join('');
+  }
+  faultList($('engFaults'), lastFaults.td5);
+  faultList($('slabsFaults'), lastFaults.slabs);
+  $('bEng').textContent = lastFaults.td5.length||'';
+  $('bSlabs').textContent = lastFaults.slabs.length||'';
+}
+function setHeight(side, sig, mm){
+  // raw counts 100..200 shown on the bar, normal band 135-165
+  const track=160, lo=100, hi=200;
+  if(!sig){ $('h'+side).textContent='—'; return; }
+  const f=Math.min(1,Math.max(0,(sig.v-lo)/(hi-lo)));
+  $('fill'+side).style.height=(f*track)+'px';
+  const band=$('band'+side); band.style.bottom=((135-lo)/(hi-lo)*track)+'px'; band.style.height=((165-135)/(hi-lo)*track)+'px';
+  $('h'+side).textContent=Math.round(sig.v);
+  $('h'+side+'mm').textContent = mm ? Math.round(mm.v)+' mm' : 'raw';
+}
+
+// ---------- live feed ----------
+function connect(){
+  const es = new EventSource('/api/events');
+  es.onmessage = e => render(JSON.parse(e.data));
+  es.onerror = () => { es.close(); $('stattxt').textContent='reconnecting'; setTimeout(connect, 2000); };
+}
+fetch('/api/snapshot').then(r=>r.json()).then(render).finally(connect);
+fetch('/api/status').then(r=>r.json()).then(s=>{
+  status=s;
+  $('foot').textContent=`d2dash ${s.version} · ${s.simulate?'SIMULATOR':s.port}`;
+  $('sysInfo').innerHTML=Object.entries(s).map(([k,v])=>`<dt>${k}</dt><dd>${Array.isArray(v)?v.join(', '):v}</dd></dt>`).join('');
+});
+
+// ---------- tabs ----------
+document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('nav button').forEach(x=>x.classList.toggle('on',x===b));
+  document.querySelectorAll('main section').forEach(s=>s.classList.toggle('on',s.id==='tab-'+b.dataset.tab));
+  if(b.dataset.tab==='more') loadLogs();
+});
+
+// ---------- actions ----------
+function toast(msg, bad){ const t=$('toast'); t.textContent=msg; t.style.borderColor=bad?'var(--bad)':'var(--line)'; t.classList.add('show'); clearTimeout(t._h); t._h=setTimeout(()=>t.classList.remove('show'),3500); }
+async function post(url, body){ const r=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}); return r.json(); }
+async function switchModule(m){ const r=await post('/api/module',{module:m}); toast(r.message||r.error,!r.ok); }
+async function cmd(action, confirm){
+  const r=await post('/api/command',{action,confirm:!!confirm});
+  toast(r.message||r.error,!r.ok);
+  if(r.identity){ $('engIdent').innerHTML=Object.entries(r.identity).map(([k,v])=>`<dt>${nice(k)}</dt><dd>${v}</dd>`).join(''); }
+  return r;
+}
+let pending=null;
+function confirmCmd(module, action, title, text){
+  if(snap && snap.module!==module){ toast(`Connect ${module.toUpperCase()} first`, true); return; }
+  if(snap && snap.status!=='connected'){ toast('Not connected', true); return; }
+  pending=action; $('mTitle').textContent=title; $('mText').textContent=text; $('modal').classList.add('show');
+}
+function closeModal(){ $('modal').classList.remove('show'); pending=null; }
+$('mGo').onclick=()=>{ const a=pending; closeModal(); if(a) cmd(a,true); };
+$('engOutputs').innerHTML = TD5_OUTPUTS.map(o=>`<button class="btn" onclick="confirmCmd('td5','output_${o}','Test ${nice(o)}?','Actuates the ${nice(o)} output for a moment.')">${nice(o)}</button>`).join('')
+  + [1,2,3,4,5].map(n=>`<button class="btn" onclick="confirmCmd('td5','injector_${n}','Pulse injector ${n}?','Fires injector ${n} once. Engine running.')">Inj ${n}</button>`).join('');
+
+async function loadLogs(){
+  const r=await fetch('/api/logs').then(r=>r.json());
+  $('logTable').innerHTML = r.logs.map(l=>`<tr><td><a href="/api/logs/${l.name}">${l.name}</a></td><td class="r">${(l.size/1024).toFixed(0)} KB</td><td class="r"><button class="btn" style="min-height:36px;padding:0 10px" onclick="delLog('${l.name}')">✕</button></td></tr>`).join('') || '<tr><td colspan=3 style="color:var(--mute)">No logs yet</td></tr>';
+}
+async function delLog(n){ await fetch('/api/logs/'+n,{method:'DELETE'}); loadLogs(); }
+</script>
+</body>
+</html>
