@@ -146,3 +146,41 @@ def test_fault_reference_endpoint(engine):
         assert font.headers["Content-Type"] == "font/woff"
     finally:
         httpd.shutdown()
+
+
+def test_static_route_cannot_escape(engine):
+    httpd = ThreadingHTTPServer(("127.0.0.1", 0), make_handler(engine))
+    httpd.daemon_threads = True
+    threading.Thread(target=httpd.serve_forever, daemon=True).start()
+    base = f"http://127.0.0.1:{httpd.server_address[1]}"
+    try:
+        for bad in ("/static//etc/passwd", "/static/../engine.py", "/static/fonts/../../engine.py",
+                    "/static/%2e%2e/engine.py"):
+            with pytest.raises(urllib.error.HTTPError) as ei:
+                urllib.request.urlopen(base + bad)
+            assert ei.value.code == 404, bad
+        assert urllib.request.urlopen(base + "/static/fonts/inter-text-500.woff").status == 200
+    finally:
+        httpd.shutdown()
+
+
+def test_unplugged_sensor_board_hides_its_values():
+    from d2dash.sensors import SerialSensors, STALE_AFTER
+    s = SerialSensors(port="none")
+    s._ingest({"egt": 500})
+    assert s.latest()["signals"]
+    s._updated -= STALE_AFTER + 1          # no line for a while
+    out = s.latest()
+    assert out["status"] == "stale" and out["signals"] == {}
+    s._ingest({"egt": 501})
+    with s._lock:
+        s._status, s._error = "error", "unplugged"
+    out = s.latest()
+    assert out["status"] == "error" and out["signals"] == {}
+
+
+def test_command_pinned_to_module(engine):
+    wait_connected(engine, "td5")
+    engine.request_module("slabs")
+    r = engine.command("clear_faults", confirm=True)
+    assert r["ok"] is False and "switch" in r["error"]

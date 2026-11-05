@@ -124,7 +124,9 @@ void loop() {
   if (haveMcp) {
     egt = mcp.readThermocouple();
     boardTemp = mcp.readAmbient();
-    if (mcp.getStatus() & MCP9600_STATUS_OPEN) egt = NAN;   // probe unplugged
+    // The MCP9600 (unlike the 9601) has no open-circuit flag: an unplugged probe reads
+    // garbage, so anything outside what a K-type can physically report is treated as absent.
+    if (isnan(egt) || egt < -50.0f || egt > 1350.0f) egt = NAN;
   }
   if (haveAds) {
     float v0 = adsVolts(0) * OILP_DIVIDER;
@@ -153,8 +155,7 @@ void loop() {
   printField("fuel_level", fuel, 0, first);
   printField("board_temp", boardTemp, 1, first);
   printField("vin", vin, 2, first);
-  printField("alarm", alarm ? 1.0f : 0.0f, 0, first);
+  printField("alarm", alarm ? 1.0f : 0.0f, 0, first);   // always present, so the line is never empty
   printField("up", now / 1000.0f, 0, first);
-  if (first) Serial.print("{");
   Serial.println("}");
 }

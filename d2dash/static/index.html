@@ -648,22 +648,26 @@ function render(s){
   else n.className='note';
 
   const sig=s.signals||{};
-  const sens=(s.sensors&&s.sensors.signals)||{};
+  const sens=(s.sensors&&s.sensors.status==='connected'&&s.sensors.signals)||{};
   $('driveNote').classList.toggle('show', s.module!=='td5');
   $('engNote').classList.toggle('show', s.module!=='td5');
   $('slabsNote').classList.toggle('show', s.module!=='slabs');
   if(s.module==='td5'){ lastFaults.td5=s.faults||[]; lastSig.td5=sig; }
   if(s.module==='slabs'){ lastFaults.slabs=s.faults||[]; lastSig.slabs=sig; }
 
-  // Drive: engine signals (last known) + sensor board (always live)
-  const eng=lastSig.td5, all=Object.assign({}, eng, sens);
+  // Drive: engine signals (last known, shown dimmed when not live) + sensor board (live only)
+  const eng=lastSig.td5, liveEng = s.module==='td5' && s.status==='connected' && !s.stale;
+  const all=Object.assign({}, eng, sens);
+  // gates like "rpm > 1200" must never run on stale engine data: without a live engine feed
+  // the oil-pressure check falls back to the board's own oil temperature (warm = running)
+  const gateCtx=Object.assign({}, liveEng?eng:{}, sens);
+  if(!liveEng && sens.oil_temp && sens.oil_temp.v>60) gateCtx.rpm={v:1500};
   worst={lvl:'',txt:''};
-  document.querySelectorAll('.hero').forEach(el=>setHero(el, all[el.dataset.g], all));
-  document.querySelectorAll('.bar').forEach(el=>setBar(el, all[el.dataset.b], all));
-  $('strip').innerHTML=STRIP.filter(k=>all[k]).map(k=>stripItem(k,all[k],all)).join('');
-  const liveEng = s.module==='td5' && s.status==='connected';
+  document.querySelectorAll('.hero').forEach(el=>setHero(el, all[el.dataset.g], gateCtx));
+  document.querySelectorAll('.bar').forEach(el=>setBar(el, all[el.dataset.b], gateCtx));
+  $('strip').innerHTML=STRIP.filter(k=>all[k]).map(k=>stripItem(k,all[k],gateCtx)).join('');
   Object.keys(G).forEach(k=>{ if(!all[k]) return; if(!liveEng && !SENSOR_KEYS.includes(k)) return;
-    const l=level(k,all[k],all); if(l&&(l==='bad'||!worst.lvl)&&worst.lvl!=='bad'){ worst={lvl:l,txt:`${G[k].label} ${G[k].fmt(all[k].v)} ${G[k].unit}`}; } });
+    const l=level(k,all[k],gateCtx); if(l&&(l==='bad'||!worst.lvl)&&worst.lvl!=='bad'){ worst={lvl:l,txt:`${G[k].label} ${G[k].fmt(all[k].v)} ${G[k].unit}`}; } });
 
   // Engine pages
   renderInputs($('engInputs'), TD5_INPUTS, eng, eng);
@@ -748,7 +752,9 @@ $('threshTable').innerHTML=Object.keys(G).filter(k=>G[k].warn||G[k].alarm).map(k
 function connect(){
   const es=new EventSource('/api/events');
   es.onmessage=e=>render(JSON.parse(e.data));
-  es.onerror=()=>{ es.close(); $('stateTxt').textContent='reconnecting'; $('state').className='state error'; setTimeout(connect,2000); };
+  es.onerror=()=>{ es.close(); $('stateTxt').textContent='reconnecting'; $('state').className='state error';
+    worst={lvl:'',txt:''}; updateAlarm();   // no feed, no alarm: never beep on data that stopped arriving
+    setTimeout(connect,2000); };
 }
 fetch('/api/snapshot').then(r=>r.json()).then(render).finally(connect);
 fetch('/api/status').then(r=>r.json()).then(s=>{
@@ -772,7 +778,7 @@ document.querySelectorAll('.sub').forEach(sub=>{
   };
   sub.querySelectorAll('button').forEach(b=>b.onclick=()=>pick(b.dataset.sub));
   let saved=null; try{ saved=localStorage.getItem('d2dash.sub.'+tab); }catch(e){}
-  if(saved) pick(saved);
+  if(saved && sub.querySelector(`button[data-sub="${saved}"]`)) pick(saved);
 });
 
 // ============ actions ============

@@ -69,10 +69,11 @@ fi
 echo "==> systemd service"
 sed "s|@APP_DIR@|$APP_DIR|g; s|@USER@|$SERVICE_USER|g" \
   "$REPO_DIR/deploy/d2dash.service" > /etc/systemd/system/d2dash.service
-# allow binding port 80 without root
-setcap 'cap_net_bind_service=+ep' "$(readlink -f "$APP_DIR/venv/bin/python")"
+# port 80 comes from AmbientCapabilities in the unit; undo the old setcap on the system python
+setcap -r "$(readlink -f "$APP_DIR/venv/bin/python")" 2>/dev/null || true
 systemctl daemon-reload
-systemctl enable --now d2dash.service
+systemctl enable d2dash.service
+systemctl restart d2dash.service
 
 if [[ "$ENABLE_HOTSPOT" == "yes" ]]; then
   echo "==> wifi hotspot $HOTSPOT_SSID"

@@ -68,9 +68,12 @@ class SerialSensors:
         with self._lock:
             age = time.time() - self._updated if self._updated else None
             stale = age is not None and age > STALE_AFTER
-            return {"status": "stale" if (self._status == "connected" and stale) else self._status,
-                    "port": self._port, "error": self._error, "age": round(age, 1) if age is not None else None,
-                    "signals": dict(self._signals)}
+            status = "stale" if (self._status == "connected" and stale) else self._status
+            # Only a live board gets to put numbers on the dashboard: an unplugged board must
+            # not leave the last EGT reading on the dial or keep an alarm ringing.
+            return {"status": status, "port": self._port, "error": self._error,
+                    "age": round(age, 1) if age is not None else None,
+                    "signals": dict(self._signals) if status == "connected" else {}}
 
     # ---- worker ----------------------------------------------------------------------
 

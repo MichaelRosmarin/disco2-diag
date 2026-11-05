@@ -133,9 +133,9 @@ def make_handler(engine: Engine):
                     return self._json({"error": "not found"}, HTTPStatus.NOT_FOUND)
                 return self._file(p, "text/csv", download=os.path.basename(p))
             if path.startswith("/static/"):
-                rel = os.path.normpath(path[len("/static/"):])
-                p = os.path.join(STATIC, rel)
-                if not rel.startswith("..") and os.path.isfile(p):
+                rel = path[len("/static/"):].lstrip("/")
+                p = os.path.realpath(os.path.join(STATIC, rel))
+                if p.startswith(os.path.realpath(STATIC) + os.sep) and os.path.isfile(p):
                     ctype = {"css": "text/css", "js": "application/javascript", "svg": "image/svg+xml",
                              "woff": "font/woff", "woff2": "font/woff2",
                              "png": "image/png"}.get(rel.rsplit(".", 1)[-1], "application/octet-stream")

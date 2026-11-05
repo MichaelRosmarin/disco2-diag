@@ -66,20 +66,21 @@ class Snapshot:
 class SessionLog:
     """One CSV per (module, connection). Columns are fixed from the first row that has data."""
 
-    def __init__(self, log_dir: str, module: str) -> None:
+    def __init__(self, log_dir: str, module: str, extra_fields: list[str] | None = None) -> None:
         os.makedirs(log_dir, exist_ok=True)
         stamp = datetime.now().strftime("%Y%m%d-%H%M%S")
         self.path = os.path.join(log_dir, f"{stamp}-{module}.csv")
         self._fh = None
         self._writer = None
         self._fields: list[str] = []
+        self._extra = list(extra_fields or [])   # columns to reserve even if absent in row one
         self._rows = 0
 
     def write(self, signals: dict, faults: list) -> None:
         if not signals:
             return
         if self._writer is None:
-            self._fields = ["time", *sorted(signals), "faults"]
+            self._fields = ["time", *sorted(set(signals) | set(self._extra)), "faults"]
             self._fh = open(self.path, "a", newline="", buffering=1)
             self._writer = csv.DictWriter(self._fh, fieldnames=self._fields, extrasaction="ignore")
             self._writer.writeheader()
@@ -112,7 +113,7 @@ class Engine:
         self._stop = threading.Event()
         self._thread = threading.Thread(target=self._run, name="d2dash-poller", daemon=True)
         self._log: SessionLog | None = None
-        self._cmd_queue: list[tuple[str, dict, threading.Event, dict]] = []
+        self._cmd_queue: list[tuple[str, str, dict, threading.Event, dict]] = []
         self.started = time.time()
 
     # ---- public API ------------------------------------------------------------------
@@ -175,16 +176,19 @@ class Engine:
     def command(self, action: str, params: dict | None = None, *, confirm: bool = False) -> dict:
         """Run an ECU command on the poller thread (the serial port is not thread-safe)."""
         params = params or {}
-        module = self._module
-        if action in WRITE_ACTIONS.get(module, set()):
-            if not confirm:
-                return {"ok": False, "error": f"'{action}' writes to the {module} ECU; confirm first"}
-        elif action not in READ_ACTIONS.get(module, set()):
-            return {"ok": False, "error": f"unknown command for {module}: {action}"}
-        done = threading.Event()
-        result: dict = {}
         with self._lock:
-            self._cmd_queue.append((action, params, done, result))
+            module = self._module
+            if self._requested is not None and self._requested != module:
+                return {"ok": False, "error": "module switch in progress; try again once connected"}
+            if action in WRITE_ACTIONS.get(module, set()):
+                if not confirm:
+                    return {"ok": False, "error": f"'{action}' writes to the {module} ECU; confirm first"}
+            elif action not in READ_ACTIONS.get(module, set()):
+                return {"ok": False, "error": f"unknown command for {module}: {action}"}
+            done = threading.Event()
+            result: dict = {}
+            # the module is pinned to the command: if a switch lands first, the poller refuses it
+            self._cmd_queue.append((module, action, params, done, result))
         if not done.wait(timeout=60):
             return {"ok": False, "error": "command timed out"}
         return result
@@ -242,7 +246,11 @@ class Engine:
             # 2. queued commands run on this thread, between polls
             with self._lock:
                 cmds, self._cmd_queue = self._cmd_queue, []
-            for action, params, done, result in cmds:
+            for module, action, params, done, result in cmds:
+                if module != self._module:
+                    result.update({"ok": False, "error": f"'{action}' was for {module} but {self._module} is active now"})
+                    done.set()
+                    continue
                 try:
                     result.update(src.command(action, params))
                 except Exception as exc:  # noqa: BLE001
@@ -259,7 +267,11 @@ class Engine:
                         "signals": {}, "faults": []}
             connected = data.get("status") == "connected"
             if connected and not was_connected:
-                self._log = SessionLog(self.cfg.log_dir, self._module)
+                extra = []
+                if self.sensors is not None:
+                    from .sensors import UNITS as SENSOR_UNITS
+                    extra = ["sensor_" + k for k in SENSOR_UNITS]
+                self._log = SessionLog(self.cfg.log_dir, self._module, extra_fields=extra)
                 log.info("%s connected; logging to %s", self._module, self._log.path)
             if not connected and was_connected:
                 log.warning("%s lost: %s", self._module, data.get("error", ""))

@@ -11,6 +11,10 @@ Group=dialout
 EnvironmentFile=/etc/d2dash/d2dash.env
 WorkingDirectory=@APP_DIR@
 ExecStart=@APP_DIR@/venv/bin/python -m d2dash
+# port 80 as an unprivileged user, without setcap on the system interpreter
+AmbientCapabilities=CAP_NET_BIND_SERVICE
+CapabilityBoundingSet=CAP_NET_BIND_SERVICE
+NoNewPrivileges=yes
 Restart=always
 RestartSec=3
 # keep the SD card quiet: logs go to the journal (volatile) and session CSVs to /var/lib/d2dash
