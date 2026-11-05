@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=61"]
+requires = ["setuptools>=77"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -8,7 +8,7 @@ version = "0.1.0"
 description = "In-car dashboard for a Land Rover Discovery 2 Td5: engine + SLABS live data and faults on a Raspberry Pi"
 readme = "README.md"
 requires-python = ">=3.9"
-license = { text = "AGPL-3.0-or-later" }
+license = "AGPL-3.0-or-later"
 # Runtime deps are the Ostler platform and its Discovery 2 pack. Neither is on PyPI yet:
 #   pip install "openostler @ git+https://github.com/openostler/ostler@main"
 #   pip install "d2diag @ git+https://github.com/openostler/ostler-pack-lr-d2@main"
