@@ -53,21 +53,35 @@ python -m d2dash --port /dev/ttyUSB0 --http-port 8080   # needs openostler + d2d
 
 Then open http://localhost:8080/.
 
+## The dashboard
+
+- **Drive**: dials for coolant, boost, EGT and oil pressure with amber/red zones on the face,
+  bars for revs, oil and gearbox temperature, a strip of secondaries. An alarm band under the
+  tabs goes amber (watch) or red (out of range), beeps on the phone until snoozed, and the
+  thresholds are listed under More.
+- **Engine** and **SLABS** follow the Nanocom's layout: Faults (with the likely cause under each),
+  Inputs (every decoded value, in the Nanocom's order), Settings, Outputs, Utilities. Items the
+  library has not decoded yet are listed as pending, so the menu is the full Nanocom menu.
+  See `docs/nanocom-parity.md` for the item-by-item status.
+- **More**: alarm sound, sensor-board status, session logs, system info.
+
 ## How it works
 
 K-line is one shared bus, so only one ECU is active at a time. The poller thread streams the
 Td5 at 2 Hz by default (the Drive tab). Tapping *Connect SLABS* releases the engine session and
 establishes SLABS, which needs up to about 30 s of bus silence first; SLABS is then polled at
-1 Hz, the most it tolerates. *Connect engine* switches back.
+1 Hz, the most it tolerates. *Connect engine* switches back. The ESP32 sensor board is a second
+serial device on its own thread, so EGT and oil pressure stay live whichever ECU holds the bus.
 
 Reads happen automatically. Anything that writes to an ECU or moves hardware (clear faults,
 output tests, suspension raise/lower, ABS bleed) is refused by the server unless the request
 carries `confirm: true`, which the page only sends after an on-screen prompt.
 
 ```
-Td5 ECU ─┐                          ┌─ phone / tablet (Safari, Chrome)
-         ├─ K-line ─ FTDI ─ Pi ─ HTTP + SSE ─┤
-SLABS ───┘        (d2diag)  (d2dash)         └─ 7" touchscreen (kiosk Chromium)
+Td5 ECU ─┐                                       ┌─ phone / tablet (Safari, Chrome)
+         ├─ K-line ─ FTDI (/dev/kline) ─┐        │
+SLABS ───┘                              ├─ Pi ─ HTTP + SSE ─┤
+ESP32 sensor board ─ USB (/dev/sensors) ┘  (d2diag + d2dash) └─ 7" touchscreen (deploy/kiosk.sh)
 ```
 
 ### API
@@ -78,27 +92,34 @@ SLABS ───┘        (d2diag)  (d2dash)         └─ 7" touchscreen (kios
 | `GET /api/events` | Server-Sent Events stream, one event per poll |
 | `POST /api/module` | `{"module":"td5"\|"slabs"}` |
 | `POST /api/command` | `{"action":"clear_faults","confirm":true}` and the other actions in `d2dash/engine.py` |
-| `GET /api/logs`, `GET /api/logs/<file>` | session CSVs |
+| `GET /api/faults/reference` | `{module: {fault name: likely cause}}` |
+| `GET /api/logs`, `GET /api/logs/<file>` | session CSVs (ECU columns plus `sensor_*`) |
 
 The same feed is what ESP32 gauges will read later (over serial from the Pi, not WiFi).
 
 ## Repository layout
 
 ```
-d2dash/            the service: engine.py (poller), server.py (HTTP/SSE), sim.py, static/index.html
-deploy/            install.sh, systemd unit, hotspot.sh, readonly.sh
+d2dash/            the service: engine.py (poller), server.py (HTTP/SSE), sensors.py (ESP32 board),
+                   sim.py, static/index.html, data/ (fault dictionaries, CC BY-SA)
+deploy/            install.sh, systemd unit, udev rules, hotspot.sh, readonly.sh, kiosk.sh
+esp32/sensor-board Arduino sketch + wiring notes for the EGT / oil / gearbox / fuel board
 tests/             pytest, runs against the simulator
-docs/              build notes and roadmap
+docs/              roadmap and the Nanocom parity map
 ```
 
 ## Status
 
 - [x] Service, dashboard, simulator, Pi install scripts
+- [x] Pi flashed, on the network, service running (5 Nov 2026)
+- [x] Nanocom-style Engine / SLABS pages with fault causes
+- [x] Sensor-board source, firmware and kiosk script written (untested on hardware)
 - [ ] First run against the car (Td5 live data, fault read)
 - [ ] SLABS in the car
-- [ ] Kiosk mode for the plug-in touchscreen
-- [ ] ESP32 sensor board: EGT, oil pressure, oil temperature
+- [ ] Sensor board built and calibrated
+- [ ] Touchscreen in the dash
 - [ ] ESP32 round gauges over serial/RS485
+- [ ] Other ECUs (BCU, auto box, airbag, ACE) as the library decodes them
 
 ## Licence
 
