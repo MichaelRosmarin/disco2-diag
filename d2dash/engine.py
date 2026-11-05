@@ -55,6 +55,7 @@ class Snapshot:
     polls: int = 0
     log_file: str = ""
     seq: int = 0
+    sensors: dict = field(default_factory=lambda: {"status": "none", "signals": {}})
 
     def as_dict(self) -> dict:
         d = self.__dict__.copy()
@@ -99,9 +100,10 @@ class SessionLog:
 
 
 class Engine:
-    def __init__(self, cfg: Config, sources: dict[str, Any]) -> None:
+    def __init__(self, cfg: Config, sources: dict[str, Any], sensors: Any = None) -> None:
         self.cfg = cfg
         self.sources = sources
+        self.sensors = sensors            # SerialSensors or None; polled on its own thread
         self._module = cfg.default_module if cfg.default_module in sources else next(iter(sources))
         self._requested: str | None = None
         self._snap = Snapshot(module=self._module)
@@ -117,20 +119,43 @@ class Engine:
 
     def start(self) -> None:
         self._thread.start()
+        if self.sensors is not None:
+            self.sensors.on_update = self._sensors_updated
+            self.sensors.start()
 
     def stop(self) -> None:
         self._stop.set()
+        if self.sensors is not None:
+            self.sensors.stop()
         self._thread.join(timeout=10)
         self._disconnect_current()
 
     def snapshot(self) -> dict:
         with self._lock:
-            return self._snap.as_dict()
+            return self._snap_dict()
 
     def wait_for_change(self, seq: int, timeout: float) -> dict:
         with self._cv:
             self._cv.wait_for(lambda: self._snap.seq != seq, timeout=timeout)
-            return self._snap.as_dict()
+            return self._snap_dict()
+
+    def _snap_dict(self) -> dict:
+        """Caller holds the lock. Sensor data is merged at read time so it is never older
+        than the snapshot it rides in."""
+        d = self._snap.as_dict()
+        if self.sensors is not None:
+            d["sensors"] = self.sensors.latest()
+        return d
+
+    def _sensors_updated(self) -> None:
+        # The sensor thread ticks a few times a second; coalesce so SSE clients see at most
+        # one push per ~250 ms from this side (ECU polls push on their own).
+        now = time.monotonic()
+        if now - getattr(self, "_last_sensor_bump", 0.0) < 0.25:
+            return
+        self._last_sensor_bump = now
+        with self._lock:
+            self._bump()
 
     def modules(self) -> list[str]:
         return list(self.sources)
@@ -244,7 +269,11 @@ class Engine:
             was_connected = connected
             if connected and self._log:
                 try:
-                    self._log.write(data.get("signals", {}), data.get("faults", []))
+                    row = dict(data.get("signals", {}))
+                    if self.sensors is not None:
+                        for k, v in self.sensors.latest().get("signals", {}).items():
+                            row["sensor_" + k] = v
+                    self._log.write(row, data.get("faults", []))
                 except Exception as exc:  # noqa: BLE001
                     log.warning("log write failed: %s", exc)
 

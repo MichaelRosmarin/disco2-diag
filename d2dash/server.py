@@ -8,6 +8,7 @@ Routes:
     GET  /api/events            SSE stream of snapshots (one event per poll)
     POST /api/module            {"module": "td5"|"slabs"}  switch the active ECU
     POST /api/command           {"action": "...", "params": {}, "confirm": true}
+    GET  /api/faults/reference  {module: {fault name: likely cause}}
     GET  /api/logs              list session CSVs
     GET  /api/logs/<name>       download one
     DELETE /api/logs/<name>     remove one
@@ -27,7 +28,32 @@ from .engine import Engine
 
 log = logging.getLogger("d2dash.server")
 STATIC = os.path.join(os.path.dirname(__file__), "static")
+DATA = os.path.join(os.path.dirname(__file__), "data")
 _SAFE_NAME = re.compile(r"^[A-Za-z0-9._-]+\.csv$")
+_fault_ref_cache: dict | None = None
+
+
+def fault_reference() -> dict:
+    """{module: {fault name: cause}} from d2diag's dictionaries when installed, else the
+    vendored copies in d2dash/data (same data, CC BY-SA, see data/README.md)."""
+    global _fault_ref_cache
+    if _fault_ref_cache is not None:
+        return _fault_ref_cache
+    out: dict = {}
+    for mod in ("td5", "slabs"):
+        rows = None
+        try:
+            from importlib import resources
+            rows = json.loads((resources.files("d2diag") / "dtc" / f"{mod}.json").read_text("utf-8"))
+        except Exception:  # noqa: BLE001 - d2diag absent (simulator) or layout changed
+            try:
+                with open(os.path.join(DATA, f"dtc-{mod}.json"), encoding="utf-8") as fh:
+                    rows = json.load(fh)
+            except OSError:
+                rows = []
+        out[mod] = {r["name"]: r.get("cause", "") for r in rows if r.get("name")}
+    _fault_ref_cache = out
+    return out
 
 
 def make_handler(engine: Engine):
@@ -97,6 +123,8 @@ def make_handler(engine: Engine):
                 return self._json(engine.snapshot())
             if path == "/api/events":
                 return self._sse()
+            if path == "/api/faults/reference":
+                return self._json(fault_reference())
             if path == "/api/logs":
                 return self._json({"logs": self._list_logs()})
             if path.startswith("/api/logs/"):

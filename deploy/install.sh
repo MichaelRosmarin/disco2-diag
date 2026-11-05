@@ -42,18 +42,28 @@ fi
   "d2diag @ git+https://github.com/openostler/ostler-pack-lr-d2@main"
 "$APP_DIR/venv/bin/pip" install -q -e "$REPO_DIR"
 
+echo "==> udev: /dev/kline (FTDI cable) and /dev/sensors (ESP32 board)"
+install -m 0644 "$REPO_DIR/deploy/99-d2dash.rules" /etc/udev/rules.d/99-d2dash.rules
+udevadm control --reload-rules && udevadm trigger --subsystem-match=tty || true
+
 echo "==> data dirs"
 install -d -o "$SERVICE_USER" -g "$SERVICE_USER" /var/lib/d2dash/logs
 install -d -o "$SERVICE_USER" -g "$SERVICE_USER" /etc/d2dash
 if [[ ! -f /etc/d2dash/d2dash.env ]]; then
   cat > /etc/d2dash/d2dash.env <<EOF
 # d2dash runtime configuration (systemd EnvironmentFile)
-D2DASH_PORT=/dev/ttyUSB0
+# K-line cable. /dev/kline is the udev name for the FTDI cable; "auto" also works with one device.
+D2DASH_PORT=/dev/kline
+# ESP32 sensor board: /dev/sensors (udev), "auto", or "none" to disable
+D2DASH_SENSORS_PORT=/dev/sensors
 D2DASH_HTTP_PORT=80
 D2DASH_LOG_DIR=/var/lib/d2dash/logs
 # set to 1 to run against the built-in simulator instead of the car
 D2DASH_SIMULATE=0
 EOF
+else
+  grep -q D2DASH_SENSORS_PORT /etc/d2dash/d2dash.env || echo "D2DASH_SENSORS_PORT=/dev/sensors" >> /etc/d2dash/d2dash.env
+  sed -i 's#^D2DASH_PORT=/dev/ttyUSB0$#D2DASH_PORT=/dev/kline#' /etc/d2dash/d2dash.env
 fi
 
 echo "==> systemd service"

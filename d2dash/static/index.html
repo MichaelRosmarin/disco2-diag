@@ -7,13 +7,14 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#0f1317">
 <title>Disco 2</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='15' fill='%230f1317'/%3E%3Cpath d='M7 20a9 9 0 0 1 18 0' fill='none' stroke='%23eef0ec' stroke-width='3' stroke-linecap='round'/%3E%3Cpath d='M16 20l5-7' stroke='%23e8a93a' stroke-width='2.5' stroke-linecap='round'/%3E%3C/svg%3E">
 <style>
 @font-face{font-family:"Inter D";font-weight:700;src:url(/static/fonts/inter-display-700.woff) format("woff");font-display:swap}
 @font-face{font-family:"Inter T";font-weight:500;src:url(/static/fonts/inter-text-500.woff) format("woff");font-display:swap}
 @font-face{font-family:"Inter T";font-weight:600;src:url(/static/fonts/inter-text-600.woff) format("woff");font-display:swap}
 
 :root{
-  --bg:#0f1317; --bg2:#151a20; --rule:#232a33; --rule2:#2e3741;
+  --bg:#0f1317; --bg2:#151a20; --bg3:#1b2129; --rule:#232a33; --rule2:#2e3741;
   --fg:#eef0ec; --fg2:#a7b0b8; --fg3:#66717c;
   --ok:#55c47a; --warn:#e8a93a; --bad:#e2574f; --act:#7cc4ff;
   --okbg:rgba(85,196,122,.12); --warnbg:rgba(232,169,58,.16); --badbg:rgba(226,87,79,.16);
@@ -26,8 +27,10 @@ html,body{margin:0;background:var(--bg);color:var(--fg);
   -webkit-user-select:none;user-select:none;overscroll-behavior:none;-webkit-font-smoothing:antialiased}
 body{display:flex;flex-direction:column;min-height:100vh;min-height:100dvh}
 button{font:inherit;color:inherit;cursor:pointer}
+input{font:inherit}
 .num{font-family:"Inter D","Inter T",-apple-system,Roboto,Helvetica,Arial,sans-serif;font-weight:700;letter-spacing:-.025em;font-variant-numeric:tabular-nums}
 .ok{color:var(--ok)}.warn{color:var(--warn)}.bad{color:var(--bad)}
+.dim{color:var(--fg3)}
 
 /* ---------- header ---------- */
 header{display:flex;align-items:center;gap:12px;padding:calc(env(safe-area-inset-top) + 10px) var(--pad) 8px;position:sticky;top:0;z-index:5;background:var(--bg)}
@@ -53,6 +56,12 @@ nav button .n{position:absolute;top:9px;margin-left:4px;min-width:18px;height:18
   background:var(--bad);color:#fff;font-size:11px;line-height:18px;font-weight:600}
 nav button .n:empty{display:none}
 
+/* sub-navigation inside Engine / SLABS: the Nanocom's five sections */
+.sub{display:flex;gap:4px;margin:10px var(--pad) 0;padding:3px;border-radius:10px;background:var(--bg2);overflow-x:auto}
+.sub button{flex:1;min-height:36px;padding:0 10px;border:0;border-radius:8px;background:none;color:var(--fg3);font-size:13.5px;font-weight:600;white-space:nowrap}
+.sub button.on{background:var(--bg3);color:var(--fg)}
+.pane{display:none}.pane.on{display:block}
+
 /* ---------- alarm band ---------- */
 #alarm{display:none;align-items:center;gap:12px;padding:12px var(--pad);font-size:16px;font-weight:600;cursor:pointer}
 #alarm.warn{display:flex;background:var(--warnbg);color:var(--warn)}
@@ -76,7 +85,6 @@ section{display:none}section.on{display:block}
 .hero .zone{fill:none;stroke-width:10;stroke-linecap:butt;opacity:.5}
 .hero .fill{fill:none;stroke-width:10;stroke-linecap:round;stroke:var(--fg);transition:stroke-dasharray .35s}
 .hero.warn .fill{stroke:var(--warn)}.hero.bad .fill{stroke:var(--bad)}
-.hero .tick{stroke:var(--fg3);stroke-width:1.5}
 .hero .rd{position:absolute;left:0;right:0;top:27%;font-size:50px;line-height:1}
 .hero .rd small{font-family:"Inter T";font-weight:500;font-size:14px;color:var(--fg2);letter-spacing:0;display:block;margin-top:2px}
 .hero .lb{color:var(--fg2);font-size:14px;margin-top:-14px}
@@ -104,13 +112,13 @@ section{display:none}section.on{display:block}
 .strip .lb{color:var(--fg3);font-size:12.5px;margin-top:3px}
 .strip .warn .rd{color:var(--warn)}.strip .bad .rd{color:var(--bad)}
 @media (min-width:720px){
-  .heroes{grid-template-columns:1fr 1fr 1fr}
+  .heroes{grid-template-columns:repeat(4,1fr)}
   .strip{grid-template-columns:repeat(6,1fr)}
 }
 
 /* ---------- shared blocks ---------- */
 .blk{margin:12px var(--pad) 0;padding:12px 0 2px;border-top:1px solid var(--rule)}
-.blk:first-child{border-top:0}
+.blk:first-child,.pane>.blk:first-child{border-top:0}
 .blk h2{font-size:13px;font-weight:600;color:var(--fg3);margin:0 0 10px}
 .blk p.hint{color:var(--fg2);font-size:13.5px;margin:0 0 10px}
 .blk.hazard{border-left:3px solid var(--warn);padding-left:12px;margin-top:16px;border-top:0;background:linear-gradient(90deg,rgba(232,169,58,.06),transparent 60%)}
@@ -119,10 +127,12 @@ section{display:none}section.on{display:block}
 .faults{border-radius:10px;padding:2px 12px;background:var(--okbg)}
 .faults.has{background:var(--badbg)}
 .faults ul{list-style:none;margin:0;padding:0}
-.faults li{display:flex;gap:10px;align-items:baseline;padding:10px 0;border-top:1px solid rgba(255,255,255,.07);font-size:15px}
+.faults li{padding:10px 0;border-top:1px solid rgba(255,255,255,.07);font-size:15px}
 .faults li:first-child{border-top:0}
+.faults li .h{display:flex;gap:10px;align-items:baseline}
 .faults .tag{font-size:11px;font-weight:600;padding:2px 7px;border-radius:5px;background:rgba(255,255,255,.1);color:var(--fg2);white-space:nowrap}
 .faults .tag.cur{background:var(--bad);color:#fff}
+.faults .cause{color:var(--fg2);font-size:13.5px;margin:4px 0 0}
 .faults .none{padding:11px 0;color:var(--ok);font-weight:600}
 
 .row{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
@@ -131,13 +141,12 @@ section{display:none}section.on{display:block}
 .btn.act{background:var(--act);border-color:var(--act);color:#06203a}
 .btn.red{border-color:var(--bad);color:var(--bad);background:none}
 .btn.amber{border-color:rgba(232,169,58,.55);color:var(--warn);background:none}
-.btn:disabled{opacity:.4}
+.btn:disabled{opacity:.4;cursor:default}
 .btn.sm{min-height:38px;padding:0 12px;font-size:14px}
 
 .chips{display:flex;flex-wrap:wrap;gap:8px}
 .chip{padding:6px 11px;border-radius:999px;border:1px solid var(--rule2);color:var(--fg3);font-size:13.5px;font-weight:600}
 .chip.on{border-color:var(--ok);color:var(--ok);background:var(--okbg)}
-.chip.lit{border-color:var(--warn);color:var(--warn);background:var(--warnbg)}
 
 .kv{display:grid;grid-template-columns:auto 1fr;gap:5px 16px;font-size:14px;margin:0}
 .kv dt{color:var(--fg2)}.kv dd{margin:0;font-variant-numeric:tabular-nums;word-break:break-all}
@@ -146,11 +155,22 @@ td,th{padding:8px 4px;border-bottom:1px solid var(--rule);text-align:left}
 th{color:var(--fg3);font-weight:600;font-size:12.5px}
 td.r,th.r{text-align:right;font-variant-numeric:tabular-nums}
 td.c{color:var(--fg3);font-size:12.5px}
-details summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:var(--fg3);margin-bottom:10px}
-details summary::-webkit-details-marker{display:none}
-details summary::after{content:"";width:7px;height:7px;border-right:1.5px solid var(--fg3);border-bottom:1.5px solid var(--fg3);transform:rotate(-45deg);margin-left:2px;transition:transform .15s}
-details[open] summary::after{transform:rotate(45deg)}
 a{color:var(--act)}
+
+/* input lists (Nanocom "Inputs" pages) */
+.list{margin:0}
+.list .li{display:grid;grid-template-columns:1fr auto;gap:2px 12px;align-items:baseline;padding:8px 0;border-bottom:1px solid var(--rule);font-size:14.5px}
+.list .li:last-child{border-bottom:0}
+.list .li .k{color:var(--fg2)}
+.list .li .v{font-variant-numeric:tabular-nums;text-align:right;font-weight:600}
+.list .li .v small{color:var(--fg3);font-weight:500;margin-left:3px;font-size:12px}
+.list .li .v.on{color:var(--ok)}.list .li .v.off{color:var(--fg3)}
+.list .li .v.warn{color:var(--warn)}.list .li .v.bad{color:var(--bad)}
+.list .li .t{grid-column:1/-1;font-size:12px;color:var(--fg3)}
+.list .li.pend .k{color:var(--fg3)}
+.list .li.pend .v{color:var(--fg3);font-weight:500;font-size:12.5px}
+.list.two{display:grid;grid-template-columns:1fr;gap:0 24px}
+@media (min-width:720px){.list.two{grid-template-columns:1fr 1fr}}
 
 /* injector balance */
 .inj{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;text-align:center}
@@ -179,6 +199,9 @@ a{color:var(--act)}
 .wheels .w{padding:10px 12px;border-radius:10px;background:var(--bg2);display:flex;justify-content:space-between;align-items:baseline}
 .wheels .w .lb{color:var(--fg3);font-size:13px}
 .wheels .w .rd{font-size:22px}
+.field{display:flex;align-items:center;gap:10px;margin:6px 0}
+.field label{color:var(--fg2);font-size:14px;min-width:110px}
+.field input{width:90px;padding:8px 10px;border-radius:8px;border:1px solid var(--rule2);background:var(--bg2);color:var(--fg);font-size:16px;text-align:right}
 
 /* ---------- more ---------- */
 .set{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 0;border-top:1px solid var(--rule)}
@@ -215,106 +238,197 @@ footer{padding:14px;color:var(--fg3);font-size:12px;text-align:center}
 <main>
   <div id="note" class="note"></div>
 
+  <!-- ================= DRIVE ================= -->
   <section id="tab-drive" class="on">
     <div class="note warn" id="driveNote">Engine data paused: SLABS is the active module. <button class="link" onclick="switchModule('td5')">Connect engine</button></div>
     <div class="heroes">
       <div class="hero" data-g="coolant_temp"></div>
       <div class="hero" data-g="manifold_press"></div>
       <div class="hero" data-g="egt"></div>
+      <div class="hero" data-g="oil_press"></div>
     </div>
     <div class="bars">
       <div class="bar" data-b="rpm"></div>
-      <div class="bar" data-b="oil_press"></div>
       <div class="bar" data-b="oil_temp"></div>
+      <div class="bar" data-b="gearbox_temp"></div>
     </div>
     <div class="strip" id="strip"></div>
   </section>
 
+  <!-- ================= ENGINE ================= -->
   <section id="tab-engine">
-    <div class="blk">
-      <div class="faults" id="engFaults"></div>
-      <div class="row">
-        <button class="btn act" id="engConnect" onclick="switchModule('td5')">Connect engine</button>
-        <button class="btn red" onclick="confirmCmd('td5','clear_faults','Clear engine faults?','Writes to the Td5 ECU. Logged faults are gone for good; note them first.','Clear faults')">Clear faults</button>
-        <button class="btn" onclick="cmd('read_identity')">ECU identity</button>
-        <button class="btn" onclick="cmd('security_status')">Immobiliser</button>
+    <div class="sub" data-for="engine">
+      <button data-sub="faults" class="on">Faults</button><button data-sub="inputs">Inputs</button>
+      <button data-sub="settings">Settings</button><button data-sub="outputs">Outputs</button><button data-sub="utilities">Utilities</button>
+    </div>
+    <div class="note" id="engNote">The engine ECU is not the active module. <button class="link" onclick="switchModule('td5')">Connect engine</button></div>
+
+    <div class="pane on" id="engine-faults">
+      <div class="blk">
+        <div class="faults" id="engFaults"></div>
+        <div class="row">
+          <button class="btn red" onclick="confirmCmd('td5','clear_faults','Clear engine faults?','Writes to the Td5 ECU. Logged faults are gone for good; note them first. Anything still wrong comes straight back.','Clear faults')">Clear faults</button>
+        </div>
+        <p class="hint" style="margin-top:12px">Current means the fault is present right now; logged means it was seen on an earlier run. Undecoded bits show as byte.bit until the dictionary names them.</p>
       </div>
-      <dl class="kv" id="engIdent" style="margin-top:12px"></dl>
+      <div class="blk">
+        <h2>Injector balance</h2>
+        <p class="hint">Fuel correction per cylinder. Healthy injectors sit near zero and stay put; one that drifts away from the others is tired.</p>
+        <div class="inj" id="inj"></div>
+      </div>
     </div>
-    <div class="blk">
-      <h2>Injector balance</h2>
-      <p class="hint">Fuel correction per cylinder. Healthy injectors sit near zero and stay put; one that drifts away from the others is tired.</p>
-      <div class="inj" id="inj"></div>
+
+    <div class="pane" id="engine-inputs">
+      <div id="engInputs"></div>
     </div>
-    <div class="blk">
-      <h2>Switches</h2>
-      <div class="chips" id="engChips"></div>
+
+    <div class="pane" id="engine-settings">
+      <div class="blk">
+        <h2>Identity</h2>
+        <div class="row" style="margin-top:0"><button class="btn sm" onclick="cmd('read_identity')">Read ECU identity</button></div>
+        <dl class="kv" id="engIdent" style="margin-top:12px"></dl>
+      </div>
+      <div class="blk">
+        <h2>Injectors and throttle</h2>
+        <div class="list" id="engSetInj"></div>
+      </div>
+      <div class="blk">
+        <h2>Configuration</h2>
+        <p class="hint">What the ECU believes is fitted. Read-only until the library confirms the write routine.</p>
+        <div class="list two" id="engSetCfg"></div>
+      </div>
     </div>
-    <div class="blk">
-      <details open><summary>All live values</summary>
-      <table><thead><tr><th>Signal</th><th class="r">Value</th><th class="r">Source</th></tr></thead><tbody id="engTable"></tbody></table>
-      </details>
+
+    <div class="pane" id="engine-outputs">
+      <div class="blk hazard">
+        <h2>Output tests</h2>
+        <p class="hint">Each button pulses a real part once. Engine running, handbrake on, nobody near the fan. These frames were decoded from captures and have not yet been fired from this software on a car: treat the first use of each as a test.</p>
+        <div class="row" id="engOutputs"></div>
+      </div>
     </div>
-    <div class="blk hazard">
-      <h2>Output tests</h2>
-      <p class="hint">Each button moves a real part. Engine running, handbrake on, nobody near the fan.</p>
-      <div class="row" id="engOutputs"></div>
+
+    <div class="pane" id="engine-utilities">
+      <div class="blk">
+        <h2>Security</h2>
+        <div class="row" style="margin-top:0">
+          <button class="btn" onclick="cmd('security_status')">Immobiliser status</button>
+          <button class="btn" disabled title="Not available yet">Learn security code</button>
+        </div>
+        <p class="hint" style="margin-top:10px">Learn security code puts the ECU into learn mode so it re-pairs with the BCU. It is not wired up yet: the library has never sent that frame, and a failed learn leaves the car immobilised.</p>
+      </div>
+      <div class="blk">
+        <h2>Fuel maps</h2>
+        <p class="hint">Map read and write (the Nanocom's SM201 module) is deliberately out of scope for this tool.</p>
+      </div>
     </div>
   </section>
 
+  <!-- ================= SLABS ================= -->
   <section id="tab-slabs">
+    <div class="sub" data-for="slabs">
+      <button data-sub="faults" class="on">Faults</button><button data-sub="inputs">Inputs</button>
+      <button data-sub="settings">Settings</button><button data-sub="outputs">Outputs</button><button data-sub="utilities">Utilities</button>
+    </div>
     <div class="note" id="slabsNote">SLABS shares the K-line with the engine, so connecting pauses engine data and can take up to 30 s of bus silence. Vehicle stationary, ignition on.
       <div class="row"><button class="btn act" onclick="switchModule('slabs')">Connect SLABS</button></div></div>
-    <div class="heights">
-      <div class="hgt" id="hgtL"><div class="scale"><div class="band"></div><div class="fill"></div><div class="mk"></div></div>
-        <div class="txt"><div class="lb">Left height</div><div class="rd num">—</div><div class="mm"></div><div class="st"></div></div></div>
-      <div class="hgt" id="hgtR"><div class="scale"><div class="band"></div><div class="fill"></div><div class="mk"></div></div>
-        <div class="txt"><div class="lb">Right height</div><div class="rd num">—</div><div class="mm"></div><div class="st"></div></div></div>
-    </div>
-    <div class="blk">
-      <h2>Wheel speeds</h2>
-      <div class="wheels" id="wheels"></div>
-    </div>
-    <div class="blk">
-      <h2>Inputs</h2>
-      <div class="chips" id="slabsChips"></div>
-      <dl class="kv" id="slabsKv" style="margin-top:12px"></dl>
-    </div>
-    <div class="blk">
-      <div class="faults" id="slabsFaults"></div>
-      <div class="row">
-        <button class="btn red" onclick="confirmCmd('slabs','clear_faults','Clear SLABS faults?','Clears logged and current ABS and suspension faults.','Clear faults')">Clear faults</button>
+
+    <div class="pane on" id="slabs-faults">
+      <div class="blk">
+        <div class="faults" id="slabsFaults"></div>
+        <div class="row">
+          <button class="btn red" onclick="confirmCmd('slabs','clear_faults','Clear SLABS faults?','Clears logged and current ABS and suspension faults.','Clear faults')">Clear faults</button>
+        </div>
+      </div>
+      <div class="heights">
+        <div class="hgt" id="hgtL"><div class="scale"><div class="band"></div><div class="fill"></div><div class="mk"></div></div>
+          <div class="txt"><div class="lb">Left height</div><div class="rd num">—</div><div class="mm"></div><div class="st"></div></div></div>
+        <div class="hgt" id="hgtR"><div class="scale"><div class="band"></div><div class="fill"></div><div class="mk"></div></div>
+          <div class="txt"><div class="lb">Right height</div><div class="rd num">—</div><div class="mm"></div><div class="st"></div></div></div>
+      </div>
+      <div class="blk">
+        <h2>Wheel speeds</h2>
+        <div class="wheels" id="wheels"></div>
+      </div>
+      <div class="blk">
+        <h2>Switches</h2>
+        <div class="chips" id="slabsChips"></div>
       </div>
     </div>
-    <div class="blk">
-      <h2>Air suspension</h2>
-      <div class="row">
-        <button class="btn" onclick="confirmCmd('slabs','raise_left','Raise left?','Runs the compressor with the left valve open.','Raise left')">Raise left</button>
-        <button class="btn" onclick="confirmCmd('slabs','raise_right','Raise right?','Runs the compressor with the right valve open.','Raise right')">Raise right</button>
-        <button class="btn" onclick="confirmCmd('slabs','lower_left','Lower left?','Opens the left exhaust valve.','Lower left')">Lower left</button>
-        <button class="btn" onclick="confirmCmd('slabs','lower_right','Lower right?','Opens the right exhaust valve.','Lower right')">Lower right</button>
-        <button class="btn" onclick="confirmCmd('slabs','compressor','Run the compressor?','Short compressor test.','Run')">Compressor</button>
-        <button class="btn" onclick="confirmCmd('slabs','exhaust','Open the exhaust valve?','Short exhaust valve test.','Open')">Exhaust valve</button>
-        <button class="btn" onclick="confirmCmd('slabs','buzzer','Sound the buzzer?','The suspension buzzer in the cabin.','Sound')">Buzzer</button>
+
+    <div class="pane" id="slabs-inputs">
+      <div id="slabsInputs"></div>
+      <p class="hint" style="margin:12px var(--pad)">SLS and switch values stop updating above about 8 km/h; that is the ECU, not the tool.</p>
+    </div>
+
+    <div class="pane" id="slabs-settings">
+      <div class="blk">
+        <h2>Ride height</h2>
+        <div class="list" id="slabsSetH"></div>
+        <div class="field" style="margin-top:10px"><label>Target left</label><input type="number" id="tgtL" placeholder="—" disabled></div>
+        <div class="field"><label>Target right</label><input type="number" id="tgtR" placeholder="—" disabled></div>
+        <div class="row"><button class="btn" disabled title="Not available yet">Store target heights</button></div>
+        <p class="hint" style="margin-top:10px">Writing target heights is a calibration write the library has not confirmed yet. Use the raise/lower buttons under Utilities to adjust for now.</p>
+      </div>
+      <div class="blk">
+        <h2>Configuration</h2>
+        <div class="list two" id="slabsSetCfg"></div>
+      </div>
+      <div class="blk">
+        <h2>Identity</h2>
+        <div class="list two" id="slabsSetId"></div>
       </div>
     </div>
-    <div class="blk hazard">
-      <h2>ABS</h2>
-      <p class="hint">Valve and pump tests are safe parked. Bleeding needs the brake system open and a helper on the pedal; read the workshop procedure first.</p>
-      <div class="row">
-        <button class="btn" onclick="confirmCmd('slabs','wheel_fl','Cycle valve FL?','Cycles the front-left ABS valve.','Cycle')">Valve FL</button>
-        <button class="btn" onclick="confirmCmd('slabs','wheel_fr','Cycle valve FR?','Cycles the front-right ABS valve.','Cycle')">Valve FR</button>
-        <button class="btn" onclick="confirmCmd('slabs','wheel_rl','Cycle valve RL?','Cycles the rear-left ABS valve.','Cycle')">Valve RL</button>
-        <button class="btn" onclick="confirmCmd('slabs','wheel_rr','Cycle valve RR?','Cycles the rear-right ABS valve.','Cycle')">Valve RR</button>
-        <button class="btn" onclick="confirmCmd('slabs','pump_on','Start the ABS pump?','Runs until you press Pump off.','Start')">Pump on</button>
-        <button class="btn" onclick="confirmCmd('slabs','pump_off','Stop the ABS pump?','','Stop')">Pump off</button>
-        <button class="btn amber" onclick="confirmCmd('slabs','bleed_power_on','Start power bleed?','Starts the ABS power-bleed routine.','Start bleed')">Power bleed start</button>
-        <button class="btn" onclick="confirmCmd('slabs','bleed_power_off','Stop power bleed?','','Stop bleed')">Power bleed stop</button>
-        <button class="btn amber" onclick="confirmCmd('slabs','bleed_module','Run the modulator bleed?','Four-step ABS modulator bleed, about 10 seconds.','Run bleed')">Module bleed</button>
+
+    <div class="pane" id="slabs-outputs">
+      <div class="blk">
+        <h2>Air suspension</h2>
+        <div class="row" style="margin-top:0">
+          <button class="btn" onclick="confirmCmd('slabs','compressor','Run the compressor?','Short compressor test.','Run')">Compressor</button>
+          <button class="btn" onclick="confirmCmd('slabs','exhaust','Open the exhaust valve?','Short exhaust valve test. The rear may drop a little.','Open')">Exhaust valve</button>
+          <button class="btn" onclick="confirmCmd('slabs','buzzer','Sound the buzzer?','The suspension buzzer in the cabin.','Sound')">Buzzer</button>
+        </div>
+      </div>
+      <div class="blk">
+        <h2>ABS</h2>
+        <div class="row" style="margin-top:0">
+          <button class="btn" onclick="confirmCmd('slabs','pump_on','Start the ABS pump?','Runs until you press Pump off.','Start')">Pump on</button>
+          <button class="btn" onclick="confirmCmd('slabs','pump_off','Stop the ABS pump?','','Stop')">Pump off</button>
+        </div>
+      </div>
+      <div class="blk">
+        <h2>Not decoded yet</h2>
+        <div class="list two" id="slabsOutPend"></div>
+      </div>
+    </div>
+
+    <div class="pane" id="slabs-utilities">
+      <div class="blk">
+        <h2>Height</h2>
+        <p class="hint">Each press runs the compressor or exhaust for one corner for a moment. Watch the height on the Faults page.</p>
+        <div class="row" style="margin-top:0">
+          <button class="btn" onclick="confirmCmd('slabs','raise_left','Raise left?','Runs the compressor with the left valve open.','Raise left')">Raise left</button>
+          <button class="btn" onclick="confirmCmd('slabs','raise_right','Raise right?','Runs the compressor with the right valve open.','Raise right')">Raise right</button>
+          <button class="btn" onclick="confirmCmd('slabs','lower_left','Lower left?','Opens the left exhaust valve.','Lower left')">Lower left</button>
+          <button class="btn" onclick="confirmCmd('slabs','lower_right','Lower right?','Opens the right exhaust valve.','Lower right')">Lower right</button>
+        </div>
+      </div>
+      <div class="blk hazard">
+        <h2>ABS bleeding</h2>
+        <p class="hint">Needs the brake system open, fluid topped up and a helper on the pedal. Read the workshop procedure first. Wheel tests cycle one corner's valves and are safe parked.</p>
+        <div class="row" style="margin-top:0">
+          <button class="btn" onclick="confirmCmd('slabs','wheel_fl','Test FL?','Cycles the front-left ABS valves.','Test')">Test FL</button>
+          <button class="btn" onclick="confirmCmd('slabs','wheel_fr','Test FR?','Cycles the front-right ABS valves.','Test')">Test FR</button>
+          <button class="btn" onclick="confirmCmd('slabs','wheel_rl','Test RL?','Cycles the rear-left ABS valves.','Test')">Test RL</button>
+          <button class="btn" onclick="confirmCmd('slabs','wheel_rr','Test RR?','Cycles the rear-right ABS valves.','Test')">Test RR</button>
+          <button class="btn amber" onclick="confirmCmd('slabs','bleed_power_on','Start power bleed?','Opens all ABS valves and runs the pump until you press Stop.','Start bleed')">Power bleed start</button>
+          <button class="btn" onclick="confirmCmd('slabs','bleed_power_off','Stop power bleed?','','Stop bleed')">Power bleed stop</button>
+          <button class="btn amber" onclick="confirmCmd('slabs','bleed_module','Run the modulator bleed?','Four-step ABS modulator bleed, about 10 seconds.','Run bleed')">Modulator bleed</button>
+        </div>
       </div>
     </div>
   </section>
 
+  <!-- ================= MORE ================= -->
   <section id="tab-more">
     <div class="blk">
       <h2>Alarms</h2>
@@ -323,8 +437,12 @@ footer{padding:14px;color:var(--fg3);font-size:12px;text-align:center}
       <table style="margin-top:8px"><thead><tr><th>Signal</th><th class="r">Amber</th><th class="r">Red</th></tr></thead><tbody id="threshTable"></tbody></table>
     </div>
     <div class="blk">
+      <h2>Sensor board</h2>
+      <dl class="kv" id="sensorInfo"></dl>
+    </div>
+    <div class="blk">
       <h2>Session logs</h2>
-      <p class="hint">One CSV per connection, a row per poll. Tap a file to download it.</p>
+      <p class="hint">One CSV per connection, a row per poll, sensor-board columns included. Tap a file to download it.</p>
       <table><thead><tr><th>File</th><th class="r">Size</th><th></th></tr></thead><tbody id="logTable"></tbody></table>
       <div class="row"><button class="btn sm" onclick="loadLogs()">Refresh</button></div>
     </div>
@@ -343,8 +461,8 @@ footer{padding:14px;color:var(--fg3);font-size:12px;text-align:center}
 <div class="toast" id="toast"></div>
 
 <script>
-// ---------- gauge + alarm definitions ----------
-// warn/alarm: [low, high] bounds; outside = that level. `when` gates the check (e.g. only with engine running).
+// ============ gauge + alarm definitions ============
+// warn/alarm: [low, high] bounds; outside = that level. `when` gates the check.
 const G = {
   coolant_temp:   {label:'Coolant',   unit:'°C',  min:40,  max:130, warn:[null,100], alarm:[null,106], fmt:v=>Math.round(v)},
   manifold_press: {label:'Boost',     unit:'bar', min:0.8, max:2.6, warn:[null,2.3], alarm:[null,2.5], fmt:v=>v.toFixed(2)},
@@ -352,21 +470,56 @@ const G = {
   rpm:            {label:'Revs',      unit:'rpm', min:0,   max:5000,warn:[null,4200],alarm:[null,4600],fmt:v=>Math.round(v)},
   oil_press:      {label:'Oil',       unit:'bar', min:0,   max:6,   warn:[1.5,null], alarm:[0.8,null], when:s=>s.rpm&&s.rpm.v>1200, fmt:v=>v.toFixed(1)},
   oil_temp:       {label:'Oil temp',  unit:'°C',  min:40,  max:150, warn:[null,120], alarm:[null,130], fmt:v=>Math.round(v)},
+  gearbox_temp:   {label:'Gearbox',   unit:'°C',  min:40,  max:150, warn:[null,110], alarm:[null,125], fmt:v=>Math.round(v)},
   battery:        {label:'Battery',   unit:'V',   warn:[12.8,15.0], alarm:[12.0,15.6], when:s=>s.rpm&&s.rpm.v>600, fmt:v=>v.toFixed(1)},
   air_temp:       {label:'Inlet air', unit:'°C',  warn:[null,60],  alarm:[null,75],  fmt:v=>Math.round(v)},
+  fuel_level:     {label:'Fuel',      unit:'%',   warn:[12,null],  fmt:v=>Math.round(v)},
   speed:          {label:'Speed',     unit:'km/h',fmt:v=>Math.round(v)},
   fuel_rate:      {label:'Fuel rate', unit:'L/h', fmt:v=>v.toFixed(1)},
   injection_qty:  {label:'Injection', unit:'mg',  fmt:v=>v.toFixed(1)},
   fuel_temp:      {label:'Fuel temp', unit:'°C',  fmt:v=>Math.round(v)},
-  economy:        {label:'Economy',   unit:'L/100',fmt:v=>v.toFixed(1)},
-  accel_pedal_pct:{label:'Pedal',     unit:'%',   fmt:v=>Math.round(v)},
 };
-const STRIP = ['speed','battery','air_temp','fuel_rate','injection_qty','fuel_temp'];
+const STRIP = ['speed','battery','air_temp','fuel_level','fuel_rate','injection_qty'];
+const SENSOR_KEYS = ['egt','oil_press','oil_temp','gearbox_temp','fuel_level','aux_temp','board_temp'];
 const TD5_OUTPUTS = ['fuel_pump','mil_lamp','ac_clutch','ac_fan','glow_plugs','rev_counter','temp_gauge','egr_throttle','wastegate'];
-const ENG_CHIPS = {fuel_pump_relay:'Fuel pump relay', brake_switch_2:'Brake pedal'};
-const SLABS_CHIPS = {diff_lock:'Diff lock', transfer_low:'Low range', reverse_gear:'Reverse', neutral_gear:'Neutral', any_door:'Door open'};
-const SLABS_KV = {battery:'Battery', ecu_supply:'ECU supply', brake_analog:'Brake pressure'};
 const HEIGHT = {lo:100, hi:200, band:[135,165], warn:[120,180]};
+
+// Nanocom "Inputs" pages, in the Nanocom's order. [signal, label] — null signal = not decoded yet.
+const TD5_INPUTS = [
+  {title:'Fuelling', items:[['rpm','Engine speed'],['rpm_error','Idle speed error'],['speed','Road speed'],['battery','Battery'],
+    ['accel_way1','Accel. way 1'],['accel_way2','Accel. way 2'],['accel_way3','Accel. way 3'],['accel_supply','Accel. supply'],
+    ['coolant_temp','Coolant temp'],['fuel_temp','Fuel temp'],['air_temp','Air inlet temp'],['maf_sensor','Air flow'],
+    ['ambient_press_1','Ambient pressure'],['manifold_press','Manifold turbo pressure'],['egr_modulator','EGR modulator'],
+    ['egr_inlet','EGR inlet'],['wastegate_modulator','Wastegate modulator'],['balance_1','Cylinder 1 balance'],
+    ['balance_2','Cylinder 2 balance'],['balance_3','Cylinder 3 balance'],['balance_4','Cylinder 4 balance'],['balance_5','Cylinder 5 balance']]},
+  {title:'Switches', items:[['brake_main','Brake switch 1'],['brake_switch_2','Brake switch 2'],[null,'Clutch switch'],
+    [null,'Transfer ratio'],[null,'Gear box'],['cruise_master','Cruise control'],['cruise_resume','Cruise resume'],
+    ['cruise_set','Set / accelerate'],[null,'A/C clutch request'],[null,'A/C clutch drive'],[null,'A/C fan request'],[null,'A/C fan drive']]},
+  {title:'Extra (not on the Nanocom)', items:[['accel_pedal_pct','Accelerator pedal'],['injection_qty','Injection quantity'],
+    ['driver_demand','Driver demand'],['smoke_limit','Smoke limit'],['torque_limit','Torque limit'],['maf','Air mass (modelled)'],
+    ['maf_sensor_v','Air flow sensor'],['coolant_sensor_v','Coolant sensor'],['intake_sensor_v','Intake air sensor'],
+    ['fuel_sensor_v','Fuel temp sensor'],['ambient_press_2','Ambient pressure 2'],['battery_direct','Battery direct'],
+    ['egr_pos','EGR position (native)'],['wastegate_pos','Wastegate position (native)'],['fuel_pump_relay','Fuel pump relay'],
+    ['ext_temp','External temp'],['fuel_rate','Fuel rate'],['economy','Economy'],['trip_economy','Trip economy'],['lifetime_economy','Lifetime economy']]},
+];
+const SLABS_INPUTS = [
+  {title:'ABS', items:[['abs_sensor_fr','Sensor FR'],['abs_sensor_fl','Sensor FL'],['abs_sensor_rr','Sensor RR'],['abs_sensor_rl','Sensor RL'],
+    ['wheel_speed_fr','Wheel speed FR'],['wheel_speed_fl','Wheel speed FL'],['wheel_speed_rr','Wheel speed RR'],['wheel_speed_rl','Wheel speed RL'],
+    [null,'Inlet valves FR/FL/RR/RL'],[null,'Outlet valves FR/FL/RR/RL'],[null,'Pump monitor'],[null,'Pump relay'],
+    ['battery','Battery'],['ecu_supply','Internal ECU supply'],[null,'Ground reference'],[null,'Engine speed'],[null,'Engine torque'],
+    [null,'Throttle position'],[null,'HDC brake'],[null,'Shuttle switch']]},
+  {title:'SLS', items:[['height_left','Left sensor value'],['height_right','Right sensor value'],['height_left_mm','Left height'],
+    ['height_right_mm','Right height'],[null,'Left / right sensor supply'],[null,'Left / right valve voltage'],[null,'Exhaust valve'],[null,'Compressor relay']]},
+  {title:'Switches', items:[['neutral_gear','Neutral switch'],['transfer_low','Low range switch'],['diff_lock','Diff lock switch'],
+    ['reverse_gear','Reverse switch'],[null,'HDC switch'],['any_door','Any door switch'],['brake_analog','Brake signal'],[null,'Plip signal']]},
+];
+const TD5_SET_INJ = [[null,'Injector 1 code'],[null,'Injector 2 code'],[null,'Injector 3 code'],[null,'Injector 4 code'],[null,'Injector 5 code'],[null,'Injector type'],[null,'Accelerator (2-way / 3-way)']];
+const TD5_SET_CFG = ['Config tune ID','Fuel tune ID','Homologation','VIN','Temperature gauge','Tachometer','SLABS link','Road speed','Radiator fan','MIL lamp','Fuel used','Fuel temperature','EGR modulator','EGR inlet','Cruise lamp','Cruise control','Clutch switch','CAN bus','Auxiliary fan','Auto gearbox','Air conditioning','Active engine mount','Ambient sensor','Wastegate modulator','ECU status'];
+const SLABS_SET_CFG = ['Test status','ECU calibrated','Transport mode','Suspension type (SLABS / ABS only)'];
+const SLABS_SET_ID = ['Factory code','Bar code','Product number / date','Module codes','VIN','Engine type','Gearbox','ECU condition'];
+const SLABS_OUT_PEND = ['Inlet + outlet valves ×8','SLS left / right valve','Speedometer drive','Brake-light relay','TC lamp','ABS warning lamp','HDC warning lamp','Brake warning lamp','SLS lamp','Off-road lamp','HDC fault lamp','HDC brake lamp'];
+const SLABS_CHIPS = {diff_lock:'Diff lock', transfer_low:'Low range', reverse_gear:'Reverse', neutral_gear:'Neutral', any_door:'Door open'};
+const SWITCH_LABELS = {any_door:['Closed','Open']};
 
 const $ = id => document.getElementById(id);
 const nice = k => k.replace(/_/g,' ');
@@ -378,10 +531,11 @@ function level(k, sig, all){
   if(out(g.warn)||sig.s==='suspect') return 'warn';
   return '';
 }
-const fmtv=(k,sig)=>G[k]&&G[k].fmt?G[k].fmt(sig.v):(Number.isInteger(sig.v)?sig.v:Number(sig.v).toFixed(1));
+const fmtv=(k,sig)=>G[k]&&G[k].fmt?G[k].fmt(sig.v):(Number.isInteger(sig.v)?sig.v:Number(sig.v).toFixed(2).replace(/\.?0+$/,''));
+const isSwitch=(sig)=>sig && !sig.u && (sig.v===0||sig.v===1);
 
-// ---------- hero arcs ----------
-const R=70, CX=85, CY=85, SWEEP=240, A0=150;           // 240° arc, open at the bottom
+// ============ hero arcs ============
+const R=70, CX=85, CY=85, SWEEP=240, A0=150;
 const rad=d=>d*Math.PI/180;
 const pt=(a)=>[CX+R*Math.cos(rad(A0+a)), CY+R*Math.sin(rad(A0+a))];
 function arcPath(a1,a2){ const [x1,y1]=pt(a1),[x2,y2]=pt(a2); return `M${x1.toFixed(2)} ${y1.toFixed(2)} A${R} ${R} 0 ${a2-a1>180?1:0} 1 ${x2.toFixed(2)} ${y2.toFixed(2)}`; }
@@ -400,18 +554,18 @@ function buildHero(el){
 }
 function setHero(el, sig, all){
   const k=el.dataset.g, g=G[k];
-  if(!sig){ el.classList.add('off'); el.style.display=(k==='egt')?'none':''; el.querySelector('.rd').innerHTML='—'; return; }
+  if(!sig){ el.classList.add('off'); el.style.display=SENSOR_KEYS.includes(k)?'none':''; el.querySelector('.rd').innerHTML='—'; return; }
   el.style.display=''; el.classList.remove('off');
   const f=Math.min(1,Math.max(0,(sig.v-g.min)/(g.max-g.min)));
   const fill=el.querySelector('.fill');
   fill.setAttribute('stroke-dasharray', `${(f*1000).toFixed(1)} 2000`);
-  fill.style.visibility = f*1000 < 8 ? 'hidden' : 'visible';   // round caps would draw a dot at zero
+  fill.style.visibility = f*1000 < 8 ? 'hidden' : 'visible';
   el.querySelector('.rd').innerHTML=`${g.fmt(sig.v)}<small>${g.unit}</small>`;
   el.className='hero '+level(k,sig,all);
 }
 document.querySelectorAll('.hero').forEach(buildHero);
 
-// ---------- bars ----------
+// ============ bars ============
 function buildBar(el){
   const k=el.dataset.b, g=G[k], f=v=>Math.min(100,Math.max(0,(v-g.min)/(g.max-g.min)*100));
   let zones='';
@@ -424,7 +578,7 @@ function buildBar(el){
 }
 function setBar(el, sig, all){
   const k=el.dataset.b, g=G[k];
-  if(!sig){ el.classList.toggle('hide', k!=='rpm'); el.querySelector('.rd').textContent='—'; return; }
+  if(!sig){ el.classList.toggle('hide', k!=='rpm'); el.querySelector('.rd').textContent='—'; el.querySelector('b').style.width='0'; return; }
   el.classList.remove('hide');
   el.querySelector('b').style.width=Math.min(100,Math.max(0,(sig.v-g.min)/(g.max-g.min)*100))+'%';
   el.querySelector('.rd').innerHTML=`${g.fmt(sig.v)}<small>${g.unit}</small>`;
@@ -436,21 +590,52 @@ function stripItem(k,sig,all){
   const g=G[k]||{label:nice(k)};
   return `<div class="it ${level(k,sig,all)}"><div class="rd num">${fmtv(k,sig)}<small>${g.unit||sig.u||''}</small></div><div class="lb">${g.label}</div></div>`;
 }
-function faultBlock(el, faults){
+
+// ============ faults with causes ============
+let FAULT_REF={td5:{},slabs:{}};
+fetch('/api/faults/reference').then(r=>r.json()).then(r=>{ FAULT_REF=r; if(snap) render(snap); }).catch(()=>{});
+function causeFor(module, name){
+  const ref=FAULT_REF[module]||{};
+  if(ref[name]) return ref[name];
+  const base=name.replace(/\s*\((Current|Logged[^)]*)\)\s*$/,'').trim().toLowerCase();
+  for(const k in ref){ if(k.replace(/\s*\((Current|Logged[^)]*)\)\s*$/,'').trim().toLowerCase()===base) return ref[k]; }
+  if(/^byte\s*\d+[.,]\s*bit\s*\d+|^unknown \(byte/i.test(name)) return 'Not in the dictionary yet. Note the byte and bit; it still counts as a stored fault.';
+  return '';
+}
+function faultBlock(el, module, faults){
   if(!faults||!faults.length){ el.className='faults'; el.innerHTML='<div class="none">No faults stored</div>'; return; }
   el.className='faults has';
   el.innerHTML='<ul>'+faults.map(f=>{
     const m=f.match(/^(.*?)\s*\((Current|Logged[^)]*)\)\s*$/), name=m?m[1]:f, tag=m?m[2]:'';
-    return `<li><span class="tag ${/Current/.test(tag)?'cur':''}">${tag||'fault'}</span><span>${name}</span></li>`;
+    const cause=causeFor(module,f);
+    return `<li><div class="h"><span class="tag ${/Current/.test(tag)?'cur':''}">${tag||'stored'}</span><span>${name}</span></div>${cause?`<p class="cause">${cause}</p>`:''}</li>`;
   }).join('')+'</ul>';
 }
+
+// ============ input lists ============
+function listRow(k, label, sig, all){
+  if(k===null) return `<div class="li pend"><span class="k">${label}</span><span class="v">not decoded yet</span></div>`;
+  if(!sig) return `<div class="li"><span class="k">${label}</span><span class="v off">—</span></div>`;
+  let v, cls='';
+  if(isSwitch(sig)){ const lab=SWITCH_LABELS[k]||['Off','On']; v=lab[sig.v]; cls=sig.v?'on':'off'; }
+  else { v=`${fmtv(k,sig)}<small>${sig.u||''}</small>`; cls=level(k,sig,all); }
+  if(sig.c==='candidate') v='<span class="dim" title="scaling not yet verified">≈ </span>'+v;
+  return `<div class="li"><span class="k">${label}</span><span class="v ${cls}">${v}</span></div>`;
+}
+function renderInputs(el, groups, sig, all){
+  el.innerHTML=groups.map(gp=>`<div class="blk"><h2>${gp.title}</h2><div class="list two">${gp.items.map(([k,l])=>listRow(k,l,sig[k],all)).join('')}</div></div>`).join('')
+    + '<p class="hint" style="margin:12px 0 0">≈ means the value is read but its scaling is not yet verified against a reference tool.</p>';
+}
+function pendList(el, names){ el.innerHTML=names.map(n=>`<div class="li pend"><span class="k">${n}</span><span class="v">not decoded yet</span></div>`).join(''); }
+pendList($('engSetInj'), TD5_SET_INJ.map(x=>x[1])); pendList($('engSetCfg'), TD5_SET_CFG);
+pendList($('slabsSetCfg'), SLABS_SET_CFG); pendList($('slabsSetId'), SLABS_SET_ID); pendList($('slabsOutPend'), SLABS_OUT_PEND);
 function chips(el, map, sig){
   el.innerHTML=Object.keys(map).filter(k=>sig[k]).map(k=>`<span class="chip ${Number(sig[k].v)?'on':''}">${map[k]}</span>`).join('')
     || '<span class="chip">no switch data</span>';
 }
 
-// ---------- state ----------
-let snap=null, lastFaults={td5:[],slabs:[]}, worst={lvl:'',txt:''};
+// ============ state ============
+let snap=null, lastSig={td5:{},slabs:{}}, lastFaults={td5:[],slabs:[]}, worst={lvl:'',txt:''};
 
 function render(s){
   snap=s;
@@ -463,35 +648,47 @@ function render(s){
   else n.className='note';
 
   const sig=s.signals||{};
+  const sens=(s.sensors&&s.sensors.signals)||{};
   $('driveNote').classList.toggle('show', s.module!=='td5');
+  $('engNote').classList.toggle('show', s.module!=='td5');
   $('slabsNote').classList.toggle('show', s.module!=='slabs');
-  $('engConnect').style.display = s.module==='td5'?'none':'';
+  if(s.module==='td5'){ lastFaults.td5=s.faults||[]; lastSig.td5=sig; }
+  if(s.module==='slabs'){ lastFaults.slabs=s.faults||[]; lastSig.slabs=sig; }
+
+  // Drive: engine signals (last known) + sensor board (always live)
+  const eng=lastSig.td5, all=Object.assign({}, eng, sens);
   worst={lvl:'',txt:''};
-  if(s.module==='td5'){
-    lastFaults.td5=s.faults||[];
-    document.querySelectorAll('.hero').forEach(el=>setHero(el, sig[el.dataset.g], sig));
-    document.querySelectorAll('.bar').forEach(el=>setBar(el, sig[el.dataset.b], sig));
-    $('strip').innerHTML=STRIP.filter(k=>sig[k]).map(k=>stripItem(k,sig[k],sig)).join('');
-    Object.keys(G).forEach(k=>{ const l=level(k,sig[k],sig); if(l&&(l==='bad'||!worst.lvl)&&worst.lvl!=='bad'){ worst={lvl:l,txt:`${G[k].label} ${G[k].fmt(sig[k].v)} ${G[k].unit}`}; } });
-    $('engTable').innerHTML=Object.keys(sig).sort().map(k=>`<tr><td>${nice(k)}</td><td class="r">${sig[k].v} ${sig[k].u||''}</td><td class="r c">${sig[k].c==='candidate'?'unverified':''}</td></tr>`).join('');
-    $('inj').innerHTML=[1,2,3,4,5].map(i=>{ const b=sig['balance_'+i]; if(!b) return ''; const v=Number(b.v), h=Math.min(45,Math.abs(v)*30), warn=Math.abs(v)>1;
-      return `<div><div class="col ${warn?'warn':''}"><i></i><b style="height:${h}%;${v>=0?'bottom:50%':'top:50%'}"></b></div><div class="rd num">${v>0?'+':''}${v.toFixed(2)}</div><div class="lb">cyl ${i}</div></div>`; }).join('') || '<p class="hint">No balance data.</p>';
-    chips($('engChips'), ENG_CHIPS, sig);
-  } else if(s.module==='slabs'){
-    lastFaults.slabs=s.faults||[];
-    renderSlabs(sig);
-  }
-  faultBlock($('engFaults'), lastFaults.td5);
-  faultBlock($('slabsFaults'), lastFaults.slabs);
+  document.querySelectorAll('.hero').forEach(el=>setHero(el, all[el.dataset.g], all));
+  document.querySelectorAll('.bar').forEach(el=>setBar(el, all[el.dataset.b], all));
+  $('strip').innerHTML=STRIP.filter(k=>all[k]).map(k=>stripItem(k,all[k],all)).join('');
+  const liveEng = s.module==='td5' && s.status==='connected';
+  Object.keys(G).forEach(k=>{ if(!all[k]) return; if(!liveEng && !SENSOR_KEYS.includes(k)) return;
+    const l=level(k,all[k],all); if(l&&(l==='bad'||!worst.lvl)&&worst.lvl!=='bad'){ worst={lvl:l,txt:`${G[k].label} ${G[k].fmt(all[k].v)} ${G[k].unit}`}; } });
+
+  // Engine pages
+  renderInputs($('engInputs'), TD5_INPUTS, eng, eng);
+  $('inj').innerHTML=[1,2,3,4,5].map(i=>{ const b=eng['balance_'+i]; if(!b) return ''; const v=Number(b.v), h=Math.min(45,Math.abs(v)*30), warn=Math.abs(v)>1;
+    return `<div><div class="col ${warn?'warn':''}"><i></i><b style="height:${h}%;${v>=0?'bottom:50%':'top:50%'}"></b></div><div class="rd num">${v>0?'+':''}${v.toFixed(2)}</div><div class="lb">cyl ${i}</div></div>`; }).join('') || '<p class="hint">No balance data yet.</p>';
+
+  // SLABS pages
+  renderSlabs(lastSig.slabs);
+  faultBlock($('engFaults'), 'td5', lastFaults.td5);
+  faultBlock($('slabsFaults'), 'slabs', lastFaults.slabs);
   $('nEng').textContent=lastFaults.td5.length||'';
   $('nSlabs').textContent=lastFaults.slabs.length||'';
+
+  // sensor board status
+  const sb=s.sensors||{status:'none'};
+  $('sensorInfo').innerHTML=[['status',sb.status],['port',sb.port||'—'],['age',sb.age!=null?sb.age+' s':'—'],['error',sb.error||'—']]
+    .concat(Object.keys(sens).map(k=>[nice(k), `${sens[k].v} ${sens[k].u||''}`])).map(([k,v])=>`<dt>${k}</dt><dd>${v}</dd>`).join('');
   updateAlarm();
 }
 function renderSlabs(sig){
   setHeight('L', sig.height_left, sig.height_left_mm); setHeight('R', sig.height_right, sig.height_right_mm);
   $('wheels').innerHTML=['fl','fr','rl','rr'].map(w=>{ const v=sig['wheel_speed_'+w]; return `<div class="w"><span class="lb">${w.toUpperCase()}</span><span class="rd num">${v?Number(v.v).toFixed(0):'—'}<small style="font-family:'Inter T';font-size:12px;color:var(--fg3);margin-left:3px">${v?v.u||'':''}</small></span></div>`; }).join('');
   chips($('slabsChips'), SLABS_CHIPS, sig);
-  $('slabsKv').innerHTML=Object.keys(SLABS_KV).filter(k=>sig[k]).map(k=>`<dt>${SLABS_KV[k]}</dt><dd>${sig[k].v} ${sig[k].u||''}</dd>`).join('');
+  renderInputs($('slabsInputs'), SLABS_INPUTS, sig, sig);
+  $('slabsSetH').innerHTML=listRow('height_left','Left current height',sig.height_left,sig)+listRow('height_right','Right current height',sig.height_right,sig);
 }
 renderSlabs({});
 function setHeight(side, sig, mm){
@@ -510,7 +707,7 @@ function setHeight(side, sig, mm){
   el.className=cls; el.querySelector('.st').textContent=st;
 }
 
-// ---------- alarms + sound ----------
+// ============ alarms + sound ============
 let audio=null, soundOn=false, snoozedUntil=0, beepTimer=null, warnedTxt='';
 try{ soundOn=localStorage.getItem('d2dash.sound')==='1'; }catch(e){}
 function ensureAudio(){ try{ if(!audio) audio=new (window.AudioContext||window.webkitAudioContext)(); if(audio.state==='suspended') audio.resume(); }catch(e){} }
@@ -534,7 +731,7 @@ function toggleSound(){
 function snooze(){ snoozedUntil=Date.now()+5*60e3; toast('Alarm snoozed for 5 minutes'); updateAlarm(); }
 function updateAlarm(){
   const a=$('alarm');
-  if(!worst.lvl || snap.status!=='connected'){ a.className=''; a.innerHTML=''; clearInterval(beepTimer); beepTimer=null; warnedTxt=''; return; }
+  if(!worst.lvl){ a.className=''; a.innerHTML=''; clearInterval(beepTimer); beepTimer=null; warnedTxt=''; return; }
   const snoozed=Date.now()<snoozedUntil;
   a.className=worst.lvl;
   a.innerHTML=`<div>${worst.lvl==='bad'?'Out of range':'Watch'}<small>${snoozed?'snoozed':'tap to snooze 5 min'}</small></div><span class="v num">${worst.txt}</span>`;
@@ -547,7 +744,7 @@ document.addEventListener('click', ()=>{ if(soundOn) ensureAudio(); }, {once:tru
 $('threshTable').innerHTML=Object.keys(G).filter(k=>G[k].warn||G[k].alarm).map(k=>{ const g=G[k], f=b=>!b?'':[b[0]!=null?'< '+b[0]:'',b[1]!=null?'> '+b[1]:''].filter(Boolean).join(', ');
   return `<tr><td>${g.label} <span class="c">${g.unit}</span></td><td class="r warn">${f(g.warn)}</td><td class="r bad">${f(g.alarm)}</td></tr>`; }).join('');
 
-// ---------- live feed ----------
+// ============ live feed ============
 function connect(){
   const es=new EventSource('/api/events');
   es.onmessage=e=>render(JSON.parse(e.data));
@@ -559,15 +756,26 @@ fetch('/api/status').then(r=>r.json()).then(s=>{
   $('sysInfo').innerHTML=Object.entries(s).map(([k,v])=>`<dt>${nice(k)}</dt><dd>${Array.isArray(v)?v.join(', '):v}</dd>`).join('');
 });
 
-// ---------- tabs ----------
+// ============ tabs + sub-tabs ============
 document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{
   document.querySelectorAll('nav button').forEach(x=>x.classList.toggle('on',x===b));
   document.querySelectorAll('main section').forEach(s=>s.classList.toggle('on',s.id==='tab-'+b.dataset.tab));
   if(b.dataset.tab==='more') loadLogs();
   window.scrollTo(0,0);
 });
+document.querySelectorAll('.sub').forEach(sub=>{
+  const tab=sub.dataset.for;
+  const pick=name=>{
+    sub.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x.dataset.sub===name));
+    document.querySelectorAll(`#tab-${tab} .pane`).forEach(p=>p.classList.toggle('on',p.id===`${tab}-${name}`));
+    try{ localStorage.setItem('d2dash.sub.'+tab,name); }catch(e){}
+  };
+  sub.querySelectorAll('button').forEach(b=>b.onclick=()=>pick(b.dataset.sub));
+  let saved=null; try{ saved=localStorage.getItem('d2dash.sub.'+tab); }catch(e){}
+  if(saved) pick(saved);
+});
 
-// ---------- actions ----------
+// ============ actions ============
 function toast(msg, bad){ const t=$('toast'); t.textContent=msg; t.className='toast show'+(bad?' bad':''); clearTimeout(t._h); t._h=setTimeout(()=>t.classList.remove('show'),3500); }
 async function post(url, body){ const r=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}); return r.json(); }
 async function switchModule(m){ const r=await post('/api/module',{module:m}); toast(r.message||r.error,!r.ok); }
@@ -585,7 +793,7 @@ function confirmCmd(module, action, title, text, verb){
 }
 function closeModal(){ $('modal').classList.remove('show'); pending=null; }
 $('mGo').onclick=()=>{ const a=pending; closeModal(); if(a) cmd(a,true); };
-$('engOutputs').innerHTML = TD5_OUTPUTS.map(o=>`<button class="btn amber" onclick="confirmCmd('td5','output_${o}','Test the ${nice(o)}?','Actuates the ${nice(o)} output for a moment.','Test')">${nice(o)}</button>`).join('')
+$('engOutputs').innerHTML = TD5_OUTPUTS.map(o=>`<button class="btn amber" onclick="confirmCmd('td5','output_${o}','Test the ${nice(o)}?','Pulses the ${nice(o)} output once.','Test')">${nice(o)}</button>`).join('')
   + [1,2,3,4,5].map(n=>`<button class="btn amber" onclick="confirmCmd('td5','injector_${n}','Pulse injector ${n}?','Fires injector ${n} once. Engine running.','Pulse')">Injector ${n}</button>`).join('');
 
 async function loadLogs(){

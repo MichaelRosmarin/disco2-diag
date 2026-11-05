@@ -1,0 +1,1268 @@
+[
+{
+"key": "0.0",
+"name": "egr inlet throttle diagnostics (Logged Low)",
+"cause": "Check the egr inlet throttle actuator, its vacuum/feedback and the wiring.",
+"confidence": "proven"
+},
+{
+"key": "0.1",
+"name": "turbocharger wastegate diagnostics (Logged Low)",
+"cause": "Check the turbocharger wastegate actuator, its vacuum/feedback and the wiring.",
+"confidence": "proven"
+},
+{
+"key": "0.2",
+"name": "egr vacuum diagnostics (Logged Low)",
+"cause": "Check the egr vacuum actuator, its vacuum/feedback and the wiring.",
+"confidence": "proven"
+},
+{
+"key": "0.3",
+"name": "temperature gauge diagnostics (Logged Low)",
+"cause": "Check the temperature gauge actuator, its vacuum/feedback and the wiring.",
+"confidence": "proven"
+},
+{
+"key": "0.4",
+"name": "driver demand problem 1 (Logged Low)",
+"cause": "Accelerator pedal sensor — check the pedal tracks, supply and wiring.",
+"confidence": "proven"
+},
+{
+"key": "0.5",
+"name": "driver demand problem 2 (Logged Low)",
+"cause": "Accelerator pedal sensor — check the pedal tracks, supply and wiring.",
+"confidence": "proven"
+},
+{
+"key": "0.6",
+"name": "air flow circuit (Logged Low)",
+"cause": "Short to ground or low supply — check the sensor, wiring and connector.",
+"confidence": "proven"
+},
+{
+"key": "0.7",
+"name": "manifold pressure circuit (Logged Low)",
+"cause": "Short to ground or low supply — check the sensor, wiring and connector.",
+"confidence": "proven"
+},
+{
+"key": "1.0",
+"name": "inlet air temp. circuit (Logged Low)",
+"cause": "Short to ground or low supply — check the sensor, wiring and connector.",
+"confidence": "proven"
+},
+{
+"key": "1.1",
+"name": "fuel temp. circuit (Logged Low)",
+"cause": "Short to ground or low supply — check the sensor, wiring and connector.",
+"confidence": "proven"
+},
+{
+"key": "1.2",
+"name": "coolant temp. circuit (Logged Low)",
+"cause": "Short to ground or low supply — check the sensor, wiring and connector.",
+"confidence": "proven"
+},
+{
+"key": "1.3",
+"name": "battery volts (Logged Low)",
+"cause": "See the workshop manual fault-finding for this circuit.",
+"confidence": "proven"
+},
+{
+"key": "1.4",
+"name": "reference voltage (Logged Low)",
+"cause": "See the workshop manual fault-finding for this circuit.",
+"confidence": "proven"
+},
+{
+"key": "1.5",
+"name": "ambient air temp. circuit (Logged Low)",
+"cause": "Short to ground or low supply — check the sensor, wiring and connector.",
+"confidence": "proven"
+},
+{
+"key": "1.6",
+"name": "driver demand supply problem (Logged Low)",
+"cause": "Accelerator pedal sensor — check the pedal tracks, supply and wiring.",
+"confidence": "proven"
+},
+{
+"key": "1.7",
+"name": "ambient pressure circuit (Logged Low)",
+"cause": "Short to ground or low supply — check the sensor, wiring and connector.",
+"confidence": "proven"
+},
+{
+"key": "2.0",
+"name": "egr inlet throttle diagnostics (Logged High)",
+"cause": "Check the egr inlet throttle actuator, its vacuum/feedback and the wiring.",
+"confidence": "proven"
+},
+{
+"key": "2.1",
+"name": "turbocharger wastegate diagnostics (Logged High)",
+"cause": "Check the turbocharger wastegate actuator, its vacuum/feedback and the wiring.",
+"confidence": "proven"
+},
+{
+"key": "2.2",
+"name": "egr vacuum diagnostics (Logged High)",
+"cause": "Check the egr vacuum actuator, its vacuum/feedback and the wiring.",
+"confidence": "proven"
+},
+{
+"key": "2.3",
+"name": "temperature gauge diagnostics (Logged High)",
+"cause": "Check the temperature gauge actuator, its vacuum/feedback and the wiring.",
+"confidence": "proven"
+},
+{
+"key": "2.4",
+"name": "driver demand problem 1 (Logged High)",
+"cause": "Accelerator pedal sensor — check the pedal tracks, supply and wiring.",
+"confidence": "proven"
+},
+{
+"key": "2.5",
+"name": "driver demand problem 2 (Logged High)",
+"cause": "Accelerator pedal sensor — check the pedal tracks, supply and wiring.",
+"confidence": "proven"
+},
+{
+"key": "2.6",
+"name": "air flow circuit (Logged High)",
+"cause": "Open circuit or break — check the sensor, wiring and connector.",
+"confidence": "proven"
+},
+{
+"key": "2.7",
+"name": "manifold pressure circuit (Logged High)",
+"cause": "Open circuit or break — check the sensor, wiring and connector.",
+"confidence": "proven"
+},
+{
+"key": "3.0",
+"name": "inlet air temp. circuit (Logged High)",
+"cause": "Open circuit or break — check the sensor, wiring and connector.",
+"confidence": "proven"
+},
+{
+"key": "3.1",
+"name": "fuel temperature circuit (Logged High)",
+"cause": "Open circuit or break — check the sensor, wiring and connector.",
+"confidence": "proven"
+},
+{
+"key": "3.2",
+"name": "coolant temp. circuit (Logged High)",
+"cause": "Open circuit or break — check the sensor, wiring and connector.",
+"confidence": "proven"
+},
+{
+"key": "3.3",
+"name": "battery volts (Logged High)",
+"cause": "See the workshop manual fault-finding for this circuit.",
+"confidence": "proven"
+},
+{
+"key": "3.4",
+"name": "reference voltage (Logged High)",
+"cause": "See the workshop manual fault-finding for this circuit.",
+"confidence": "proven"
+},
+{
+"key": "3.5",
+"name": "ambient air temperature circuit (Logged High)",
+"cause": "Open circuit or break — check the sensor, wiring and connector.",
+"confidence": "proven"
+},
+{
+"key": "3.6",
+"name": "driver demand supply problem (Logged High)",
+"cause": "Accelerator pedal sensor — check the pedal tracks, supply and wiring.",
+"confidence": "proven"
+},
+{
+"key": "3.7",
+"name": "ambient pressure circuit (Logged High)",
+"cause": "Open circuit or break — check the sensor, wiring and connector.",
+"confidence": "proven"
+},
+{
+"key": "4.0",
+"name": "egr inlet throttle diagnostics (Current)",
+"cause": "Check the egr inlet throttle actuator, its vacuum/feedback and the wiring.",
+"confidence": "proven"
+},
+{
+"key": "4.1",
+"name": "turbocharger wastegate diagnostics (Current)",
+"cause": "Check the turbocharger wastegate actuator, its vacuum/feedback and the wiring.",
+"confidence": "proven"
+},
+{
+"key": "4.2",
+"name": "egr vacuum diagnostics (Current)",
+"cause": "Check the egr vacuum actuator, its vacuum/feedback and the wiring.",
+"confidence": "proven"
+},
+{
+"key": "4.3",
+"name": "temperature gauge diagnostics (Current)",
+"cause": "Check the temperature gauge actuator, its vacuum/feedback and the wiring.",
+"confidence": "proven"
+},
+{
+"key": "4.4",
+"name": "driver demand problem 1 (Current)",
+"cause": "Accelerator pedal sensor — check the pedal tracks, supply and wiring.",
+"confidence": "proven"
+},
+{
+"key": "4.5",
+"name": "driver demand problem 2 (Current)",
+"cause": "Accelerator pedal sensor — check the pedal tracks, supply and wiring.",
+"confidence": "proven"
+},
+{
+"key": "4.6",
+"name": "air flow circuit (Current)",
+"cause": "Check the sensor, its wiring and connector.",
+"confidence": "proven"
+},
+{
+"key": "4.7",
+"name": "manifold pressure circuit (Current)",
+"cause": "Check the sensor, its wiring and connector.",
+"confidence": "proven"
+},
+{
+"key": "5.0",
+"name": "inlet air temp. circuit (Current)",
+"cause": "Check the sensor, its wiring and connector.",
+"confidence": "proven"
+},
+{
+"key": "5.1",
+"name": "fuel temperature circuit (Current)",
+"cause": "Check the sensor, its wiring and connector.",
+"confidence": "proven"
+},
+{
+"key": "5.2",
+"name": "coolant temp. circuit (Current)",
+"cause": "Check the sensor, its wiring and connector.",
+"confidence": "proven"
+},
+{
+"key": "5.3",
+"name": "battery voltage problem (Current)",
+"cause": "See the workshop manual fault-finding for this circuit.",
+"confidence": "proven"
+},
+{
+"key": "5.4",
+"name": "reference voltage (Current)",
+"cause": "See the workshop manual fault-finding for this circuit.",
+"confidence": "proven"
+},
+{
+"key": "5.6",
+"name": "driver demand supply problem (Current)",
+"cause": "Accelerator pedal sensor — check the pedal tracks, supply and wiring.",
+"confidence": "proven"
+},
+{
+"key": "5.7",
+"name": "ambient pressure circuit (Current)",
+"cause": "Check the sensor, its wiring and connector.",
+"confidence": "proven"
+},
+{
+"key": "6.0",
+"name": "cruise lamp drive over temp. (Logged)",
+"cause": "Driver overloaded — check the circuit for a short or excessive current.",
+"confidence": "proven"
+},
+{
+"key": "6.1",
+"name": "fuel used output drive over temp. (Logged)",
+"cause": "Driver overloaded — check the circuit for a short or excessive current.",
+"confidence": "proven"
+},
+{
+"key": "6.2",
+"name": "radiator fan drive over temp. (Logged)",
+"cause": "Driver overloaded — check the circuit for a short or excessive current.",
+"confidence": "proven"
+},
+{
+"key": "6.3",
+"name": "active engine mounting over temp. (Logged)",
+"cause": "Driver overloaded — check the circuit for a short or excessive current.",
+"confidence": "proven"
+},
+{
+"key": "6.4",
+"name": "turbocharger wastegate short circuit (Logged)",
+"cause": "Short in the actuator/injector or its harness — check wiring.",
+"confidence": "proven"
+},
+{
+"key": "6.5",
+"name": "egr inlet throttle short circuit (Logged)",
+"cause": "Short in the actuator/injector or its harness — check wiring.",
+"confidence": "proven"
+},
+{
+"key": "6.6",
+"name": "egr vacuum modulator short circuit (Logged)",
+"cause": "Short in the actuator/injector or its harness — check wiring.",
+"confidence": "proven"
+},
+{
+"key": "6.7",
+"name": "temperature gauge short circuit (Logged)",
+"cause": "Short in the actuator/injector or its harness — check wiring.",
+"confidence": "proven"
+},
+{
+"key": "7.0",
+"name": "air conditioning fan drive over temp. (Logged)",
+"cause": "Driver overloaded — check the circuit for a short or excessive current.",
+"confidence": "proven"
+},
+{
+"key": "7.1",
+"name": "fuel pump drive over temp. (Logged)",
+"cause": "Driver overloaded — check the circuit for a short or excessive current.",
+"confidence": "proven"
+},
+{
+"key": "7.2",
+"name": "tacho drive over temp. (Logged)",
+"cause": "Driver overloaded — check the circuit for a short or excessive current.",
+"confidence": "proven"
+},
+{
+"key": "7.3",
+"name": "gearbox/abs drive over temp. (Logged)",
+"cause": "Driver overloaded — check the circuit for a short or excessive current.",
+"confidence": "proven"
+},
+{
+"key": "7.4",
+"name": "air conditioning clutch over temp. (Logged)",
+"cause": "Driver overloaded — check the circuit for a short or excessive current.",
+"confidence": "proven"
+},
+{
+"key": "7.5",
+"name": "mil lamp drive over temp. (Logged)",
+"cause": "Driver overloaded — check the circuit for a short or excessive current.",
+"confidence": "proven"
+},
+{
+"key": "7.6",
+"name": "glow plug relay drive over temp. (Logged)",
+"cause": "Driver overloaded — check the circuit for a short or excessive current.",
+"confidence": "proven"
+},
+{
+"key": "7.7",
+"name": "glowplug lamp drive over temperature (Logged)",
+"cause": "Driver overloaded — check the circuit for a short or excessive current.",
+"confidence": "proven"
+},
+{
+"key": "8.0",
+"name": "fuel used output drive open load (Logged)",
+"cause": "Open circuit — check the actuator and its wiring/connector.",
+"confidence": "proven"
+},
+{
+"key": "8.1",
+"name": "cruise lamp drive open load (Logged)",
+"cause": "Open circuit — check the actuator and its wiring/connector.",
+"confidence": "proven"
+},
+{
+"key": "8.2",
+"name": "radiator fan drive open load (Logged)",
+"cause": "Open circuit — check the actuator and its wiring/connector.",
+"confidence": "proven"
+},
+{
+"key": "8.3",
+"name": "active engine mounting open load (Logged)",
+"cause": "Open circuit — check the actuator and its wiring/connector.",
+"confidence": "proven"
+},
+{
+"key": "8.4",
+"name": "turbocharger wastegate open load (Logged)",
+"cause": "Open circuit — check the actuator and its wiring/connector.",
+"confidence": "proven"
+},
+{
+"key": "8.5",
+"name": "egr inlet throttle open load (Logged)",
+"cause": "Open circuit — check the actuator and its wiring/connector.",
+"confidence": "proven"
+},
+{
+"key": "8.6",
+"name": "egr vacuum modulator open load (Logged)",
+"cause": "Open circuit — check the actuator and its wiring/connector.",
+"confidence": "proven"
+},
+{
+"key": "8.7",
+"name": "temperature gauge open load (Logged)",
+"cause": "Open circuit — check the actuator and its wiring/connector.",
+"confidence": "proven"
+},
+{
+"key": "9.0",
+"name": "air conditioning fan drive open load (Logged)",
+"cause": "Open circuit — check the actuator and its wiring/connector.",
+"confidence": "proven"
+},
+{
+"key": "9.1",
+"name": "fuel pump drive open load (Logged)",
+"cause": "Open circuit — check the actuator and its wiring/connector.",
+"confidence": "proven"
+},
+{
+"key": "9.2",
+"name": "tachometer open load (Logged)",
+"cause": "Open circuit — check the actuator and its wiring/connector.",
+"confidence": "proven"
+},
+{
+"key": "9.3",
+"name": "gearbox/abs drive open load (Logged)",
+"cause": "Open circuit — check the actuator and its wiring/connector.",
+"confidence": "proven"
+},
+{
+"key": "9.4",
+"name": "air conditioning clutch open load (Logged)",
+"cause": "Open circuit — check the actuator and its wiring/connector.",
+"confidence": "proven"
+},
+{
+"key": "9.5",
+"name": "mil lamp drive open load (Logged)",
+"cause": "Open circuit — check the actuator and its wiring/connector.",
+"confidence": "proven"
+},
+{
+"key": "9.6",
+"name": "glow plug lamp drive open load (Logged)",
+"cause": "Open circuit — check the actuator and its wiring/connector.",
+"confidence": "proven"
+},
+{
+"key": "9.7",
+"name": "glow plug relay drive open load (Logged)",
+"cause": "Open circuit — check the actuator and its wiring/connector.",
+"confidence": "proven"
+},
+{
+"key": "10.0",
+"name": "cruise control lamp drive over temperature (Current)",
+"cause": "Driver overloaded — check the circuit for a short or excessive current.",
+"confidence": "proven"
+},
+{
+"key": "10.1",
+"name": "fuel used output drive over temperature (Current)",
+"cause": "Driver overloaded — check the circuit for a short or excessive current.",
+"confidence": "proven"
+},
+{
+"key": "10.2",
+"name": "radiator fan drive over temperature (Current)",
+"cause": "Driver overloaded — check the circuit for a short or excessive current.",
+"confidence": "proven"
+},
+{
+"key": "10.3",
+"name": "active engine mounting over temperature (Current)",
+"cause": "Driver overloaded — check the circuit for a short or excessive current.",
+"confidence": "proven"
+},
+{
+"key": "10.4",
+"name": "turbocharger wastegate short circuit (Current)",
+"cause": "Short in the actuator/injector or its harness — check wiring.",
+"confidence": "proven"
+},
+{
+"key": "10.5",
+"name": "egr inlet throttle short circuit (Current)",
+"cause": "Short in the actuator/injector or its harness — check wiring.",
+"confidence": "proven"
+},
+{
+"key": "10.6",
+"name": "egr vacuum modulator short circuit (Current)",
+"cause": "Short in the actuator/injector or its harness — check wiring.",
+"confidence": "proven"
+},
+{
+"key": "10.7",
+"name": "temperature gauge short circuit (Current)",
+"cause": "Short in the actuator/injector or its harness — check wiring.",
+"confidence": "proven"
+},
+{
+"key": "11.0",
+"name": "air conditioning fan drive open load (Current)",
+"cause": "Open circuit — check the actuator and its wiring/connector.",
+"confidence": "proven"
+},
+{
+"key": "11.1",
+"name": "fuel pump drive open load (Current)",
+"cause": "Open circuit — check the actuator and its wiring/connector.",
+"confidence": "proven"
+},
+{
+"key": "11.2",
+"name": "tachometer open load (Current)",
+"cause": "Open circuit — check the actuator and its wiring/connector.",
+"confidence": "proven"
+},
+{
+"key": "11.3",
+"name": "gearbox/abs drive open load (Current)",
+"cause": "Open circuit — check the actuator and its wiring/connector.",
+"confidence": "proven"
+},
+{
+"key": "11.4",
+"name": "air conditioning clutch open load (Current)",
+"cause": "Open circuit — check the actuator and its wiring/connector.",
+"confidence": "proven"
+},
+{
+"key": "11.5",
+"name": "mil lamp drive open load (Current)",
+"cause": "Open circuit — check the actuator and its wiring/connector.",
+"confidence": "proven"
+},
+{
+"key": "11.6",
+"name": "glowplug lamp drive open load (Current)",
+"cause": "Open circuit — check the actuator and its wiring/connector.",
+"confidence": "candidate"
+},
+{
+"key": "11.7",
+"name": "glowplug relay drive open load (Current)",
+"cause": "Open circuit — check the actuator and its wiring/connector.",
+"confidence": "proven"
+},
+{
+"key": "12.0",
+"name": "cruise control lamp drive over temp. (Current)",
+"cause": "Driver overloaded — check the circuit for a short or excessive current.",
+"confidence": "proven"
+},
+{
+"key": "12.1",
+"name": "fuel used output drive over temp. (Current)",
+"cause": "Driver overloaded — check the circuit for a short or excessive current.",
+"confidence": "proven"
+},
+{
+"key": "12.2",
+"name": "radiator fan drive over temp. (Current)",
+"cause": "Driver overloaded — check the circuit for a short or excessive current.",
+"confidence": "proven"
+},
+{
+"key": "12.3",
+"name": "active engine mounting over temp. (Current)",
+"cause": "Driver overloaded — check the circuit for a short or excessive current.",
+"confidence": "proven"
+},
+{
+"key": "12.4",
+"name": "turbocharger wastegate short circuit (Current)",
+"cause": "Short in the actuator/injector or its harness — check wiring.",
+"confidence": "proven"
+},
+{
+"key": "12.5",
+"name": "egr inlet throttle short circuit (Current)",
+"cause": "Short in the actuator/injector or its harness — check wiring.",
+"confidence": "proven"
+},
+{
+"key": "12.6",
+"name": "egr vacuum modulator short circuit (Current)",
+"cause": "Short in the actuator/injector or its harness — check wiring.",
+"confidence": "proven"
+},
+{
+"key": "12.7",
+"name": "temperature gauge short circuit (Current)",
+"cause": "Short in the actuator/injector or its harness — check wiring.",
+"confidence": "proven"
+},
+{
+"key": "13.0",
+"name": "air conditioning fan drive open load (Current)",
+"cause": "Open circuit — check the actuator and its wiring/connector.",
+"confidence": "proven"
+},
+{
+"key": "13.1",
+"name": "fuel pump drive open load (Current)",
+"cause": "Open circuit — check the actuator and its wiring/connector.",
+"confidence": "proven"
+},
+{
+"key": "13.2",
+"name": "tachometer open load (Current)",
+"cause": "Open circuit — check the actuator and its wiring/connector.",
+"confidence": "proven"
+},
+{
+"key": "13.3",
+"name": "gearbox/abs drive open load (Current)",
+"cause": "Open circuit — check the actuator and its wiring/connector.",
+"confidence": "proven"
+},
+{
+"key": "13.4",
+"name": "air conditioning clutch open load (Current)",
+"cause": "Open circuit — check the actuator and its wiring/connector.",
+"confidence": "proven"
+},
+{
+"key": "13.5",
+"name": "mil lamp drive open load (Current)",
+"cause": "Open circuit — check the actuator and its wiring/connector.",
+"confidence": "proven"
+},
+{
+"key": "13.6",
+"name": "glowplug lamp drive open load (Current)",
+"cause": "Open circuit — check the actuator and its wiring/connector.",
+"confidence": "candidate"
+},
+{
+"key": "13.7",
+"name": "glowplug relay drive open load (Current)",
+"cause": "Open circuit — check the actuator and its wiring/connector.",
+"confidence": "proven"
+},
+{
+"key": "14.1",
+"name": "high speed crank (Logged)",
+"cause": "Crankshaft sensor signal issue — check the sensor and reluctor.",
+"confidence": "proven"
+},
+{
+"key": "15.1",
+"name": "high speed crank (Logged)",
+"cause": "Crankshaft sensor signal issue — check the sensor and reluctor.",
+"confidence": "proven"
+},
+{
+"key": "16.1",
+"name": "high speed crank (Current)",
+"cause": "Crankshaft sensor signal issue — check the sensor and reluctor.",
+"confidence": "proven"
+},
+{
+"key": "18.1",
+"name": "can rx/tx error (Logged)",
+"cause": "CAN bus communication fault — check the bus wiring and the modules on it (SLABS/gearbox).",
+"confidence": "proven"
+},
+{
+"key": "18.2",
+"name": "can tx/rx error (Logged)",
+"cause": "CAN bus communication fault — check the bus wiring and the modules on it (SLABS/gearbox).",
+"confidence": "proven"
+},
+{
+"key": "18.5",
+"name": "noisy crank signal has been detected (Logged)",
+"cause": "Crankshaft sensor signal issue — check the sensor and reluctor.",
+"confidence": "proven"
+},
+{
+"key": "18.7",
+"name": "can has had reset failure (Logged)",
+"cause": "CAN bus communication fault — check the bus wiring and the modules on it (SLABS/gearbox).",
+"confidence": "proven"
+},
+{
+"key": "19.0",
+"name": "turbocharger under boosting (Logged)",
+"cause": "Boost-control fault — check the turbo, wastegate modulator, hoses and MAP.",
+"confidence": "proven"
+},
+{
+"key": "19.1",
+"name": "turbocharger over boosting (Logged)",
+"cause": "Boost-control fault — check the turbo, wastegate modulator, hoses and MAP.",
+"confidence": "proven"
+},
+{
+"key": "19.3",
+"name": "egr valve stuck open (Logged)",
+"cause": "EGR valve/modulator stuck — check the valve, vacuum and soot.",
+"confidence": "proven"
+},
+{
+"key": "19.4",
+"name": "egr valve stuck closed (Logged)",
+"cause": "EGR valve/modulator stuck — check the valve, vacuum and soot.",
+"confidence": "proven"
+},
+{
+"key": "20.3",
+"name": "driver demand 1 out of range (Logged)",
+"cause": "Accelerator pedal sensor — check the pedal tracks, supply and wiring.",
+"confidence": "proven"
+},
+{
+"key": "20.4",
+"name": "driver demand 2 out of range (Logged)",
+"cause": "Accelerator pedal sensor — check the pedal tracks, supply and wiring.",
+"confidence": "proven"
+},
+{
+"key": "20.5",
+"name": "problem detected with driver demand (Logged)",
+"cause": "Accelerator pedal sensor — check the pedal tracks, supply and wiring.",
+"confidence": "proven"
+},
+{
+"key": "20.6",
+"name": "inconsistencies found with driver demand (Logged)",
+"cause": "Accelerator pedal sensor — check the pedal tracks, supply and wiring.",
+"confidence": "proven"
+},
+{
+"key": "20.7",
+"name": "injector trim data corrupted (Logged)",
+"cause": "Re-enter the injector codes with a capable tool.",
+"confidence": "candidate"
+},
+{
+"key": "21.0",
+"name": "road speed missing (Logged)",
+"cause": "Road-speed signal missing — check the source (SLABS/instruments).",
+"confidence": "proven"
+},
+{
+"key": "21.2",
+"name": "vehicle accel. outside bounds of cruise control (Logged)",
+"cause": "Cruise-control input/switch fault — check the stalk and brake/clutch switches.",
+"confidence": "proven"
+},
+{
+"key": "21.6",
+"name": "cruise control resume stuck closed (Logged)",
+"cause": "Cruise-control input/switch fault — check the stalk and brake/clutch switches.",
+"confidence": "proven"
+},
+{
+"key": "21.7",
+"name": "cruise control set stuck closed (Logged)",
+"cause": "Cruise-control input/switch fault — check the stalk and brake/clutch switches.",
+"confidence": "proven"
+},
+{
+"key": "22.0",
+"name": "excessive can bus off (Current)",
+"cause": "CAN bus communication fault — check the bus wiring and the modules on it (SLABS/gearbox).",
+"confidence": "proven"
+},
+{
+"key": "22.1",
+"name": "can rx/tx error (Current)",
+"cause": "CAN bus communication fault — check the bus wiring and the modules on it (SLABS/gearbox).",
+"confidence": "proven"
+},
+{
+"key": "22.2",
+"name": "can tx/rx error (Current)",
+"cause": "CAN bus communication fault — check the bus wiring and the modules on it (SLABS/gearbox).",
+"confidence": "proven"
+},
+{
+"key": "22.3",
+"name": "unable to detect remote can mode (Current)",
+"cause": "CAN bus communication fault — check the bus wiring and the modules on it (SLABS/gearbox).",
+"confidence": "proven"
+},
+{
+"key": "22.4",
+"name": "under boost has occurred on this trip (Current)",
+"cause": "Boost-control fault — check the turbo, wastegate modulator, hoses and MAP.",
+"confidence": "proven"
+},
+{
+"key": "22.5",
+"name": "noisy crank signal has been detected (Current)",
+"cause": "Crankshaft sensor signal issue — check the sensor and reluctor.",
+"confidence": "proven"
+},
+{
+"key": "23.0",
+"name": "turbocharger under boosting (Current)",
+"cause": "Boost-control fault — check the turbo, wastegate modulator, hoses and MAP.",
+"confidence": "proven"
+},
+{
+"key": "23.1",
+"name": "turbocharger over boosting (Current)",
+"cause": "Boost-control fault — check the turbo, wastegate modulator, hoses and MAP.",
+"confidence": "proven"
+},
+{
+"key": "23.2",
+"name": "over boost has occurred this trip (Current)",
+"cause": "Boost-control fault — check the turbo, wastegate modulator, hoses and MAP.",
+"confidence": "proven"
+},
+{
+"key": "23.3",
+"name": "egr valve stuck open (Current)",
+"cause": "EGR valve/modulator stuck — check the valve, vacuum and soot.",
+"confidence": "proven"
+},
+{
+"key": "23.4",
+"name": "egr valve stuck closed (Current)",
+"cause": "EGR valve/modulator stuck — check the valve, vacuum and soot.",
+"confidence": "proven"
+},
+{
+"key": "23.6",
+"name": "problem detected with auto gear box (Current)",
+"cause": "Fault reported for the automatic gearbox — read the EAT module.",
+"confidence": "proven"
+},
+{
+"key": "24.3",
+"name": "driver demand 1 out of range (Logged)",
+"cause": "Accelerator pedal sensor — check the pedal tracks, supply and wiring.",
+"confidence": "proven"
+},
+{
+"key": "24.4",
+"name": "driver demand 2 out of range (Logged)",
+"cause": "Accelerator pedal sensor — check the pedal tracks, supply and wiring.",
+"confidence": "proven"
+},
+{
+"key": "24.5",
+"name": "problem detected with drive demand (Current)",
+"cause": "See the workshop manual fault-finding for this circuit.",
+"confidence": "proven"
+},
+{
+"key": "24.6",
+"name": "inconsistencies found with driver demand (Current)",
+"cause": "Accelerator pedal sensor — check the pedal tracks, supply and wiring.",
+"confidence": "proven"
+},
+{
+"key": "24.7",
+"name": "injector trim data corrupted (Current)",
+"cause": "Re-enter the injector codes with a capable tool.",
+"confidence": "proven"
+},
+{
+"key": "25.0",
+"name": "road speed missing (Current)",
+"cause": "Road-speed signal missing — check the source (SLABS/instruments).",
+"confidence": "proven"
+},
+{
+"key": "25.1",
+"name": "cruise control system problem (Current)",
+"cause": "Cruise-control input/switch fault — check the stalk and brake/clutch switches.",
+"confidence": "proven"
+},
+{
+"key": "25.2",
+"name": "vehicle accel. outside bounds for cruise control (Current)",
+"cause": "Cruise-control input/switch fault — check the stalk and brake/clutch switches.",
+"confidence": "proven"
+},
+{
+"key": "25.6",
+"name": "cruise control resume stuck closed (Current)",
+"cause": "Cruise-control input/switch fault — check the stalk and brake/clutch switches.",
+"confidence": "proven"
+},
+{
+"key": "25.7",
+"name": "cruise control set stuck closed (Current)",
+"cause": "Cruise-control input/switch fault — check the stalk and brake/clutch switches.",
+"confidence": "proven"
+},
+{
+"key": "26.0",
+"name": "inj. 1 peak charge long (Logged)",
+"cause": "Suspect injector or harness — check resistance/connector, compare balance.",
+"confidence": "proven"
+},
+{
+"key": "26.1",
+"name": "inj. 2 peak charge long (Logged)",
+"cause": "Suspect injector or harness — check resistance/connector, compare balance.",
+"confidence": "proven"
+},
+{
+"key": "26.2",
+"name": "inj. 3 peak charge long (Logged)",
+"cause": "Suspect injector or harness — check resistance/connector, compare balance.",
+"confidence": "proven"
+},
+{
+"key": "26.3",
+"name": "inj. 4 peak charge long (Logged)",
+"cause": "Suspect injector or harness — check resistance/connector, compare balance.",
+"confidence": "proven"
+},
+{
+"key": "26.4",
+"name": "inj. 5 peak charge long (Logged)",
+"cause": "Suspect injector or harness — check resistance/connector, compare balance.",
+"confidence": "proven"
+},
+{
+"key": "26.5",
+"name": "inj. 6 peak charge long (Logged)",
+"cause": "Suspect injector or harness — check resistance/connector, compare balance.",
+"confidence": "proven"
+},
+{
+"key": "26.6",
+"name": "topside switch failed post injection (Logged)",
+"cause": "See the workshop manual fault-finding for this circuit.",
+"confidence": "proven"
+},
+{
+"key": "27.0",
+"name": "inj. 1 peak charge short (Logged)",
+"cause": "Suspect injector or harness — check resistance/connector, compare balance.",
+"confidence": "proven"
+},
+{
+"key": "27.1",
+"name": "inj. 2 peak charge short (Logged)",
+"cause": "Suspect injector or harness — check resistance/connector, compare balance.",
+"confidence": "proven"
+},
+{
+"key": "27.2",
+"name": "inj. 3 peak charge short (Logged)",
+"cause": "Suspect injector or harness — check resistance/connector, compare balance.",
+"confidence": "proven"
+},
+{
+"key": "27.3",
+"name": "inj. 4 peak charge short (Logged)",
+"cause": "Suspect injector or harness — check resistance/connector, compare balance.",
+"confidence": "proven"
+},
+{
+"key": "27.4",
+"name": "inj. 5 peak charge short (Logged)",
+"cause": "Suspect injector or harness — check resistance/connector, compare balance.",
+"confidence": "proven"
+},
+{
+"key": "27.5",
+"name": "inj. 6 peak charge short (Logged)",
+"cause": "Suspect injector or harness — check resistance/connector, compare balance.",
+"confidence": "proven"
+},
+{
+"key": "27.6",
+"name": "topside switch failed pre injection (Logged)",
+"cause": "See the workshop manual fault-finding for this circuit.",
+"confidence": "proven"
+},
+{
+"key": "28.0",
+"name": "inj. 1 peak charge long (Current)",
+"cause": "Suspect injector or harness — check resistance/connector, compare balance.",
+"confidence": "proven"
+},
+{
+"key": "28.1",
+"name": "inj. 2 peak charge long (Current)",
+"cause": "Suspect injector or harness — check resistance/connector, compare balance.",
+"confidence": "proven"
+},
+{
+"key": "28.2",
+"name": "inj. 3 peak charge long (Current)",
+"cause": "Suspect injector or harness — check resistance/connector, compare balance.",
+"confidence": "proven"
+},
+{
+"key": "28.3",
+"name": "inj. 4 peak charge long (Current)",
+"cause": "Suspect injector or harness — check resistance/connector, compare balance.",
+"confidence": "proven"
+},
+{
+"key": "28.4",
+"name": "inj. 5 peak charge long (Current)",
+"cause": "Suspect injector or harness — check resistance/connector, compare balance.",
+"confidence": "proven"
+},
+{
+"key": "28.5",
+"name": "inj. 6 peak charge long (Current)",
+"cause": "Suspect injector or harness — check resistance/connector, compare balance.",
+"confidence": "proven"
+},
+{
+"key": "28.6",
+"name": "topside switch failed post injection (Current)",
+"cause": "See the workshop manual fault-finding for this circuit.",
+"confidence": "proven"
+},
+{
+"key": "29.0",
+"name": "inj. 1 peak charge short (Current)",
+"cause": "Suspect injector or harness — check resistance/connector, compare balance.",
+"confidence": "proven"
+},
+{
+"key": "29.1",
+"name": "inj. 2 peak charge short (Current)",
+"cause": "Suspect injector or harness — check resistance/connector, compare balance.",
+"confidence": "proven"
+},
+{
+"key": "29.2",
+"name": "inj. 3 peak charge short (Current)",
+"cause": "Suspect injector or harness — check resistance/connector, compare balance.",
+"confidence": "proven"
+},
+{
+"key": "29.3",
+"name": "inj. 4 peak charge short (Current)",
+"cause": "Suspect injector or harness — check resistance/connector, compare balance.",
+"confidence": "proven"
+},
+{
+"key": "29.4",
+"name": "inj. 5 peak charge short (Current)",
+"cause": "Suspect injector or harness — check resistance/connector, compare balance.",
+"confidence": "proven"
+},
+{
+"key": "29.5",
+"name": "inj. 6 peak charge short (Current)",
+"cause": "Suspect injector or harness — check resistance/connector, compare balance.",
+"confidence": "proven"
+},
+{
+"key": "29.6",
+"name": "topside switch failed pre injection (Current)",
+"cause": "See the workshop manual fault-finding for this circuit.",
+"confidence": "proven"
+},
+{
+"key": "30.0",
+"name": "inj. 1 open circuit (Logged)",
+"cause": "Open circuit — check the actuator/injector and its wiring.",
+"confidence": "proven"
+},
+{
+"key": "30.1",
+"name": "inj. 2 open circuit (Logged)",
+"cause": "Open circuit — check the actuator/injector and its wiring.",
+"confidence": "proven"
+},
+{
+"key": "30.2",
+"name": "inj. 3 open circuit (Logged)",
+"cause": "Open circuit — check the actuator/injector and its wiring.",
+"confidence": "proven"
+},
+{
+"key": "30.3",
+"name": "inj. 4 open circuit (Logged)",
+"cause": "Open circuit — check the actuator/injector and its wiring.",
+"confidence": "proven"
+},
+{
+"key": "30.4",
+"name": "inj. 5 open circuit (Logged)",
+"cause": "Open circuit — check the actuator/injector and its wiring.",
+"confidence": "proven"
+},
+{
+"key": "30.5",
+"name": "inj. 6 open circuit (Logged)",
+"cause": "Open circuit — check the actuator/injector and its wiring.",
+"confidence": "proven"
+},
+{
+"key": "31.0",
+"name": "inj. 1 short circuit (Logged)",
+"cause": "Short in the actuator/injector or its harness — check wiring.",
+"confidence": "proven"
+},
+{
+"key": "31.1",
+"name": "inj. 2 short circuit (Logged)",
+"cause": "Short in the actuator/injector or its harness — check wiring.",
+"confidence": "proven"
+},
+{
+"key": "31.2",
+"name": "inj. 3 short circuit (Logged)",
+"cause": "Short in the actuator/injector or its harness — check wiring.",
+"confidence": "proven"
+},
+{
+"key": "31.3",
+"name": "inj. 4 short circuit (Logged)",
+"cause": "Short in the actuator/injector or its harness — check wiring.",
+"confidence": "proven"
+},
+{
+"key": "31.4",
+"name": "inj. 5 short circuit (Logged)",
+"cause": "Short in the actuator/injector or its harness — check wiring.",
+"confidence": "proven"
+},
+{
+"key": "31.5",
+"name": "inj. 6 short circuit (Logged)",
+"cause": "Short in the actuator/injector or its harness — check wiring.",
+"confidence": "proven"
+},
+{
+"key": "32.0",
+"name": "inj. 1 open circuit (Current)",
+"cause": "Open circuit — check the actuator/injector and its wiring.",
+"confidence": "proven"
+},
+{
+"key": "32.1",
+"name": "inj. 2 open circuit (Current)",
+"cause": "Open circuit — check the actuator/injector and its wiring.",
+"confidence": "proven"
+},
+{
+"key": "32.2",
+"name": "inj. 3 open circuit (Current)",
+"cause": "Open circuit — check the actuator/injector and its wiring.",
+"confidence": "proven"
+},
+{
+"key": "32.3",
+"name": "inj. 4 open circuit (Current)",
+"cause": "Open circuit — check the actuator/injector and its wiring.",
+"confidence": "proven"
+},
+{
+"key": "32.4",
+"name": "inj. 5 open circuit (Current)",
+"cause": "Open circuit — check the actuator/injector and its wiring.",
+"confidence": "proven"
+},
+{
+"key": "32.5",
+"name": "inj. 6 open circuit (Current)",
+"cause": "Open circuit — check the actuator/injector and its wiring.",
+"confidence": "proven"
+},
+{
+"key": "33.0",
+"name": "inj. 1 short circuit (Current)",
+"cause": "Short in the actuator/injector or its harness — check wiring.",
+"confidence": "proven"
+},
+{
+"key": "33.1",
+"name": "inj. 2 short circuit (Current)",
+"cause": "Short in the actuator/injector or its harness — check wiring.",
+"confidence": "proven"
+},
+{
+"key": "33.2",
+"name": "inj. 3 short circuit (Current)",
+"cause": "Short in the actuator/injector or its harness — check wiring.",
+"confidence": "proven"
+},
+{
+"key": "33.3",
+"name": "inj. 4 short circuit (Current)",
+"cause": "Short in the actuator/injector or its harness — check wiring.",
+"confidence": "proven"
+},
+{
+"key": "33.4",
+"name": "inj. 5 short circuit (Current)",
+"cause": "Short in the actuator/injector or its harness — check wiring.",
+"confidence": "proven"
+},
+{
+"key": "33.5",
+"name": "inj. 6 short circuit (Current)",
+"cause": "Short in the actuator/injector or its harness — check wiring.",
+"confidence": "proven"
+},
+{
+"key": "34.0",
+"name": "inj. 1 partial short circuit (Logged)",
+"cause": "Check the injector and its harness; compare cylinder balance.",
+"confidence": "proven"
+},
+{
+"key": "34.1",
+"name": "inj. 2 partial short circuit (Logged)",
+"cause": "Check the injector and its harness; compare cylinder balance.",
+"confidence": "proven"
+},
+{
+"key": "34.2",
+"name": "inj. 3 partial short circuit (Logged)",
+"cause": "Check the injector and its harness; compare cylinder balance.",
+"confidence": "proven"
+},
+{
+"key": "34.3",
+"name": "inj. 4 partial short circuit (Logged)",
+"cause": "Check the injector and its harness; compare cylinder balance.",
+"confidence": "proven"
+},
+{
+"key": "34.4",
+"name": "inj. 5 partial short circuit (Logged)",
+"cause": "Check the injector and its harness; compare cylinder balance.",
+"confidence": "proven"
+},
+{
+"key": "34.5",
+"name": "inj. 6 partial short circuit (Logged)",
+"cause": "Check the injector and its harness; compare cylinder balance.",
+"confidence": "proven"
+}
+]

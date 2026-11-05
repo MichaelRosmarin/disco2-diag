@@ -24,7 +24,8 @@ class SimTd5:
         self._t0 = time.monotonic()
         self._connected_at: float | None = None
         self.on_progress = None
-        self._faults = ["coolant temp. circuit (Logged)", "byte12.bit3 (Logged)"]
+        # real decoder output: names from the dictionary, plus an undecoded bit
+        self._faults = ["coolant temp. circuit (Logged High)", "air flow circuit (Current)", "byte12.bit3"]
         self._odo = 0.0
 
     def is_connected(self) -> bool:
@@ -73,7 +74,33 @@ class SimTd5:
                 "balance_4": _sig(random.uniform(-0.4, 0.4), "", "proven"),
                 "balance_5": _sig(random.uniform(-0.4, 0.4), "", "proven"),
                 "brake_switch_2": _sig(1 if speed < 2 else 0, ""),
+                "brake_main": _sig(1 if speed < 2 else 0, ""),
                 "fuel_pump_relay": _sig(1, ""),
+                # the rest of the Nanocom "Inputs" set, as d2diag names them
+                "rpm_error": _sig(random.uniform(-12, 12) if rpm < 900 else 0, "rpm"),
+                "accel_way1": _sig(0.6 + 3.2 * max(0.0, math.sin(phase * math.pi)), "V"),
+                "accel_way2": _sig(0.3 + 1.6 * max(0.0, math.sin(phase * math.pi)), "V"),
+                "accel_way3": _sig(0.3 + 1.6 * max(0.0, math.sin(phase * math.pi)), "V"),
+                "accel_supply": _sig(4.98, "V"),
+                "egr_modulator": _sig(0 if boost > 1.3 else 35.0, "%", "candidate"),
+                "egr_inlet": _sig(0 if boost > 1.3 else 20.0, "%", "candidate"),
+                "wastegate_modulator": _sig(min(95.0, (boost - 1.0) * 110), "%", "candidate"),
+                "cruise_master": _sig(0, ""),
+                "cruise_set": _sig(0, ""),
+                "cruise_resume": _sig(0, ""),
+                "ambient_press_2": _sig(1.0, "bar", "candidate"),
+                "battery_direct": _sig(14.05 if rpm > 900 else 12.55, "V", "candidate"),
+                "driver_demand": _sig(inj * 1.05, "mg/stroke", "candidate"),
+                "smoke_limit": _sig(48.0, "mg/stroke", "candidate"),
+                "torque_limit": _sig(52.0, "mg/stroke", "candidate"),
+                "maf": _sig(40 + boost * 290, "kg/hr", "candidate"),
+                "maf_sensor_v": _sig(1.2 + boost * 1.1, "V", "candidate"),
+                "coolant_sensor_v": _sig(3.9 - coolant * 0.025, "V", "candidate"),
+                "intake_sensor_v": _sig(2.4, "V", "candidate"),
+                "fuel_sensor_v": _sig(2.1, "V", "candidate"),
+                "egr_pos": _sig(0 if boost > 1.3 else 34.0, "%", "candidate"),
+                "wastegate_pos": _sig(min(95.0, (boost - 1.0) * 110), "%", "candidate"),
+                "ext_temp": _sig(24.0, "°C", "candidate"),
             },
             "faults": list(self._faults),
         }
@@ -130,10 +157,14 @@ class SimSlabs:
                 "height_right_mm": _sig(self._right * 1.4, "mm"),
                 "battery": _sig(batt, "V"),
                 "ecu_supply": _sig(batt - 0.2, "V"),
-                "wheel_speed_fl": _sig(0, "?", "candidate"),
-                "wheel_speed_fr": _sig(0, "?", "candidate"),
-                "wheel_speed_rl": _sig(0, "?", "candidate"),
-                "wheel_speed_rr": _sig(0, "?", "candidate"),
+                "wheel_speed_fl": _sig(0, "", "candidate"),
+                "wheel_speed_fr": _sig(0, "", "candidate"),
+                "wheel_speed_rl": _sig(0, "", "candidate"),
+                "wheel_speed_rr": _sig(0, "", "candidate"),
+                "abs_sensor_fl": _sig(0.02, "V", "candidate"),
+                "abs_sensor_fr": _sig(0.02, "V", "candidate"),
+                "abs_sensor_rl": _sig(0.01, "V", "candidate"),
+                "abs_sensor_rr": _sig(0.02, "V", "candidate"),
                 "any_door": _sig(0, ""),
                 "reverse_gear": _sig(0, ""),
                 "neutral_gear": _sig(1, ""),

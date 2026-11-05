@@ -28,12 +28,28 @@ def build_sources(cfg: Config) -> dict:
                         module_ids=["td5", "slabs"])
 
 
+def build_sensors(cfg: Config):
+    """The ESP32 board, the simulator, or nothing (D2DASH_SENSORS_PORT=none).
+
+    With --simulate the board is simulated too, unless a real port is named explicitly:
+    `--simulate --sensors-port /dev/ttyUSB1` is how to bench-test a real board without the car.
+    """
+    if cfg.sensors_port.lower() in ("none", "off", ""):
+        return None
+    if cfg.simulate and cfg.sensors_port == "auto":
+        from .sensors import SimSensors
+        return SimSensors()
+    from .sensors import SerialSensors
+    return SerialSensors(cfg.sensors_port)
+
+
 def main(argv: list[str] | None = None) -> None:
     ap = argparse.ArgumentParser(prog="d2dash", description="Discovery 2 Td5/SLABS dashboard")
     ap.add_argument("--simulate", action="store_true", help="use the built-in simulator")
     ap.add_argument("--port", help="serial port (default: $D2DASH_PORT or auto)")
     ap.add_argument("--http-port", type=int, help="HTTP port (default: $D2DASH_HTTP_PORT or 8080)")
     ap.add_argument("--log-dir", help="session CSV directory")
+    ap.add_argument("--sensors-port", help="ESP32 sensor board port: auto (default), none, or a device")
     ap.add_argument("-v", "--verbose", action="store_true")
     args = ap.parse_args(argv)
 
@@ -45,6 +61,8 @@ def main(argv: list[str] | None = None) -> None:
         os.environ["D2DASH_HTTP_PORT"] = str(args.http_port)
     if args.log_dir:
         os.environ["D2DASH_LOG_DIR"] = args.log_dir
+    if args.sensors_port:
+        os.environ["D2DASH_SENSORS_PORT"] = args.sensors_port
 
     logging.basicConfig(level=logging.DEBUG if args.verbose else logging.INFO,
                         format="%(asctime)s %(levelname)s %(name)s: %(message)s")
@@ -53,7 +71,7 @@ def main(argv: list[str] | None = None) -> None:
         "starting: port=%s http=%s:%d simulate=%s logs=%s",
         cfg.port, cfg.http_host, cfg.http_port, cfg.simulate, cfg.log_dir)
 
-    engine = Engine(cfg, build_sources(cfg))
+    engine = Engine(cfg, build_sources(cfg), sensors=build_sensors(cfg))
     engine.start()
 
     def _stop(*_):

@@ -1,0 +1,392 @@
+[
+{
+"key": "3.4",
+"name": "right front wheel speed sensor — output too low",
+"cause": "Wheel-speed signal low — check the sensor air gap, reluctor ring and wiring.",
+"confidence": "proven"
+},
+{
+"key": "10.4",
+"name": "shuttle valve switch — electrical failure",
+"cause": "Switch circuit electrical failure — check the switch, connector and wiring.",
+"confidence": "proven"
+},
+{
+"key": "rsw-012",
+"name": "Pump Fail — Monitor Line",
+"cause": "Pump monitor line fault — check the monitor wiring.",
+"confidence": "candidate"
+},
+{
+"key": "rsw-013",
+"name": "Pump Fail — Pump Not Running When On",
+"cause": "Pump commanded on but not running — check the pump, relay and supply.",
+"confidence": "candidate"
+},
+{
+"key": "rsw-014",
+"name": "Pump Fail — Pump Sticking",
+"cause": "Mechanical sticking — inspect the valve/pump.",
+"confidence": "candidate"
+},
+{
+"key": "rsw-015",
+"name": "Pump Fail — Pump Running When Not On",
+"cause": "Pump running when off — check the relay and pump drive.",
+"confidence": "candidate"
+},
+{
+"key": "rsw-016",
+"name": "Shuttle Valve Switch Long Term Failure",
+"cause": "See the workshop manual fault-finding for this circuit.",
+"confidence": "candidate"
+},
+{
+"key": "rsw-017",
+"name": "ECU Internal Valve Relay Bad",
+"cause": "Internal valve relay fault — ECU suspect.",
+"confidence": "candidate"
+},
+{
+"key": "rsw-020",
+"name": "No Batt Supply Voltage",
+"cause": "See the workshop manual fault-finding for this circuit.",
+"confidence": "candidate"
+},
+{
+"key": "rsw-021",
+"name": "Engine PWM Signal Bad",
+"cause": "See the workshop manual fault-finding for this circuit.",
+"confidence": "candidate"
+},
+{
+"key": "rsw-022",
+"name": "ECU Gnd or Reference Gnd Bad",
+"cause": "See the workshop manual fault-finding for this circuit.",
+"confidence": "candidate"
+},
+{
+"key": "rsw-023",
+"name": "Gear Info Not Valid",
+"cause": "See the workshop manual fault-finding for this circuit.",
+"confidence": "candidate"
+},
+{
+"key": "rsw-030",
+"name": "Front Right In Valve — Open Circuit",
+"cause": "Open circuit — check the component and its wiring/connector.",
+"confidence": "candidate"
+},
+{
+"key": "rsw-031",
+"name": "Front Right Out Valve — Open Circuit",
+"cause": "Open circuit — check the component and its wiring/connector.",
+"confidence": "candidate"
+},
+{
+"key": "rsw-032",
+"name": "Front Left In Valve — Open Circuit",
+"cause": "Open circuit — check the component and its wiring/connector.",
+"confidence": "candidate"
+},
+{
+"key": "rsw-033",
+"name": "Front Left Out Valve — Open Circuit",
+"cause": "Open circuit — check the component and its wiring/connector.",
+"confidence": "candidate"
+},
+{
+"key": "rsw-034",
+"name": "Rear Right In Valve — Open Circuit",
+"cause": "Open circuit — check the component and its wiring/connector.",
+"confidence": "candidate"
+},
+{
+"key": "rsw-035",
+"name": "Rear Right Out Valve — Open Circuit",
+"cause": "Open circuit — check the component and its wiring/connector.",
+"confidence": "candidate"
+},
+{
+"key": "rsw-036",
+"name": "Rear Left In Valve — Open Circuit",
+"cause": "Open circuit — check the component and its wiring/connector.",
+"confidence": "candidate"
+},
+{
+"key": "rsw-037",
+"name": "Rear Left Out Valve — Open Circuit",
+"cause": "Open circuit — check the component and its wiring/connector.",
+"confidence": "candidate"
+},
+{
+"key": "rsw-040",
+"name": "Pump Relay — Open Circuit",
+"cause": "Open circuit — check the component and its wiring/connector.",
+"confidence": "candidate"
+},
+{
+"key": "rsw-041",
+"name": "Brake Light Relay — Open Circuit",
+"cause": "Open circuit — check the component and its wiring/connector.",
+"confidence": "candidate"
+},
+{
+"key": "rsw-044",
+"name": "Front Right Sensor — Output Low",
+"cause": "Wheel-speed signal low — check the sensor air gap, reluctor ring and wiring.",
+"confidence": "candidate"
+},
+{
+"key": "rsw-045",
+"name": "Rear Left Sensor — Output Low",
+"cause": "Wheel-speed signal low — check the sensor air gap, reluctor ring and wiring.",
+"confidence": "candidate"
+},
+{
+"key": "rsw-046",
+"name": "Front Left Sensor — Output Low",
+"cause": "Wheel-speed signal low — check the sensor air gap, reluctor ring and wiring.",
+"confidence": "candidate"
+},
+{
+"key": "rsw-047",
+"name": "Rear Right Sensor — Output Low",
+"cause": "Wheel-speed signal low — check the sensor air gap, reluctor ring and wiring.",
+"confidence": "candidate"
+},
+{
+"key": "rsw-050",
+"name": "Front Right In Valve — Short To Gnd",
+"cause": "Short to ground — check the wiring for a short to chassis.",
+"confidence": "candidate"
+},
+{
+"key": "rsw-051",
+"name": "Front Right Out Valve — Short To Gnd",
+"cause": "Short to ground — check the wiring for a short to chassis.",
+"confidence": "candidate"
+},
+{
+"key": "rsw-052",
+"name": "Front Left In Valve — Short To Gnd",
+"cause": "Short to ground — check the wiring for a short to chassis.",
+"confidence": "candidate"
+},
+{
+"key": "rsw-053",
+"name": "Front Left Out Valve — Short To Gnd",
+"cause": "Short to ground — check the wiring for a short to chassis.",
+"confidence": "candidate"
+},
+{
+"key": "rsw-054",
+"name": "Rear Right In Valve — Short To Gnd",
+"cause": "Short to ground — check the wiring for a short to chassis.",
+"confidence": "candidate"
+},
+{
+"key": "rsw-055",
+"name": "Rear Right Out Valve — Short To Gnd",
+"cause": "Short to ground — check the wiring for a short to chassis.",
+"confidence": "candidate"
+},
+{
+"key": "rsw-056",
+"name": "Rear Left In Valve — Short To Gnd",
+"cause": "Short to ground — check the wiring for a short to chassis.",
+"confidence": "candidate"
+},
+{
+"key": "rsw-057",
+"name": "Rear Left Out Valve — Short To Gnd",
+"cause": "Short to ground — check the wiring for a short to chassis.",
+"confidence": "candidate"
+},
+{
+"key": "rsw-060",
+"name": "Pump Relay — Short To Gnd",
+"cause": "Short to ground — check the wiring for a short to chassis.",
+"confidence": "candidate"
+},
+{
+"key": "rsw-061",
+"name": "Brake Light Relay — Short To Gnd",
+"cause": "Short to ground — check the wiring for a short to chassis.",
+"confidence": "candidate"
+},
+{
+"key": "rsw-064",
+"name": "Front Right Sensor — Electric Fail",
+"cause": "Wheel-speed sensor electrical failure — check the sensor and wiring.",
+"confidence": "candidate"
+},
+{
+"key": "rsw-065",
+"name": "Rear Left Sensor — Electric Fail",
+"cause": "Wheel-speed sensor electrical failure — check the sensor and wiring.",
+"confidence": "candidate"
+},
+{
+"key": "rsw-066",
+"name": "Front Left Sensor — Electric Fail",
+"cause": "Wheel-speed sensor electrical failure — check the sensor and wiring.",
+"confidence": "candidate"
+},
+{
+"key": "rsw-067",
+"name": "Rear Right Sensor — Electric Fail",
+"cause": "Wheel-speed sensor electrical failure — check the sensor and wiring.",
+"confidence": "candidate"
+},
+{
+"key": "rsw-070",
+"name": "Front Right In Valve — Short to Supply",
+"cause": "Short to +12V — check the wiring for a short to supply.",
+"confidence": "candidate"
+},
+{
+"key": "rsw-071",
+"name": "Front Right Out Valve — Short to Supply",
+"cause": "Short to +12V — check the wiring for a short to supply.",
+"confidence": "candidate"
+},
+{
+"key": "rsw-072",
+"name": "Front Left In Valve — Short to Supply",
+"cause": "Short to +12V — check the wiring for a short to supply.",
+"confidence": "candidate"
+},
+{
+"key": "rsw-073",
+"name": "Front Left Out Valve — Short to Supply",
+"cause": "Short to +12V — check the wiring for a short to supply.",
+"confidence": "candidate"
+},
+{
+"key": "rsw-074",
+"name": "Rear Right In Valve — Short to Supply",
+"cause": "Short to +12V — check the wiring for a short to supply.",
+"confidence": "candidate"
+},
+{
+"key": "rsw-075",
+"name": "Rear Right Out Valve — Short to Supply",
+"cause": "Short to +12V — check the wiring for a short to supply.",
+"confidence": "candidate"
+},
+{
+"key": "rsw-076",
+"name": "Rear Left In Valve — Short to Supply",
+"cause": "Short to +12V — check the wiring for a short to supply.",
+"confidence": "candidate"
+},
+{
+"key": "rsw-077",
+"name": "Rear Left Out Valve — Short to Supply",
+"cause": "Short to +12V — check the wiring for a short to supply.",
+"confidence": "candidate"
+},
+{
+"key": "rsw-080",
+"name": "Pump Relay — Short To Supply",
+"cause": "Short to +12V — check the wiring for a short to supply.",
+"confidence": "candidate"
+},
+{
+"key": "rsw-081",
+"name": "Brake Light Relay — Short to Supply",
+"cause": "Short to +12V — check the wiring for a short to supply.",
+"confidence": "candidate"
+},
+{
+"key": "rsw-090",
+"name": "Front Right In Valve — Drive Short to Supply",
+"cause": "Driver short to +12V — suspect the ECU driver or a harness short to supply.",
+"confidence": "candidate"
+},
+{
+"key": "rsw-091",
+"name": "Front Right Out Valve — Drive Short to Supply",
+"cause": "Driver short to +12V — suspect the ECU driver or a harness short to supply.",
+"confidence": "candidate"
+},
+{
+"key": "rsw-092",
+"name": "Front Left In Valve — Drive Short to Supply",
+"cause": "Driver short to +12V — suspect the ECU driver or a harness short to supply.",
+"confidence": "candidate"
+},
+{
+"key": "rsw-093",
+"name": "Front Left Out Valve — Drive Short to Supply",
+"cause": "Driver short to +12V — suspect the ECU driver or a harness short to supply.",
+"confidence": "candidate"
+},
+{
+"key": "rsw-094",
+"name": "Rear Right In Valve — Drive Short to Supply",
+"cause": "Driver short to +12V — suspect the ECU driver or a harness short to supply.",
+"confidence": "candidate"
+},
+{
+"key": "rsw-095",
+"name": "Rear Right Out Valve — Drive Short to Supply",
+"cause": "Driver short to +12V — suspect the ECU driver or a harness short to supply.",
+"confidence": "candidate"
+},
+{
+"key": "rsw-096",
+"name": "Rear Left In Valve — Drive Short to Supply",
+"cause": "Driver short to +12V — suspect the ECU driver or a harness short to supply.",
+"confidence": "candidate"
+},
+{
+"key": "rsw-097",
+"name": "Rear Left Out Valve — Drive Short to Supply",
+"cause": "Driver short to +12V — suspect the ECU driver or a harness short to supply.",
+"confidence": "candidate"
+},
+{
+"key": "rsw-100",
+"name": "Pump Relay — Drive Short to Supply",
+"cause": "Driver short to +12V — suspect the ECU driver or a harness short to supply.",
+"confidence": "candidate"
+},
+{
+"key": "rsw-101",
+"name": "Brake Light Relay — Drive Short to Supply",
+"cause": "Driver short to +12V — suspect the ECU driver or a harness short to supply.",
+"confidence": "candidate"
+},
+{
+"key": "rsw-110",
+"name": "Sticking Throttle Detected",
+"cause": "Mechanical sticking — inspect the valve/pump.",
+"confidence": "candidate"
+},
+{
+"key": "rsw-111",
+"name": "Shuttle Valve Sticking",
+"cause": "Mechanical sticking — inspect the valve/pump.",
+"confidence": "candidate"
+},
+{
+"key": "rsw-112",
+"name": "Internal ECU comms error",
+"cause": "See the workshop manual fault-finding for this circuit.",
+"confidence": "candidate"
+},
+{
+"key": "rsw-113",
+"name": "Shuttle Valve Switch Dynamic Failure",
+"cause": "See the workshop manual fault-finding for this circuit.",
+"confidence": "candidate"
+},
+{
+"key": "rsw-114",
+"name": "Shuttle Valve Switch Electrical Failure",
+"cause": "Switch circuit electrical failure — check the switch, connector and wiring.",
+"confidence": "candidate"
+}
+]

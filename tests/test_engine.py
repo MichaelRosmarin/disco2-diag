@@ -101,3 +101,48 @@ def test_http_api(engine, cfg):
         assert ei.value.code == 404
     finally:
         httpd.shutdown()
+
+
+def test_sensor_board_merges_into_snapshot_and_log(cfg):
+    from d2dash.sensors import SimSensors
+    e = Engine(cfg, make_sim_sources(), sensors=SimSensors())
+    e.start()
+    try:
+        s = wait_connected(e, "td5")
+        time.sleep(0.6)
+        s = e.snapshot()
+        assert s["sensors"]["status"] == "connected"
+        assert "egt" in s["sensors"]["signals"] and s["sensors"]["signals"]["egt"]["u"] == "°C"
+        with open(s["log_file"]) as fh:
+            header = fh.readline()
+        assert "sensor_egt" in header and "sensor_oil_press" in header
+    finally:
+        e.stop()
+
+
+def test_sensor_line_parsing():
+    from d2dash.sensors import SerialSensors
+    s = SerialSensors(port="none")
+    s._ingest({"egt": 512.25, "oil_press": 3.14159, "up": 99, "name": "ignored"})
+    out = s.latest()
+    assert out["status"] == "connected"
+    assert out["signals"]["egt"] == {"v": 512.25, "u": "°C", "s": None, "c": "proven"}
+    assert out["signals"]["oil_press"]["v"] == 3.14
+    assert "up" not in out["signals"] and "name" not in out["signals"]
+
+
+def test_fault_reference_endpoint(engine):
+    from d2dash.server import fault_reference
+    ref = fault_reference()
+    assert len(ref["td5"]) > 190 and len(ref["slabs"]) > 50   # 211 bits, 196 distinct names
+    assert ref["td5"]["coolant temp. circuit (Logged High)"]
+    httpd = ThreadingHTTPServer(("127.0.0.1", 0), make_handler(engine))
+    httpd.daemon_threads = True
+    threading.Thread(target=httpd.serve_forever, daemon=True).start()
+    try:
+        r = json.load(urllib.request.urlopen(f"http://127.0.0.1:{httpd.server_address[1]}/api/faults/reference"))
+        assert r["slabs"]
+        font = urllib.request.urlopen(f"http://127.0.0.1:{httpd.server_address[1]}/static/fonts/inter-display-700.woff")
+        assert font.headers["Content-Type"] == "font/woff"
+    finally:
+        httpd.shutdown()

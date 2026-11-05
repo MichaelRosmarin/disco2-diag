@@ -23,6 +23,7 @@ class Config:
     td5_interval: float       # seconds between Td5 polls
     slabs_interval: float     # seconds between SLABS polls (the ECU tolerates ~1 Hz)
     raw_log_dir: str | None   # optional raw K-line capture dir (for mapping work)
+    sensors_port: str = "auto"  # ESP32 sensor board: serial port, "auto", or "none"
 
     @classmethod
     def from_env(cls) -> "Config":
@@ -37,4 +38,5 @@ class Config:
             td5_interval=float(os.environ.get("D2DASH_TD5_INTERVAL", "0.5")),
             slabs_interval=float(os.environ.get("D2DASH_SLABS_INTERVAL", "1.0")),
             raw_log_dir=os.environ.get("D2DASH_RAW_LOG_DIR") or None,
+            sensors_port=os.environ.get("D2DASH_SENSORS_PORT", "auto"),
         )
