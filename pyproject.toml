@@ -22,4 +22,4 @@ d2dash = "d2dash.__main__:main"
 include = ["d2dash*"]
 
 [tool.setuptools.package-data]
-d2dash = ["static/*"]
+d2dash = ["static/*", "static/fonts/*"]

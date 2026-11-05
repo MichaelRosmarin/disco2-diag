@@ -5,231 +5,332 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="theme-color" content="#0b0d10">
+<meta name="theme-color" content="#0f1317">
 <title>Disco 2</title>
 <style>
+@font-face{font-family:"Inter D";font-weight:700;src:url(/static/fonts/inter-display-700.woff) format("woff");font-display:swap}
+@font-face{font-family:"Inter T";font-weight:500;src:url(/static/fonts/inter-text-500.woff) format("woff");font-display:swap}
+@font-face{font-family:"Inter T";font-weight:600;src:url(/static/fonts/inter-text-600.woff) format("woff");font-display:swap}
+
 :root{
-  --bg:#0b0d10; --panel:#13171c; --panel2:#1a2027; --line:#242b34;
-  --fg:#e8ecf1; --dim:#8a96a3; --mute:#58636f;
-  --ok:#3fcf7f; --warn:#f2b534; --bad:#ef5350; --info:#4fa3f7;
-  --accent:#e0a33a;
-  --tap:48px;
+  --bg:#0f1317; --bg2:#151a20; --rule:#232a33; --rule2:#2e3741;
+  --fg:#eef0ec; --fg2:#a7b0b8; --fg3:#66717c;
+  --ok:#55c47a; --warn:#e8a93a; --bad:#e2574f; --act:#7cc4ff;
+  --okbg:rgba(85,196,122,.12); --warnbg:rgba(232,169,58,.16); --badbg:rgba(226,87,79,.16);
+  --tap:50px; --pad:14px;
+  font-feature-settings:"tnum","cv11";
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;background:var(--bg);color:var(--fg);
-  font:16px/1.35 -apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
-  -webkit-user-select:none;user-select:none;overscroll-behavior:none}
+  font:15px/1.4 "Inter T",-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;font-weight:500;
+  -webkit-user-select:none;user-select:none;overscroll-behavior:none;-webkit-font-smoothing:antialiased}
 body{display:flex;flex-direction:column;min-height:100vh;min-height:100dvh}
+button{font:inherit;color:inherit;cursor:pointer}
+.num{font-family:"Inter D","Inter T",-apple-system,Roboto,Helvetica,Arial,sans-serif;font-weight:700;letter-spacing:-.025em;font-variant-numeric:tabular-nums}
+.ok{color:var(--ok)}.warn{color:var(--warn)}.bad{color:var(--bad)}
 
-header{display:flex;align-items:center;gap:12px;padding:10px 14px;background:var(--panel);
-  border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5}
-header h1{font-size:17px;margin:0;letter-spacing:.04em;font-weight:600}
-header .spacer{flex:1}
-.pill{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;
-  background:var(--panel2);color:var(--dim);font-size:13px;white-space:nowrap}
-.pill .dot{width:9px;height:9px;border-radius:50%;background:var(--mute)}
-.pill.connected .dot{background:var(--ok);box-shadow:0 0 8px var(--ok)}
-.pill.connecting .dot,.pill.switching .dot{background:var(--warn);animation:blink 1s infinite}
-.pill.error .dot{background:var(--bad)}
+/* ---------- header ---------- */
+header{display:flex;align-items:center;gap:12px;padding:calc(env(safe-area-inset-top) + 10px) var(--pad) 8px;position:sticky;top:0;z-index:5;background:var(--bg)}
+header .mark{font-weight:600;font-size:15px;letter-spacing:.02em}
+header .mark b{color:var(--fg3);font-weight:600}
+header .state{flex:1;color:var(--fg2);font-size:14px;display:flex;align-items:center;gap:8px;min-width:0}
+header .state .dot{width:8px;height:8px;border-radius:50%;background:var(--fg3);flex:none}
+header .state.connected .dot{background:var(--ok)}
+header .state.connecting .dot,header .state.switching .dot{background:var(--warn);animation:blink 1s infinite}
+header .state.error .dot{background:var(--bad)}
+header .state span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 @keyframes blink{50%{opacity:.25}}
+#sound{width:40px;height:40px;border-radius:50%;border:1px solid var(--rule2);background:none;display:grid;place-items:center;color:var(--fg3)}
+#sound.on{color:var(--fg);border-color:var(--fg2)}
+#sound svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+#sound .off{display:none}#sound:not(.on) .off{display:block}
 
-nav{display:flex;background:var(--panel);border-bottom:1px solid var(--line)}
-nav button{flex:1;min-height:var(--tap);background:none;border:0;color:var(--dim);
-  font-size:15px;font-weight:600;border-bottom:3px solid transparent;cursor:pointer}
-nav button.on{color:var(--fg);border-bottom-color:var(--accent)}
-nav button .badge{display:inline-block;min-width:20px;padding:1px 6px;margin-left:6px;
-  border-radius:999px;background:var(--bad);color:#fff;font-size:12px}
-nav button .badge:empty{display:none}
+nav{display:flex;padding:0 6px;border-bottom:1px solid var(--rule);background:var(--bg);position:sticky;top:0;z-index:4}
+nav button{flex:1;min-height:var(--tap);background:none;border:0;color:var(--fg3);font-size:15px;font-weight:600;
+  border-bottom:2px solid transparent;margin-bottom:-1px;position:relative}
+nav button.on{color:var(--fg);border-bottom-color:var(--fg)}
+nav button .n{position:absolute;top:9px;margin-left:4px;min-width:18px;height:18px;padding:0 5px;border-radius:9px;
+  background:var(--bad);color:#fff;font-size:11px;line-height:18px;font-weight:600}
+nav button .n:empty{display:none}
 
-main{flex:1;padding:12px;max-width:1100px;width:100%;margin:0 auto}
+/* ---------- alarm band ---------- */
+#alarm{display:none;align-items:center;gap:12px;padding:12px var(--pad);font-size:16px;font-weight:600;cursor:pointer}
+#alarm.warn{display:flex;background:var(--warnbg);color:var(--warn)}
+#alarm.bad{display:flex;background:var(--bad);color:#fff;animation:pulse 1s infinite}
+#alarm .v{font-size:22px;margin-left:auto}
+#alarm small{font-weight:500;opacity:.8;font-size:12px;display:block}
+@keyframes pulse{50%{background:#9e2e28}}
+@media (prefers-reduced-motion:reduce){#alarm.bad{animation:none}}
+
+main{flex:1;width:100%;max-width:1040px;margin:0 auto}
 section{display:none}section.on{display:block}
+.note{margin:12px var(--pad) 0;padding:10px 12px;border-radius:8px;background:var(--bg2);color:var(--fg2);font-size:14px;display:none}
+.note.show{display:block}.note.bad{background:var(--badbg);color:#f4b2ad}.note.warn{background:var(--warnbg);color:#f5d08a}
+.note a,.note button.link{color:var(--act);background:none;border:0;padding:0;font:inherit;font-weight:600;text-decoration:none}
 
-.banner{padding:10px 14px;border-radius:10px;background:var(--panel2);color:var(--dim);
-  margin-bottom:12px;font-size:14px;display:none}
-.banner.show{display:block}
-.banner.bad{background:#3a1d1d;color:#ffb3b0}
-.banner.warn{background:#3a2f12;color:#ffd98a}
+/* ---------- drive ---------- */
+.heroes{display:grid;grid-template-columns:1fr 1fr;gap:0 8px;padding:8px var(--pad) 0}
+.hero{text-align:center;position:relative}
+.hero svg{width:100%;max-width:230px;height:auto;display:block;margin:0 auto}
+.hero .track{fill:none;stroke-width:10;stroke-linecap:butt;stroke:var(--rule2)}
+.hero .zone{fill:none;stroke-width:10;stroke-linecap:butt;opacity:.5}
+.hero .fill{fill:none;stroke-width:10;stroke-linecap:round;stroke:var(--fg);transition:stroke-dasharray .35s}
+.hero.warn .fill{stroke:var(--warn)}.hero.bad .fill{stroke:var(--bad)}
+.hero .tick{stroke:var(--fg3);stroke-width:1.5}
+.hero .rd{position:absolute;left:0;right:0;top:27%;font-size:50px;line-height:1}
+.hero .rd small{font-family:"Inter T";font-weight:500;font-size:14px;color:var(--fg2);letter-spacing:0;display:block;margin-top:2px}
+.hero .lb{color:var(--fg2);font-size:14px;margin-top:-14px}
+@media (min-width:420px){.hero .rd{font-size:58px}}
+.hero.warn .rd{color:var(--warn)}.hero.bad .rd{color:var(--bad)}
+.hero.off .rd{color:var(--fg3)}.hero.off .fill{stroke:transparent}
 
-/* gauges */
-.gauges{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
-@media (min-width:700px){.gauges{grid-template-columns:repeat(3,1fr)}}
-@media (min-width:980px){.gauges{grid-template-columns:repeat(4,1fr)}}
-.gauge{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:10px 10px 8px;
-  display:flex;flex-direction:column;align-items:center;position:relative}
-.gauge svg{width:100%;max-width:190px;height:auto;display:block}
-.gauge .val{font-size:34px;font-weight:700;letter-spacing:-.02em;line-height:1;margin-top:-28px;
-  font-variant-numeric:tabular-nums}
-.gauge .unit{font-size:12px;color:var(--dim);margin-top:2px}
-.gauge .lbl{font-size:13px;color:var(--dim);margin-top:6px;text-transform:uppercase;letter-spacing:.08em}
-.gauge.high .val,.gauge.low .val{color:var(--bad)}
-.gauge.suspect .val{color:var(--warn)}
-.gauge .conf{position:absolute;top:8px;right:10px;font-size:10px;color:var(--mute);
-  text-transform:uppercase;letter-spacing:.08em}
-.arc-bg{stroke:var(--line);fill:none;stroke-width:12;stroke-linecap:round}
-.arc{fill:none;stroke-width:12;stroke-linecap:round;stroke:var(--info);transition:stroke-dashoffset .3s}
-.gauge.high .arc,.gauge.low .arc{stroke:var(--bad)}
-.gauge.suspect .arc{stroke:var(--warn)}
+.bars{padding:10px var(--pad) 0}
+.bar{display:grid;grid-template-columns:62px 1fr auto;align-items:center;gap:12px;padding:9px 0;border-top:1px solid var(--rule)}
+.bar:first-child{border-top:0}
+.bar.hide{display:none}
+.bar .lb{color:var(--fg2);font-size:14px}
+.bar .tr{height:10px;border-radius:5px;background:var(--rule2);position:relative;overflow:hidden}
+.bar .tr i{position:absolute;top:0;bottom:0;opacity:.45}
+.bar .tr b{position:absolute;left:0;top:0;bottom:0;background:var(--fg);border-radius:5px;transition:width .3s}
+.bar.warn .tr b{background:var(--warn)}.bar.bad .tr b{background:var(--bad)}
+.bar .rd{font-size:24px;min-width:96px;text-align:right}
+.bar .rd small{font-family:"Inter T";font-weight:500;font-size:13px;color:var(--fg2);letter-spacing:0;margin-left:3px}
+.bar.warn .rd{color:var(--warn)}.bar.bad .rd{color:var(--bad)}
 
-/* tiles */
-.tiles{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:12px}
-@media (min-width:700px){.tiles{grid-template-columns:repeat(4,1fr)}}
-.tile{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 12px}
-.tile .k{font-size:12px;color:var(--dim);text-transform:uppercase;letter-spacing:.08em}
-.tile .v{font-size:22px;font-weight:600;margin-top:2px;font-variant-numeric:tabular-nums}
-.tile .v small{font-size:12px;color:var(--dim);font-weight:400;margin-left:4px}
-.tile.high .v,.tile.low .v{color:var(--bad)}.tile.suspect .v{color:var(--warn)}
+.strip{display:grid;grid-template-columns:repeat(3,1fr);margin:14px var(--pad) 0;border-top:1px solid var(--rule)}
+.strip .it{padding:12px 4px 10px;border-bottom:1px solid var(--rule)}
+.strip .rd{font-size:26px;line-height:1.1}
+.strip .rd small{font-family:"Inter T";font-weight:500;font-size:12px;color:var(--fg2);letter-spacing:0;margin-left:2px}
+.strip .lb{color:var(--fg3);font-size:12.5px;margin-top:3px}
+.strip .warn .rd{color:var(--warn)}.strip .bad .rd{color:var(--bad)}
+@media (min-width:720px){
+  .heroes{grid-template-columns:1fr 1fr 1fr}
+  .strip{grid-template-columns:repeat(6,1fr)}
+}
 
-h2{font-size:14px;color:var(--dim);text-transform:uppercase;letter-spacing:.1em;margin:18px 0 8px}
-.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin-bottom:12px}
-.faults{list-style:none;margin:0;padding:0}
-.faults li{padding:10px 0;border-bottom:1px solid var(--line);display:flex;gap:10px;align-items:baseline}
-.faults li:last-child{border-bottom:0}
-.faults .tag{font-size:11px;padding:2px 7px;border-radius:6px;background:var(--panel2);color:var(--dim);
-  white-space:nowrap;text-transform:uppercase;letter-spacing:.06em}
-.faults .tag.cur{background:#3a1d1d;color:#ffb3b0}
-.faults .none{color:var(--ok);padding:10px 0}
+/* ---------- shared blocks ---------- */
+.blk{margin:12px var(--pad) 0;padding:12px 0 2px;border-top:1px solid var(--rule)}
+.blk:first-child{border-top:0}
+.blk h2{font-size:13px;font-weight:600;color:var(--fg3);margin:0 0 10px}
+.blk p.hint{color:var(--fg2);font-size:13.5px;margin:0 0 10px}
+.blk.hazard{border-left:3px solid var(--warn);padding-left:12px;margin-top:16px;border-top:0;background:linear-gradient(90deg,rgba(232,169,58,.06),transparent 60%)}
+.blk.hazard h2{color:var(--warn)}
 
-.btnrow{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
-button.btn{min-height:var(--tap);padding:0 16px;border-radius:10px;border:1px solid var(--line);
-  background:var(--panel2);color:var(--fg);font-size:15px;font-weight:600;cursor:pointer}
-button.btn:active{transform:scale(.98)}
-button.btn.danger{border-color:#6a2a2a;color:#ffb3b0}
-button.btn.primary{background:var(--accent);color:#1a1200;border-color:var(--accent)}
-button.btn:disabled{opacity:.4}
-.kv{display:grid;grid-template-columns:auto 1fr;gap:4px 14px;font-size:14px}
-.kv dt{color:var(--dim)}.kv dd{margin:0;font-variant-numeric:tabular-nums}
+.faults{border-radius:10px;padding:2px 12px;background:var(--okbg)}
+.faults.has{background:var(--badbg)}
+.faults ul{list-style:none;margin:0;padding:0}
+.faults li{display:flex;gap:10px;align-items:baseline;padding:10px 0;border-top:1px solid rgba(255,255,255,.07);font-size:15px}
+.faults li:first-child{border-top:0}
+.faults .tag{font-size:11px;font-weight:600;padding:2px 7px;border-radius:5px;background:rgba(255,255,255,.1);color:var(--fg2);white-space:nowrap}
+.faults .tag.cur{background:var(--bad);color:#fff}
+.faults .none{padding:11px 0;color:var(--ok);font-weight:600}
 
-/* slabs heights */
-.heights{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.hbar{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px;text-align:center}
-.hbar .track{height:160px;width:34px;margin:8px auto;background:var(--panel2);border-radius:8px;position:relative;overflow:hidden}
-.hbar .fill{position:absolute;left:0;right:0;bottom:0;background:var(--info);transition:height .4s}
-.hbar .band{position:absolute;left:0;right:0;background:rgba(63,207,127,.18);border-top:1px solid var(--ok);border-bottom:1px solid var(--ok)}
-.hbar .val{font-size:30px;font-weight:700}.hbar .lbl{font-size:12px;color:var(--dim);text-transform:uppercase;letter-spacing:.08em}
+.row{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.btn{min-height:var(--tap);padding:0 16px;border-radius:10px;border:1px solid var(--rule2);background:var(--bg2);font-size:15px;font-weight:600}
+.btn:active{transform:scale(.98)}
+.btn.act{background:var(--act);border-color:var(--act);color:#06203a}
+.btn.red{border-color:var(--bad);color:var(--bad);background:none}
+.btn.amber{border-color:rgba(232,169,58,.55);color:var(--warn);background:none}
+.btn:disabled{opacity:.4}
+.btn.sm{min-height:38px;padding:0 12px;font-size:14px}
 
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{padding:6px 11px;border-radius:999px;border:1px solid var(--rule2);color:var(--fg3);font-size:13.5px;font-weight:600}
+.chip.on{border-color:var(--ok);color:var(--ok);background:var(--okbg)}
+.chip.lit{border-color:var(--warn);color:var(--warn);background:var(--warnbg)}
+
+.kv{display:grid;grid-template-columns:auto 1fr;gap:5px 16px;font-size:14px;margin:0}
+.kv dt{color:var(--fg2)}.kv dd{margin:0;font-variant-numeric:tabular-nums;word-break:break-all}
 table{width:100%;border-collapse:collapse;font-size:14px}
-td,th{padding:8px 6px;border-bottom:1px solid var(--line);text-align:left}
-th{color:var(--dim);font-weight:500;font-size:12px;text-transform:uppercase;letter-spacing:.06em}
-td.r{text-align:right;font-variant-numeric:tabular-nums}
-a{color:var(--info)}
+td,th{padding:8px 4px;border-bottom:1px solid var(--rule);text-align:left}
+th{color:var(--fg3);font-weight:600;font-size:12.5px}
+td.r,th.r{text-align:right;font-variant-numeric:tabular-nums}
+td.c{color:var(--fg3);font-size:12.5px}
+details summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:var(--fg3);margin-bottom:10px}
+details summary::-webkit-details-marker{display:none}
+details summary::after{content:"";width:7px;height:7px;border-right:1.5px solid var(--fg3);border-bottom:1.5px solid var(--fg3);transform:rotate(-45deg);margin-left:2px;transition:transform .15s}
+details[open] summary::after{transform:rotate(45deg)}
+a{color:var(--act)}
 
-/* modal */
-.modal{position:fixed;inset:0;background:rgba(0,0,0,.7);display:none;align-items:center;justify-content:center;z-index:20;padding:20px}
+/* injector balance */
+.inj{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;text-align:center}
+.inj .col{position:relative;height:90px;border-radius:6px;background:var(--bg2)}
+.inj .col i{position:absolute;left:0;right:0;top:50%;height:1px;background:var(--rule2)}
+.inj .col b{position:absolute;left:22%;right:22%;background:var(--fg2);border-radius:3px;transition:all .3s}
+.inj .col.warn b{background:var(--warn)}
+.inj .rd{font-size:16px;margin-top:6px}.inj .lb{font-size:12px;color:var(--fg3)}
+
+/* ---------- slabs ---------- */
+.heights{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:12px var(--pad) 0}
+.hgt{display:grid;grid-template-columns:auto 1fr;gap:0 14px;align-items:stretch;padding:12px;border-radius:12px;background:var(--bg2)}
+.hgt .scale{position:relative;width:26px;height:190px;border-radius:6px;background:var(--rule)}
+.hgt .scale .band{position:absolute;left:0;right:0;background:var(--okbg);border-top:1px solid var(--ok);border-bottom:1px solid var(--ok)}
+.hgt .scale .fill{position:absolute;left:0;right:0;bottom:0;background:var(--fg2);border-radius:0 0 6px 6px;transition:height .4s;opacity:.35}
+.hgt .scale .mk{position:absolute;left:-5px;right:-5px;height:3px;background:var(--fg);border-radius:2px;transition:bottom .4s}
+.hgt.warn .scale .mk{background:var(--warn)}.hgt.bad .scale .mk{background:var(--bad)}
+.hgt .txt{display:flex;flex-direction:column;justify-content:center}
+.hgt .lb{color:var(--fg2);font-size:14px}
+.hgt .rd{font-size:40px;line-height:1}
+.hgt .mm{color:var(--fg3);font-size:13px;margin-top:4px}
+.hgt .st{font-size:13px;font-weight:600;margin-top:10px}
+.hgt.warn .rd,.hgt.warn .st{color:var(--warn)}.hgt.bad .rd,.hgt.bad .st{color:var(--bad)}
+.hgt.okz .st{color:var(--ok)}
+.wheels{display:grid;grid-template-columns:1fr 1fr;gap:8px;max-width:360px}
+.wheels .w{padding:10px 12px;border-radius:10px;background:var(--bg2);display:flex;justify-content:space-between;align-items:baseline}
+.wheels .w .lb{color:var(--fg3);font-size:13px}
+.wheels .w .rd{font-size:22px}
+
+/* ---------- more ---------- */
+.set{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 0;border-top:1px solid var(--rule)}
+.set:first-of-type{border-top:0}
+.set .d{font-size:13px;color:var(--fg3)}
+
+/* ---------- modal / toast ---------- */
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.72);display:none;align-items:flex-end;justify-content:center;z-index:20;padding:16px}
 .modal.show{display:flex}
-.modal .box{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:20px;max-width:420px;width:100%}
-.modal h3{margin:0 0 8px;font-size:18px}.modal p{color:var(--dim);margin:0 0 16px}
-.toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:var(--panel2);
-  border:1px solid var(--line);padding:10px 16px;border-radius:10px;font-size:14px;opacity:0;transition:opacity .2s;pointer-events:none;z-index:30}
-.toast.show{opacity:1}
-footer{padding:8px 14px;color:var(--mute);font-size:12px;text-align:center}
+.modal .box{background:var(--bg2);border:1px solid var(--rule2);border-radius:16px;padding:20px;max-width:440px;width:100%}
+.modal h3{margin:0 0 6px;font-size:18px}.modal p{color:var(--fg2);margin:0 0 16px;font-size:14.5px}
+.modal .row{justify-content:flex-end}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--bg2);border:1px solid var(--rule2);
+  padding:10px 16px;border-radius:10px;font-size:14px;opacity:0;transition:opacity .2s;pointer-events:none;z-index:30;max-width:90vw}
+.toast.show{opacity:1}.toast.bad{border-color:var(--bad)}
+footer{padding:14px;color:var(--fg3);font-size:12px;text-align:center}
 </style>
 </head>
 <body>
 <header>
-  <h1>DISCO 2</h1>
-  <span id="modpill" class="pill"><span class="dot"></span><span id="modtxt">td5</span></span>
-  <span class="spacer"></span>
-  <span id="stat" class="pill"><span class="dot"></span><span id="stattxt">starting</span></span>
+  <span class="mark">DISCO <b>2</b></span>
+  <span id="state" class="state"><span class="dot"></span><span id="stateTxt">starting</span></span>
+  <button id="sound" title="Alarm sound" aria-label="Alarm sound" onclick="toggleSound()">
+    <svg viewBox="0 0 24 24"><path d="M6 9a6 6 0 0 1 12 0v4l2 3H4l2-3z"/><path d="M10 19a2 2 0 0 0 4 0"/><path class="off" d="M4 4l16 16"/></svg>
+  </button>
 </header>
 <nav>
   <button data-tab="drive" class="on">Drive</button>
-  <button data-tab="engine">Engine<span id="bEng" class="badge"></span></button>
-  <button data-tab="slabs">SLABS<span id="bSlabs" class="badge"></span></button>
+  <button data-tab="engine">Engine<span id="nEng" class="n"></span></button>
+  <button data-tab="slabs">SLABS<span id="nSlabs" class="n"></span></button>
   <button data-tab="more">More</button>
 </nav>
+<div id="alarm" onclick="snooze()"></div>
 <main>
-  <div id="banner" class="banner"></div>
+  <div id="note" class="note"></div>
 
   <section id="tab-drive" class="on">
-    <div class="banner warn" id="driveNote">Engine is not the active module. <a href="#" onclick="switchModule('td5');return false">Connect engine</a></div>
-    <div class="gauges">
-      <div class="gauge" data-g="rpm"></div>
-      <div class="gauge" data-g="speed"></div>
-      <div class="gauge" data-g="coolant_temp"></div>
-      <div class="gauge" data-g="manifold_press"></div>
-      <div class="gauge" data-g="battery"></div>
-      <div class="gauge" data-g="air_temp"></div>
+    <div class="note warn" id="driveNote">Engine data paused: SLABS is the active module. <button class="link" onclick="switchModule('td5')">Connect engine</button></div>
+    <div class="heroes">
+      <div class="hero" data-g="coolant_temp"></div>
+      <div class="hero" data-g="manifold_press"></div>
+      <div class="hero" data-g="egt"></div>
     </div>
-    <div class="tiles" id="driveTiles"></div>
+    <div class="bars">
+      <div class="bar" data-b="rpm"></div>
+      <div class="bar" data-b="oil_press"></div>
+      <div class="bar" data-b="oil_temp"></div>
+    </div>
+    <div class="strip" id="strip"></div>
   </section>
 
   <section id="tab-engine">
-    <div class="card">
-      <h2 style="margin-top:0">Fault codes</h2>
-      <ul class="faults" id="engFaults"><li class="none">—</li></ul>
-      <div class="btnrow">
-        <button class="btn" onclick="switchModule('td5')">Connect engine</button>
-        <button class="btn danger" onclick="confirmCmd('td5','clear_faults','Clear engine fault codes?','This writes to the Td5 ECU. Logged faults are gone for good; note them down first.')">Clear faults</button>
+    <div class="blk">
+      <div class="faults" id="engFaults"></div>
+      <div class="row">
+        <button class="btn act" id="engConnect" onclick="switchModule('td5')">Connect engine</button>
+        <button class="btn red" onclick="confirmCmd('td5','clear_faults','Clear engine faults?','Writes to the Td5 ECU. Logged faults are gone for good; note them first.','Clear faults')">Clear faults</button>
         <button class="btn" onclick="cmd('read_identity')">ECU identity</button>
         <button class="btn" onclick="cmd('security_status')">Immobiliser</button>
       </div>
       <dl class="kv" id="engIdent" style="margin-top:12px"></dl>
     </div>
-    <div class="card">
-      <h2 style="margin-top:0">All live values</h2>
-      <table><thead><tr><th>Signal</th><th>Value</th><th>Conf.</th></tr></thead><tbody id="engTable"></tbody></table>
+    <div class="blk">
+      <h2>Injector balance</h2>
+      <p class="hint">Fuel correction per cylinder. Healthy injectors sit near zero and stay put; one that drifts away from the others is tired.</p>
+      <div class="inj" id="inj"></div>
     </div>
-    <div class="card">
-      <h2 style="margin-top:0">Output tests</h2>
-      <p style="color:var(--dim);font-size:13px;margin:0 0 6px">Engine running, handbrake on. Each one actuates the real component.</p>
-      <div class="btnrow" id="engOutputs"></div>
+    <div class="blk">
+      <h2>Switches</h2>
+      <div class="chips" id="engChips"></div>
+    </div>
+    <div class="blk">
+      <details open><summary>All live values</summary>
+      <table><thead><tr><th>Signal</th><th class="r">Value</th><th class="r">Source</th></tr></thead><tbody id="engTable"></tbody></table>
+      </details>
+    </div>
+    <div class="blk hazard">
+      <h2>Output tests</h2>
+      <p class="hint">Each button moves a real part. Engine running, handbrake on, nobody near the fan.</p>
+      <div class="row" id="engOutputs"></div>
     </div>
   </section>
 
   <section id="tab-slabs">
-    <div class="banner warn show" id="slabsNote">Switching to SLABS releases the engine session and can take up to 30 seconds of bus silence. Ignition on, vehicle stationary.</div>
+    <div class="note" id="slabsNote">SLABS shares the K-line with the engine, so connecting pauses engine data and can take up to 30 s of bus silence. Vehicle stationary, ignition on.
+      <div class="row"><button class="btn act" onclick="switchModule('slabs')">Connect SLABS</button></div></div>
     <div class="heights">
-      <div class="hbar"><div class="lbl">Left</div><div class="track"><div class="band" id="bandL"></div><div class="fill" id="fillL"></div></div><div class="val" id="hL">—</div><div class="lbl" id="hLmm"></div></div>
-      <div class="hbar"><div class="lbl">Right</div><div class="track"><div class="band" id="bandR"></div><div class="fill" id="fillR"></div></div><div class="val" id="hR">—</div><div class="lbl" id="hRmm"></div></div>
+      <div class="hgt" id="hgtL"><div class="scale"><div class="band"></div><div class="fill"></div><div class="mk"></div></div>
+        <div class="txt"><div class="lb">Left height</div><div class="rd num">—</div><div class="mm"></div><div class="st"></div></div></div>
+      <div class="hgt" id="hgtR"><div class="scale"><div class="band"></div><div class="fill"></div><div class="mk"></div></div>
+        <div class="txt"><div class="lb">Right height</div><div class="rd num">—</div><div class="mm"></div><div class="st"></div></div></div>
     </div>
-    <div class="tiles" id="slabsTiles"></div>
-    <div class="card" style="margin-top:12px">
-      <h2 style="margin-top:0">Fault codes</h2>
-      <ul class="faults" id="slabsFaults"><li class="none">—</li></ul>
-      <div class="btnrow">
-        <button class="btn primary" onclick="switchModule('slabs')">Connect SLABS</button>
-        <button class="btn danger" onclick="confirmCmd('slabs','clear_faults','Clear SLABS fault codes?','Clears logged and current ABS / suspension faults in the SLABS ECU.')">Clear faults</button>
+    <div class="blk">
+      <h2>Wheel speeds</h2>
+      <div class="wheels" id="wheels"></div>
+    </div>
+    <div class="blk">
+      <h2>Inputs</h2>
+      <div class="chips" id="slabsChips"></div>
+      <dl class="kv" id="slabsKv" style="margin-top:12px"></dl>
+    </div>
+    <div class="blk">
+      <div class="faults" id="slabsFaults"></div>
+      <div class="row">
+        <button class="btn red" onclick="confirmCmd('slabs','clear_faults','Clear SLABS faults?','Clears logged and current ABS and suspension faults.','Clear faults')">Clear faults</button>
       </div>
     </div>
-    <div class="card">
-      <h2 style="margin-top:0">Air suspension</h2>
-      <div class="btnrow">
-        <button class="btn" onclick="confirmCmd('slabs','raise_left','Raise left?','Runs the compressor and opens the left valve.')">Raise L</button>
-        <button class="btn" onclick="confirmCmd('slabs','raise_right','Raise right?','Runs the compressor and opens the right valve.')">Raise R</button>
-        <button class="btn" onclick="confirmCmd('slabs','lower_left','Lower left?','Opens the left exhaust valve.')">Lower L</button>
-        <button class="btn" onclick="confirmCmd('slabs','lower_right','Lower right?','Opens the right exhaust valve.')">Lower R</button>
-        <button class="btn" onclick="confirmCmd('slabs','compressor','Run compressor?','Short compressor test.')">Compressor</button>
-        <button class="btn" onclick="confirmCmd('slabs','exhaust','Exhaust valve?','Short exhaust valve test.')">Exhaust valve</button>
-        <button class="btn" onclick="confirmCmd('slabs','buzzer','Sound buzzer?','The SLS buzzer in the cabin.')">Buzzer</button>
+    <div class="blk">
+      <h2>Air suspension</h2>
+      <div class="row">
+        <button class="btn" onclick="confirmCmd('slabs','raise_left','Raise left?','Runs the compressor with the left valve open.','Raise left')">Raise left</button>
+        <button class="btn" onclick="confirmCmd('slabs','raise_right','Raise right?','Runs the compressor with the right valve open.','Raise right')">Raise right</button>
+        <button class="btn" onclick="confirmCmd('slabs','lower_left','Lower left?','Opens the left exhaust valve.','Lower left')">Lower left</button>
+        <button class="btn" onclick="confirmCmd('slabs','lower_right','Lower right?','Opens the right exhaust valve.','Lower right')">Lower right</button>
+        <button class="btn" onclick="confirmCmd('slabs','compressor','Run the compressor?','Short compressor test.','Run')">Compressor</button>
+        <button class="btn" onclick="confirmCmd('slabs','exhaust','Open the exhaust valve?','Short exhaust valve test.','Open')">Exhaust valve</button>
+        <button class="btn" onclick="confirmCmd('slabs','buzzer','Sound the buzzer?','The suspension buzzer in the cabin.','Sound')">Buzzer</button>
       </div>
     </div>
-    <div class="card">
-      <h2 style="margin-top:0">ABS</h2>
-      <p style="color:var(--dim);font-size:13px;margin:0 0 6px">Bleeding needs the brake system open and a helper on the pedal. Read the workshop procedure first.</p>
-      <div class="btnrow">
-        <button class="btn" onclick="confirmCmd('slabs','wheel_fl','Valve test FL?','Cycles the front-left ABS valve.')">Valve FL</button>
-        <button class="btn" onclick="confirmCmd('slabs','wheel_fr','Valve test FR?','Cycles the front-right ABS valve.')">Valve FR</button>
-        <button class="btn" onclick="confirmCmd('slabs','wheel_rl','Valve test RL?','Cycles the rear-left ABS valve.')">Valve RL</button>
-        <button class="btn" onclick="confirmCmd('slabs','wheel_rr','Valve test RR?','Cycles the rear-right ABS valve.')">Valve RR</button>
-        <button class="btn" onclick="confirmCmd('slabs','pump_on','ABS pump on?','Runs the ABS pump until you press pump off.')">Pump on</button>
-        <button class="btn" onclick="confirmCmd('slabs','pump_off','ABS pump off?','Stops the ABS pump.')">Pump off</button>
-        <button class="btn danger" onclick="confirmCmd('slabs','bleed_power_on','Start power bleed?','Starts the ABS power bleed routine.')">Power bleed start</button>
-        <button class="btn" onclick="confirmCmd('slabs','bleed_power_off','Stop power bleed?','Stops the ABS power bleed routine.')">Power bleed stop</button>
-        <button class="btn danger" onclick="confirmCmd('slabs','bleed_module','Module bleed sequence?','Runs the 4-step ABS modulator bleed. About 10 seconds.')">Module bleed</button>
+    <div class="blk hazard">
+      <h2>ABS</h2>
+      <p class="hint">Valve and pump tests are safe parked. Bleeding needs the brake system open and a helper on the pedal; read the workshop procedure first.</p>
+      <div class="row">
+        <button class="btn" onclick="confirmCmd('slabs','wheel_fl','Cycle valve FL?','Cycles the front-left ABS valve.','Cycle')">Valve FL</button>
+        <button class="btn" onclick="confirmCmd('slabs','wheel_fr','Cycle valve FR?','Cycles the front-right ABS valve.','Cycle')">Valve FR</button>
+        <button class="btn" onclick="confirmCmd('slabs','wheel_rl','Cycle valve RL?','Cycles the rear-left ABS valve.','Cycle')">Valve RL</button>
+        <button class="btn" onclick="confirmCmd('slabs','wheel_rr','Cycle valve RR?','Cycles the rear-right ABS valve.','Cycle')">Valve RR</button>
+        <button class="btn" onclick="confirmCmd('slabs','pump_on','Start the ABS pump?','Runs until you press Pump off.','Start')">Pump on</button>
+        <button class="btn" onclick="confirmCmd('slabs','pump_off','Stop the ABS pump?','','Stop')">Pump off</button>
+        <button class="btn amber" onclick="confirmCmd('slabs','bleed_power_on','Start power bleed?','Starts the ABS power-bleed routine.','Start bleed')">Power bleed start</button>
+        <button class="btn" onclick="confirmCmd('slabs','bleed_power_off','Stop power bleed?','','Stop bleed')">Power bleed stop</button>
+        <button class="btn amber" onclick="confirmCmd('slabs','bleed_module','Run the modulator bleed?','Four-step ABS modulator bleed, about 10 seconds.','Run bleed')">Module bleed</button>
       </div>
     </div>
   </section>
 
   <section id="tab-more">
-    <div class="card">
-      <h2 style="margin-top:0">Status</h2>
-      <dl class="kv" id="sysInfo"></dl>
+    <div class="blk">
+      <h2>Alarms</h2>
+      <div class="set"><div>Sound on this phone<div class="d">Beeps while any value is in the red. Tap the band to snooze 5 min.</div></div><button class="btn sm" onclick="toggleSound()" id="soundBtn">Off</button></div>
+      <div class="set"><div>Test<div class="d">Plays the alarm tone once.</div></div><button class="btn sm" onclick="testBeep()">Beep</button></div>
+      <table style="margin-top:8px"><thead><tr><th>Signal</th><th class="r">Amber</th><th class="r">Red</th></tr></thead><tbody id="threshTable"></tbody></table>
     </div>
-    <div class="card">
-      <h2 style="margin-top:0">Session logs</h2>
-      <p style="color:var(--dim);font-size:13px;margin:0 0 6px">One CSV per connection, every poll a row. Tap to download; long drives are a few MB.</p>
+    <div class="blk">
+      <h2>Session logs</h2>
+      <p class="hint">One CSV per connection, a row per poll. Tap a file to download it.</p>
       <table><thead><tr><th>File</th><th class="r">Size</th><th></th></tr></thead><tbody id="logTable"></tbody></table>
-      <div class="btnrow"><button class="btn" onclick="loadLogs()">Refresh</button></div>
+      <div class="row"><button class="btn sm" onclick="loadLogs()">Refresh</button></div>
+    </div>
+    <div class="blk">
+      <h2>System</h2>
+      <dl class="kv" id="sysInfo"></dl>
     </div>
   </section>
 </main>
@@ -237,120 +338,225 @@ footer{padding:8px 14px;color:var(--mute);font-size:12px;text-align:center}
 
 <div class="modal" id="modal"><div class="box">
   <h3 id="mTitle"></h3><p id="mText"></p>
-  <div class="btnrow"><button class="btn" onclick="closeModal()">Cancel</button><button class="btn danger" id="mGo">Confirm</button></div>
+  <div class="row"><button class="btn" onclick="closeModal()">Cancel</button><button class="btn red" id="mGo">Confirm</button></div>
 </div></div>
 <div class="toast" id="toast"></div>
 
 <script>
-// ---------- gauge definitions (drive tab) ----------
-const GAUGES = {
-  rpm:            {label:'RPM',       min:0,   max:5000, fmt:v=>Math.round(v),        warn:v=>v>4500},
-  speed:          {label:'Speed',     min:0,   max:160,  fmt:v=>Math.round(v)},
-  coolant_temp:   {label:'Coolant',   min:40,  max:130,  fmt:v=>Math.round(v),        warn:v=>v>102},
-  manifold_press: {label:'Boost',     min:0.8, max:2.4,  fmt:v=>v.toFixed(2)},
-  battery:        {label:'Battery',   min:10,  max:16,   fmt:v=>v.toFixed(1),         warn:v=>v<12.2||v>15},
-  air_temp:       {label:'Inlet air', min:0,   max:90,   fmt:v=>Math.round(v),        warn:v=>v>70},
+// ---------- gauge + alarm definitions ----------
+// warn/alarm: [low, high] bounds; outside = that level. `when` gates the check (e.g. only with engine running).
+const G = {
+  coolant_temp:   {label:'Coolant',   unit:'°C',  min:40,  max:130, warn:[null,100], alarm:[null,106], fmt:v=>Math.round(v)},
+  manifold_press: {label:'Boost',     unit:'bar', min:0.8, max:2.6, warn:[null,2.3], alarm:[null,2.5], fmt:v=>v.toFixed(2)},
+  egt:            {label:'EGT',       unit:'°C',  min:100, max:900, warn:[null,650], alarm:[null,720], fmt:v=>Math.round(v)},
+  rpm:            {label:'Revs',      unit:'rpm', min:0,   max:5000,warn:[null,4200],alarm:[null,4600],fmt:v=>Math.round(v)},
+  oil_press:      {label:'Oil',       unit:'bar', min:0,   max:6,   warn:[1.5,null], alarm:[0.8,null], when:s=>s.rpm&&s.rpm.v>1200, fmt:v=>v.toFixed(1)},
+  oil_temp:       {label:'Oil temp',  unit:'°C',  min:40,  max:150, warn:[null,120], alarm:[null,130], fmt:v=>Math.round(v)},
+  battery:        {label:'Battery',   unit:'V',   warn:[12.8,15.0], alarm:[12.0,15.6], when:s=>s.rpm&&s.rpm.v>600, fmt:v=>v.toFixed(1)},
+  air_temp:       {label:'Inlet air', unit:'°C',  warn:[null,60],  alarm:[null,75],  fmt:v=>Math.round(v)},
+  speed:          {label:'Speed',     unit:'km/h',fmt:v=>Math.round(v)},
+  fuel_rate:      {label:'Fuel rate', unit:'L/h', fmt:v=>v.toFixed(1)},
+  injection_qty:  {label:'Injection', unit:'mg',  fmt:v=>v.toFixed(1)},
+  fuel_temp:      {label:'Fuel temp', unit:'°C',  fmt:v=>Math.round(v)},
+  economy:        {label:'Economy',   unit:'L/100',fmt:v=>v.toFixed(1)},
+  accel_pedal_pct:{label:'Pedal',     unit:'%',   fmt:v=>Math.round(v)},
 };
-const DRIVE_TILES = ['fuel_temp','maf_sensor','injection_qty','accel_pedal_pct','fuel_rate','economy','ambient_press_1','trip_economy'];
-const SLABS_TILES = ['battery','ecu_supply','brake_analog','any_door','diff_lock','transfer_low','reverse_gear','neutral_gear',
-                     'wheel_speed_fl','wheel_speed_fr','wheel_speed_rl','wheel_speed_rr'];
+const STRIP = ['speed','battery','air_temp','fuel_rate','injection_qty','fuel_temp'];
 const TD5_OUTPUTS = ['fuel_pump','mil_lamp','ac_clutch','ac_fan','glow_plugs','rev_counter','temp_gauge','egr_throttle','wastegate'];
+const ENG_CHIPS = {fuel_pump_relay:'Fuel pump relay', brake_switch_2:'Brake pedal'};
+const SLABS_CHIPS = {diff_lock:'Diff lock', transfer_low:'Low range', reverse_gear:'Reverse', neutral_gear:'Neutral', any_door:'Door open'};
+const SLABS_KV = {battery:'Battery', ecu_supply:'ECU supply', brake_analog:'Brake pressure'};
+const HEIGHT = {lo:100, hi:200, band:[135,165], warn:[120,180]};
 
 const $ = id => document.getElementById(id);
 const nice = k => k.replace(/_/g,' ');
+function level(k, sig, all){
+  const g=G[k]; if(!g||!sig) return '';
+  if(g.when && !g.when(all)) return '';
+  const v=sig.v, out=(b)=>b&&((b[0]!=null&&v<b[0])||(b[1]!=null&&v>b[1]));
+  if(out(g.alarm)||sig.s==='high'||sig.s==='low') return 'bad';
+  if(out(g.warn)||sig.s==='suspect') return 'warn';
+  return '';
+}
+const fmtv=(k,sig)=>G[k]&&G[k].fmt?G[k].fmt(sig.v):(Number.isInteger(sig.v)?sig.v:Number(sig.v).toFixed(1));
 
-// ---------- build gauges ----------
-const R=64, C=2*Math.PI*R, SWEEP=0.75; // 270° arc
-document.querySelectorAll('.gauge').forEach(el=>{
-  const g = GAUGES[el.dataset.g];
-  el.innerHTML = `<span class="conf"></span>
-    <svg viewBox="0 0 160 150"><g transform="rotate(135 80 80)">
-      <circle class="arc-bg" cx="80" cy="80" r="${R}" stroke-dasharray="${C*SWEEP} ${C}"/>
-      <circle class="arc" cx="80" cy="80" r="${R}" stroke-dasharray="${C*SWEEP} ${C}" stroke-dashoffset="${C*SWEEP}"/>
-    </g></svg>
-    <div class="val">—</div><div class="unit"></div><div class="lbl">${g.label}</div>`;
-});
-function setGauge(el, sig){
-  const g = GAUGES[el.dataset.g];
-  if(!sig){ el.querySelector('.val').textContent='—'; el.className='gauge'; return; }
-  const v = sig.v, f = Math.min(1,Math.max(0,(v-g.min)/(g.max-g.min)));
-  el.querySelector('.arc').style.strokeDashoffset = C*SWEEP*(1-f);
-  el.querySelector('.val').textContent = g.fmt(v);
-  el.querySelector('.unit').textContent = sig.u||'';
-  el.querySelector('.conf').textContent = sig.c==='candidate'?'unverified':'';
-  let cls='gauge';
-  if(sig.s==='high'||sig.s==='low'||(g.warn&&g.warn(v))) cls+=' high';
-  else if(sig.s==='suspect') cls+=' suspect';
-  el.className=cls;
+// ---------- hero arcs ----------
+const R=70, CX=85, CY=85, SWEEP=240, A0=150;           // 240° arc, open at the bottom
+const rad=d=>d*Math.PI/180;
+const pt=(a)=>[CX+R*Math.cos(rad(A0+a)), CY+R*Math.sin(rad(A0+a))];
+function arcPath(a1,a2){ const [x1,y1]=pt(a1),[x2,y2]=pt(a2); return `M${x1.toFixed(2)} ${y1.toFixed(2)} A${R} ${R} 0 ${a2-a1>180?1:0} 1 ${x2.toFixed(2)} ${y2.toFixed(2)}`; }
+function buildHero(el){
+  const k=el.dataset.g, g=G[k], f=v=>Math.min(1,Math.max(0,(v-g.min)/(g.max-g.min)))*SWEEP;
+  let zones='';
+  const z=(lo,hi,c)=>{ if(hi-lo>0.5) zones+=`<path class="zone" d="${arcPath(lo,hi)}" stroke="var(--${c})"/>`; };
+  if(g.warn&&g.warn[1]!=null) z(f(g.warn[1]), g.alarm&&g.alarm[1]!=null?f(g.alarm[1]):SWEEP, 'warn');
+  if(g.alarm&&g.alarm[1]!=null) z(f(g.alarm[1]), SWEEP, 'bad');
+  if(g.warn&&g.warn[0]!=null) z(g.alarm&&g.alarm[0]!=null?f(g.alarm[0]):0, f(g.warn[0]), 'warn');
+  if(g.alarm&&g.alarm[0]!=null) z(0, f(g.alarm[0]), 'bad');
+  el.innerHTML=`<svg viewBox="0 0 170 150">
+      <path class="track" d="${arcPath(0,SWEEP)}"/>${zones}
+      <path class="fill" d="${arcPath(0,SWEEP)}" pathLength="1000" stroke-dasharray="0 2000" style="visibility:hidden"/>
+    </svg><div class="rd num">—</div><div class="lb">${g.label}</div>`;
 }
-function tile(k,sig){
-  const cls = sig && (sig.s==='high'||sig.s==='low') ? 'tile '+sig.s : sig&&sig.s==='suspect'?'tile suspect':'tile';
-  const v = sig ? (Number.isInteger(sig.v)?sig.v:Number(sig.v).toFixed(1)) : '—';
-  return `<div class="${cls}"><div class="k">${nice(k)}</div><div class="v">${v}<small>${sig?sig.u||'':''}</small></div></div>`;
+function setHero(el, sig, all){
+  const k=el.dataset.g, g=G[k];
+  if(!sig){ el.classList.add('off'); el.style.display=(k==='egt')?'none':''; el.querySelector('.rd').innerHTML='—'; return; }
+  el.style.display=''; el.classList.remove('off');
+  const f=Math.min(1,Math.max(0,(sig.v-g.min)/(g.max-g.min)));
+  const fill=el.querySelector('.fill');
+  fill.setAttribute('stroke-dasharray', `${(f*1000).toFixed(1)} 2000`);
+  fill.style.visibility = f*1000 < 8 ? 'hidden' : 'visible';   // round caps would draw a dot at zero
+  el.querySelector('.rd').innerHTML=`${g.fmt(sig.v)}<small>${g.unit}</small>`;
+  el.className='hero '+level(k,sig,all);
 }
-function faultList(ul, faults){
-  if(!faults||!faults.length){ ul.innerHTML='<li class="none">No faults stored</li>'; return; }
-  ul.innerHTML = faults.map(f=>{
-    const m = f.match(/^(.*?)\s*\((Current|Logged[^)]*)\)\s*$/);
-    const name = m?m[1]:f, tag = m?m[2]:'';
+document.querySelectorAll('.hero').forEach(buildHero);
+
+// ---------- bars ----------
+function buildBar(el){
+  const k=el.dataset.b, g=G[k], f=v=>Math.min(100,Math.max(0,(v-g.min)/(g.max-g.min)*100));
+  let zones='';
+  const z=(lo,hi,c)=>{ zones+=`<i style="left:${lo}%;width:${hi-lo}%;background:var(--${c})"></i>`; };
+  if(g.warn&&g.warn[1]!=null) z(f(g.warn[1]), 100, 'warn');
+  if(g.alarm&&g.alarm[1]!=null) z(f(g.alarm[1]), 100, 'bad');
+  if(g.warn&&g.warn[0]!=null) z(0, f(g.warn[0]), 'warn');
+  if(g.alarm&&g.alarm[0]!=null) z(0, f(g.alarm[0]), 'bad');
+  el.innerHTML=`<div class="lb">${g.label}</div><div class="tr">${zones}<b style="width:0"></b></div><div class="rd num">—</div>`;
+}
+function setBar(el, sig, all){
+  const k=el.dataset.b, g=G[k];
+  if(!sig){ el.classList.toggle('hide', k!=='rpm'); el.querySelector('.rd').textContent='—'; return; }
+  el.classList.remove('hide');
+  el.querySelector('b').style.width=Math.min(100,Math.max(0,(sig.v-g.min)/(g.max-g.min)*100))+'%';
+  el.querySelector('.rd').innerHTML=`${g.fmt(sig.v)}<small>${g.unit}</small>`;
+  el.className='bar '+level(k,sig,all);
+}
+document.querySelectorAll('.bar').forEach(buildBar);
+
+function stripItem(k,sig,all){
+  const g=G[k]||{label:nice(k)};
+  return `<div class="it ${level(k,sig,all)}"><div class="rd num">${fmtv(k,sig)}<small>${g.unit||sig.u||''}</small></div><div class="lb">${g.label}</div></div>`;
+}
+function faultBlock(el, faults){
+  if(!faults||!faults.length){ el.className='faults'; el.innerHTML='<div class="none">No faults stored</div>'; return; }
+  el.className='faults has';
+  el.innerHTML='<ul>'+faults.map(f=>{
+    const m=f.match(/^(.*?)\s*\((Current|Logged[^)]*)\)\s*$/), name=m?m[1]:f, tag=m?m[2]:'';
     return `<li><span class="tag ${/Current/.test(tag)?'cur':''}">${tag||'fault'}</span><span>${name}</span></li>`;
-  }).join('');
+  }).join('')+'</ul>';
+}
+function chips(el, map, sig){
+  el.innerHTML=Object.keys(map).filter(k=>sig[k]).map(k=>`<span class="chip ${Number(sig[k].v)?'on':''}">${map[k]}</span>`).join('')
+    || '<span class="chip">no switch data</span>';
 }
 
 // ---------- state ----------
-let snap=null, status=null, lastFaults={td5:[],slabs:[]};
+let snap=null, lastFaults={td5:[],slabs:[]}, worst={lvl:'',txt:''};
 
 function render(s){
   snap=s;
-  $('modtxt').textContent = s.module.toUpperCase();
-  $('modpill').className = 'pill '+s.status;
-  $('stat').className = 'pill '+s.status;
-  $('stattxt').textContent = s.status==='connected' ? (s.stale?'stale':`live · ${s.age??0}s`) : (s.progress||s.status);
-  const b=$('banner');
-  if(s.status==='error'){ b.className='banner bad show'; b.textContent='No ECU: '+(s.error||'retrying…')+' (ignition on? cable in?)'; }
-  else if(s.status!=='connected'){ b.className='banner warn show'; b.textContent=s.progress||s.status; }
-  else b.className='banner';
+  const mod=s.module==='slabs'?'SLABS':'Engine';
+  $('state').className='state '+s.status;
+  $('stateTxt').textContent = s.status==='connected' ? `${mod} · ${s.stale?'stale':'live'}` : `${mod} · ${s.progress||s.status}`;
+  const n=$('note');
+  if(s.status==='error'){ n.className='note bad show'; n.textContent='No ECU answering: '+(s.error||'retrying')+'. Ignition on? Cable in?'; }
+  else if(s.status!=='connected'){ n.className='note warn show'; n.textContent=s.progress||s.status; }
+  else n.className='note';
 
-  const sig = s.signals||{};
+  const sig=s.signals||{};
   $('driveNote').classList.toggle('show', s.module!=='td5');
+  $('slabsNote').classList.toggle('show', s.module!=='slabs');
+  $('engConnect').style.display = s.module==='td5'?'none':'';
+  worst={lvl:'',txt:''};
   if(s.module==='td5'){
-    lastFaults.td5 = s.faults||[];
-    document.querySelectorAll('.gauge').forEach(el=>setGauge(el, sig[el.dataset.g]));
-    $('driveTiles').innerHTML = DRIVE_TILES.filter(k=>sig[k]).map(k=>tile(k,sig[k])).join('');
-    $('engTable').innerHTML = Object.keys(sig).sort().map(k=>`<tr><td>${nice(k)}</td><td class="r">${sig[k].v} ${sig[k].u||''}</td><td style="color:var(--mute)">${sig[k].c||''}</td></tr>`).join('');
+    lastFaults.td5=s.faults||[];
+    document.querySelectorAll('.hero').forEach(el=>setHero(el, sig[el.dataset.g], sig));
+    document.querySelectorAll('.bar').forEach(el=>setBar(el, sig[el.dataset.b], sig));
+    $('strip').innerHTML=STRIP.filter(k=>sig[k]).map(k=>stripItem(k,sig[k],sig)).join('');
+    Object.keys(G).forEach(k=>{ const l=level(k,sig[k],sig); if(l&&(l==='bad'||!worst.lvl)&&worst.lvl!=='bad'){ worst={lvl:l,txt:`${G[k].label} ${G[k].fmt(sig[k].v)} ${G[k].unit}`}; } });
+    $('engTable').innerHTML=Object.keys(sig).sort().map(k=>`<tr><td>${nice(k)}</td><td class="r">${sig[k].v} ${sig[k].u||''}</td><td class="r c">${sig[k].c==='candidate'?'unverified':''}</td></tr>`).join('');
+    $('inj').innerHTML=[1,2,3,4,5].map(i=>{ const b=sig['balance_'+i]; if(!b) return ''; const v=Number(b.v), h=Math.min(45,Math.abs(v)*30), warn=Math.abs(v)>1;
+      return `<div><div class="col ${warn?'warn':''}"><i></i><b style="height:${h}%;${v>=0?'bottom:50%':'top:50%'}"></b></div><div class="rd num">${v>0?'+':''}${v.toFixed(2)}</div><div class="lb">cyl ${i}</div></div>`; }).join('') || '<p class="hint">No balance data.</p>';
+    chips($('engChips'), ENG_CHIPS, sig);
   } else if(s.module==='slabs'){
-    lastFaults.slabs = s.faults||[];
-    const L=sig.height_left, Rr=sig.height_right;
-    setHeight('L', L, sig.height_left_mm); setHeight('R', Rr, sig.height_right_mm);
-    $('slabsTiles').innerHTML = SLABS_TILES.filter(k=>sig[k]).map(k=>tile(k,sig[k])).join('');
+    lastFaults.slabs=s.faults||[];
+    renderSlabs(sig);
   }
-  faultList($('engFaults'), lastFaults.td5);
-  faultList($('slabsFaults'), lastFaults.slabs);
-  $('bEng').textContent = lastFaults.td5.length||'';
-  $('bSlabs').textContent = lastFaults.slabs.length||'';
+  faultBlock($('engFaults'), lastFaults.td5);
+  faultBlock($('slabsFaults'), lastFaults.slabs);
+  $('nEng').textContent=lastFaults.td5.length||'';
+  $('nSlabs').textContent=lastFaults.slabs.length||'';
+  updateAlarm();
 }
+function renderSlabs(sig){
+  setHeight('L', sig.height_left, sig.height_left_mm); setHeight('R', sig.height_right, sig.height_right_mm);
+  $('wheels').innerHTML=['fl','fr','rl','rr'].map(w=>{ const v=sig['wheel_speed_'+w]; return `<div class="w"><span class="lb">${w.toUpperCase()}</span><span class="rd num">${v?Number(v.v).toFixed(0):'—'}<small style="font-family:'Inter T';font-size:12px;color:var(--fg3);margin-left:3px">${v?v.u||'':''}</small></span></div>`; }).join('');
+  chips($('slabsChips'), SLABS_CHIPS, sig);
+  $('slabsKv').innerHTML=Object.keys(SLABS_KV).filter(k=>sig[k]).map(k=>`<dt>${SLABS_KV[k]}</dt><dd>${sig[k].v} ${sig[k].u||''}</dd>`).join('');
+}
+renderSlabs({});
 function setHeight(side, sig, mm){
-  // raw counts 100..200 shown on the bar, normal band 135-165
-  const track=160, lo=100, hi=200;
-  if(!sig){ $('h'+side).textContent='—'; return; }
-  const f=Math.min(1,Math.max(0,(sig.v-lo)/(hi-lo)));
-  $('fill'+side).style.height=(f*track)+'px';
-  const band=$('band'+side); band.style.bottom=((135-lo)/(hi-lo)*track)+'px'; band.style.height=((165-135)/(hi-lo)*track)+'px';
-  $('h'+side).textContent=Math.round(sig.v);
-  $('h'+side+'mm').textContent = mm ? Math.round(mm.v)+' mm' : 'raw';
+  const el=$('hgt'+side), H=190, span=HEIGHT.hi-HEIGHT.lo, px=v=>(v-HEIGHT.lo)/span*H;
+  const band=el.querySelector('.band'); band.style.bottom=px(HEIGHT.band[0])+'px'; band.style.height=(px(HEIGHT.band[1])-px(HEIGHT.band[0]))+'px';
+  const mk=el.querySelector('.mk');
+  if(!sig){ el.className='hgt'; el.querySelector('.rd').textContent='—'; el.querySelector('.st').textContent='Not connected'; el.querySelector('.mm').textContent=''; mk.style.display='none'; el.querySelector('.fill').style.height='0'; return; }
+  const v=sig.v, p=Math.min(H,Math.max(0,px(v)));
+  el.querySelector('.fill').style.height=p+'px'; mk.style.display=''; mk.style.bottom=(p-1.5)+'px';
+  el.querySelector('.rd').textContent=Math.round(v);
+  el.querySelector('.mm').textContent = mm ? Math.round(mm.v)+' mm' : 'raw sensor count';
+  let cls='hgt', st='In the normal band';
+  if(v<HEIGHT.warn[0]||v>HEIGHT.warn[1]){ cls+=' bad'; st=v<HEIGHT.warn[0]?'Far too low':'Far too high'; }
+  else if(v<HEIGHT.band[0]||v>HEIGHT.band[1]){ cls+=' warn'; st=v<HEIGHT.band[0]?'Below normal':'Above normal'; }
+  else cls+=' okz';
+  el.className=cls; el.querySelector('.st').textContent=st;
 }
+
+// ---------- alarms + sound ----------
+let audio=null, soundOn=false, snoozedUntil=0, beepTimer=null, warnedTxt='';
+try{ soundOn=localStorage.getItem('d2dash.sound')==='1'; }catch(e){}
+function ensureAudio(){ try{ if(!audio) audio=new (window.AudioContext||window.webkitAudioContext)(); if(audio.state==='suspended') audio.resume(); }catch(e){} }
+function tone(freq, t0, dur){ const o=audio.createOscillator(), g=audio.createGain(); o.type='square'; o.frequency.value=freq;
+  g.gain.setValueAtTime(0.0001,t0); g.gain.exponentialRampToValueAtTime(0.25,t0+0.01); g.gain.exponentialRampToValueAtTime(0.0001,t0+dur);
+  o.connect(g).connect(audio.destination); o.start(t0); o.stop(t0+dur+0.02); }
+function beep(kind){
+  if(!soundOn) return; ensureAudio(); if(!audio) return;
+  const t=audio.currentTime;
+  if(kind==='bad'){ tone(880,t,.14); tone(660,t+.17,.14); tone(880,t+.34,.14); }
+  else tone(660,t,.12);
+  if(navigator.vibrate) navigator.vibrate(kind==='bad'?[200,100,200]:[80]);
+}
+function testBeep(){ if(!soundOn){ toggleSound(); } beep('bad'); }
+function toggleSound(){
+  soundOn=!soundOn; try{ localStorage.setItem('d2dash.sound', soundOn?'1':'0'); }catch(e){}
+  if(soundOn){ ensureAudio(); beep('warn'); }
+  $('sound').classList.toggle('on', soundOn); $('soundBtn').textContent=soundOn?'On':'Off';
+  toast(soundOn?'Alarm sound on':'Alarm sound off');
+}
+function snooze(){ snoozedUntil=Date.now()+5*60e3; toast('Alarm snoozed for 5 minutes'); updateAlarm(); }
+function updateAlarm(){
+  const a=$('alarm');
+  if(!worst.lvl || snap.status!=='connected'){ a.className=''; a.innerHTML=''; clearInterval(beepTimer); beepTimer=null; warnedTxt=''; return; }
+  const snoozed=Date.now()<snoozedUntil;
+  a.className=worst.lvl;
+  a.innerHTML=`<div>${worst.lvl==='bad'?'Out of range':'Watch'}<small>${snoozed?'snoozed':'tap to snooze 5 min'}</small></div><span class="v num">${worst.txt}</span>`;
+  if(worst.lvl==='bad' && !snoozed){ if(!beepTimer){ beep('bad'); beepTimer=setInterval(()=>beep('bad'),2500); } }
+  else { clearInterval(beepTimer); beepTimer=null; if(worst.lvl==='warn' && warnedTxt!==worst.txt.split(' ')[0]){ warnedTxt=worst.txt.split(' ')[0]; beep('warn'); } }
+}
+$('sound').classList.toggle('on', soundOn); $('soundBtn').textContent=soundOn?'On':'Off';
+document.addEventListener('touchstart', ()=>{ if(soundOn) ensureAudio(); }, {once:true, passive:true});
+document.addEventListener('click', ()=>{ if(soundOn) ensureAudio(); }, {once:true});
+$('threshTable').innerHTML=Object.keys(G).filter(k=>G[k].warn||G[k].alarm).map(k=>{ const g=G[k], f=b=>!b?'':[b[0]!=null?'< '+b[0]:'',b[1]!=null?'> '+b[1]:''].filter(Boolean).join(', ');
+  return `<tr><td>${g.label} <span class="c">${g.unit}</span></td><td class="r warn">${f(g.warn)}</td><td class="r bad">${f(g.alarm)}</td></tr>`; }).join('');
 
 // ---------- live feed ----------
 function connect(){
-  const es = new EventSource('/api/events');
-  es.onmessage = e => render(JSON.parse(e.data));
-  es.onerror = () => { es.close(); $('stattxt').textContent='reconnecting'; setTimeout(connect, 2000); };
+  const es=new EventSource('/api/events');
+  es.onmessage=e=>render(JSON.parse(e.data));
+  es.onerror=()=>{ es.close(); $('stateTxt').textContent='reconnecting'; $('state').className='state error'; setTimeout(connect,2000); };
 }
 fetch('/api/snapshot').then(r=>r.json()).then(render).finally(connect);
 fetch('/api/status').then(r=>r.json()).then(s=>{
-  status=s;
-  $('foot').textContent=`d2dash ${s.version} · ${s.simulate?'SIMULATOR':s.port}`;
-  $('sysInfo').innerHTML=Object.entries(s).map(([k,v])=>`<dt>${k}</dt><dd>${Array.isArray(v)?v.join(', '):v}</dd></dt>`).join('');
+  $('foot').textContent=`d2dash ${s.version} · ${s.simulate?'simulator':s.port}`;
+  $('sysInfo').innerHTML=Object.entries(s).map(([k,v])=>`<dt>${nice(k)}</dt><dd>${Array.isArray(v)?v.join(', '):v}</dd>`).join('');
 });
 
 // ---------- tabs ----------
@@ -358,10 +564,11 @@ document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{
   document.querySelectorAll('nav button').forEach(x=>x.classList.toggle('on',x===b));
   document.querySelectorAll('main section').forEach(s=>s.classList.toggle('on',s.id==='tab-'+b.dataset.tab));
   if(b.dataset.tab==='more') loadLogs();
+  window.scrollTo(0,0);
 });
 
 // ---------- actions ----------
-function toast(msg, bad){ const t=$('toast'); t.textContent=msg; t.style.borderColor=bad?'var(--bad)':'var(--line)'; t.classList.add('show'); clearTimeout(t._h); t._h=setTimeout(()=>t.classList.remove('show'),3500); }
+function toast(msg, bad){ const t=$('toast'); t.textContent=msg; t.className='toast show'+(bad?' bad':''); clearTimeout(t._h); t._h=setTimeout(()=>t.classList.remove('show'),3500); }
 async function post(url, body){ const r=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}); return r.json(); }
 async function switchModule(m){ const r=await post('/api/module',{module:m}); toast(r.message||r.error,!r.ok); }
 async function cmd(action, confirm){
@@ -371,19 +578,19 @@ async function cmd(action, confirm){
   return r;
 }
 let pending=null;
-function confirmCmd(module, action, title, text){
-  if(snap && snap.module!==module){ toast(`Connect ${module.toUpperCase()} first`, true); return; }
+function confirmCmd(module, action, title, text, verb){
+  if(snap && snap.module!==module){ toast(`Connect ${module==='slabs'?'SLABS':'the engine'} first`, true); return; }
   if(snap && snap.status!=='connected'){ toast('Not connected', true); return; }
-  pending=action; $('mTitle').textContent=title; $('mText').textContent=text; $('modal').classList.add('show');
+  pending=action; $('mTitle').textContent=title; $('mText').textContent=text||''; $('mGo').textContent=verb||'Confirm'; $('modal').classList.add('show');
 }
 function closeModal(){ $('modal').classList.remove('show'); pending=null; }
 $('mGo').onclick=()=>{ const a=pending; closeModal(); if(a) cmd(a,true); };
-$('engOutputs').innerHTML = TD5_OUTPUTS.map(o=>`<button class="btn" onclick="confirmCmd('td5','output_${o}','Test ${nice(o)}?','Actuates the ${nice(o)} output for a moment.')">${nice(o)}</button>`).join('')
-  + [1,2,3,4,5].map(n=>`<button class="btn" onclick="confirmCmd('td5','injector_${n}','Pulse injector ${n}?','Fires injector ${n} once. Engine running.')">Inj ${n}</button>`).join('');
+$('engOutputs').innerHTML = TD5_OUTPUTS.map(o=>`<button class="btn amber" onclick="confirmCmd('td5','output_${o}','Test the ${nice(o)}?','Actuates the ${nice(o)} output for a moment.','Test')">${nice(o)}</button>`).join('')
+  + [1,2,3,4,5].map(n=>`<button class="btn amber" onclick="confirmCmd('td5','injector_${n}','Pulse injector ${n}?','Fires injector ${n} once. Engine running.','Pulse')">Injector ${n}</button>`).join('');
 
 async function loadLogs(){
   const r=await fetch('/api/logs').then(r=>r.json());
-  $('logTable').innerHTML = r.logs.map(l=>`<tr><td><a href="/api/logs/${l.name}">${l.name}</a></td><td class="r">${(l.size/1024).toFixed(0)} KB</td><td class="r"><button class="btn" style="min-height:36px;padding:0 10px" onclick="delLog('${l.name}')">✕</button></td></tr>`).join('') || '<tr><td colspan=3 style="color:var(--mute)">No logs yet</td></tr>';
+  $('logTable').innerHTML = r.logs.map(l=>`<tr><td><a href="/api/logs/${l.name}">${l.name}</a></td><td class="r">${(l.size/1024).toFixed(0)} KB</td><td class="r"><button class="btn sm" onclick="delLog('${l.name}')">Delete</button></td></tr>`).join('') || '<tr><td colspan=3 class="c">No logs yet. One appears after the first connection.</td></tr>';
 }
 async function delLog(n){ await fetch('/api/logs/'+n,{method:'DELETE'}); loadLogs(); }
 </script>
