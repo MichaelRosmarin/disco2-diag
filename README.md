@@ -24,17 +24,30 @@ It is a thin layer (`d2dash`) over two open-source projects that did the hard wo
 
 ## Install on the Pi
 
-Flash Raspberry Pi OS Lite (64-bit), enable SSH, boot, then:
+Flash Raspberry Pi OS Lite (64-bit) with Raspberry Pi Imager (hostname `disco2`, SSH on, your
+home WiFi), boot, `ssh pi@disco2.local`, then:
 
 ```bash
+sudo apt install -y git
 git clone https://github.com/MichaelRosmarin/disco2-diag.git
 cd disco2-diag
-sudo HOTSPOT_PSK='choose-a-password' bash deploy/install.sh
+sudo ENABLE_HOTSPOT=no bash deploy/install.sh
 ```
 
-That installs everything under `/opt/d2dash`, starts the `d2dash` service on port 80, and
-brings up a WiFi hotspot called `Disco2`. Join it from a phone and open
-`http://10.42.0.1/` (or `http://disco2.local/` if your phone resolves mDNS).
+That installs everything under `/opt/d2dash` and starts the `d2dash` service on port 80:
+`http://disco2.local/` from anything on the same network. Re-run `install.sh` after a
+`git pull` to update; it is idempotent.
+
+The car has no WiFi, so the Pi makes its own:
+
+```bash
+sudo bash deploy/hotspot.sh Disco2 'choose-a-password'
+```
+
+The Pi has one radio: when a network it knows is in range (home, office) it joins that, as
+before; anywhere else it raises the `Disco2` hotspot by itself. Join it from a phone and open
+`http://10.42.0.1/`. Running the command over SSH drops that session, which is expected.
+`sudo bash deploy/hotspot.sh off` turns the hotspot off again.
 
 Config lives in `/etc/d2dash/d2dash.env`. Once the install is proven in the car:
 

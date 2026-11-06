@@ -18,8 +18,8 @@ APP_DIR=/opt/d2dash
 REPO_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 SERVICE_USER=${SUDO_USER:-pi}
 HOTSPOT_SSID=${HOTSPOT_SSID:-Disco2}
-HOTSPOT_PSK=${HOTSPOT_PSK:-landrover}   # change this before running, or export HOTSPOT_PSK
-ENABLE_HOTSPOT=${ENABLE_HOTSPOT:-yes}
+HOTSPOT_PSK=${HOTSPOT_PSK:-}           # export HOTSPOT_PSK=... with ENABLE_HOTSPOT=yes
+ENABLE_HOTSPOT=${ENABLE_HOTSPOT:-no}   # the hotspot is normally a separate step: deploy/hotspot.sh
 ENABLE_READONLY=${ENABLE_READONLY:-no}   # set to yes once everything works
 
 if [[ $EUID -ne 0 ]]; then echo "run with sudo"; exit 1; fi
