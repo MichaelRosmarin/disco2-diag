@@ -244,6 +244,15 @@ a{color:var(--act)}
 .health .legend i{display:inline-block;width:18px;border-top:2px solid var(--fg);vertical-align:middle;margin-right:5px}
 .health .legend i.b{border-top:2px dashed var(--fg3)}
 
+/* thresholds editor */
+.thr td,.thr th{padding:6px 2px}
+.thr td.r{white-space:nowrap}
+.thr input{width:64px;padding:7px 6px;border-radius:7px;border:1px solid var(--rule2);background:var(--bg2);color:var(--fg);font-size:15px;text-align:right;font-variant-numeric:tabular-nums}
+.thr input.w{border-color:rgba(232,169,58,.45)}.thr input.a{border-color:rgba(226,87,79,.5)}
+.thr input:focus{outline:2px solid var(--act);outline-offset:-1px}
+.thr input.changed{background:var(--bg3)}
+.thr .u{color:var(--fg3);font-size:12px}
+
 /* ---------- more ---------- */
 .set{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 0;border-top:1px solid var(--rule)}
 .set:first-of-type{border-top:0}
@@ -495,7 +504,12 @@ footer{padding:14px;color:var(--fg3);font-size:12px;text-align:center}
       <h2>Alarms</h2>
       <div class="set"><div>Sound on this phone<div class="d">Beeps while any value is in the red. Tap the band to snooze 5 min.</div></div><button class="btn sm" onclick="toggleSound()" id="soundBtn">Off</button></div>
       <div class="set"><div>Test<div class="d">Plays the alarm tone once.</div></div><button class="btn sm" onclick="testBeep()">Beep</button></div>
-      <table style="margin-top:8px"><thead><tr><th>Signal</th><th class="r">Amber</th><th class="r">Red</th></tr></thead><tbody id="threshTable"></tbody></table>
+    </div>
+    <div class="blk">
+      <h2>Alarm limits</h2>
+      <p class="hint">Amber is "watch", red is "out of range" (beeps). Leave a box empty for no limit on that side. Saved on the Pi, so the phone and the dash screen agree.</p>
+      <table class="thr"><thead><tr><th>Signal</th><th class="r">Amber low</th><th class="r">Amber high</th><th class="r">Red low</th><th class="r">Red high</th></tr></thead><tbody id="threshTable"></tbody></table>
+      <div class="row"><button class="btn act sm" onclick="saveThresholds()">Save limits</button><button class="btn sm" onclick="resetThresholds()">Back to defaults</button></div>
     </div>
     <div class="blk">
       <h2>Sensor board</h2>
@@ -806,8 +820,38 @@ function updateAlarm(){
 $('sound').classList.toggle('on', soundOn); $('soundBtn').textContent=soundOn?'On':'Off';
 document.addEventListener('touchstart', ()=>{ if(soundOn) ensureAudio(); }, {once:true, passive:true});
 document.addEventListener('click', ()=>{ if(soundOn) ensureAudio(); }, {once:true});
-$('threshTable').innerHTML=Object.keys(G).filter(k=>G[k].warn||G[k].alarm).map(k=>{ const g=G[k], f=b=>!b?'':[b[0]!=null?'< '+b[0]:'',b[1]!=null?'> '+b[1]:''].filter(Boolean).join(', ');
-  return `<tr><td>${g.label} <span class="c">${g.unit}</span></td><td class="r warn">${f(g.warn)}</td><td class="r bad">${f(g.alarm)}</td></tr>`; }).join('');
+// ---------- alarm limits: defaults in G, user overrides from the Pi ----------
+const DEFAULT_LIMITS = {};
+Object.keys(G).forEach(k=>{ if(G[k].warn||G[k].alarm) DEFAULT_LIMITS[k]={warn:G[k].warn?[...G[k].warn]:null, alarm:G[k].alarm?[...G[k].alarm]:null}; });
+const LIMIT_KEYS = Object.keys(DEFAULT_LIMITS);
+function applyLimits(ov){
+  LIMIT_KEYS.forEach(k=>{ const d=DEFAULT_LIMITS[k], o=ov&&ov[k];
+    G[k].warn = o&&o.warn ? o.warn.map(v=>v==null?null:+v) : (d.warn?[...d.warn]:undefined);
+    G[k].alarm = o&&o.alarm ? o.alarm.map(v=>v==null?null:+v) : (d.alarm?[...d.alarm]:undefined); });
+  document.querySelectorAll('.hero').forEach(buildHero);   // zones are baked into the dial faces
+  document.querySelectorAll('.bar').forEach(buildBar);
+  if(snap) render(snap);
+  renderLimitsTable();
+}
+function renderLimitsTable(){
+  const cell=(k,lvl,i)=>{ const v=G[k][lvl]?G[k][lvl][i]:null; return `<input class="${lvl==='warn'?'w':'a'}" type="number" step="any" inputmode="decimal" data-k="${k}" data-l="${lvl}" data-i="${i}" value="${v==null?'':v}" oninput="this.classList.add('changed')">`; };
+  $('threshTable').innerHTML=LIMIT_KEYS.map(k=>{ const g=G[k], isDef=JSON.stringify({warn:g.warn||null,alarm:g.alarm||null})===JSON.stringify(DEFAULT_LIMITS[k]);
+    return `<tr><td>${g.label} <span class="u">${g.unit}${isDef?'':' · custom'}</span></td><td class="r">${cell(k,'warn',0)}</td><td class="r">${cell(k,'warn',1)}</td><td class="r">${cell(k,'alarm',0)}</td><td class="r">${cell(k,'alarm',1)}</td></tr>`; }).join('');
+}
+async function saveThresholds(){
+  const ov={};
+  document.querySelectorAll('#threshTable input').forEach(inp=>{ const {k,l,i}=inp.dataset; ov[k]=ov[k]||{warn:[null,null],alarm:[null,null]}; ov[k][l][+i]=inp.value===''?null:+inp.value; });
+  // only send what differs from the defaults, so a later default change still reaches untouched rows
+  Object.keys(ov).forEach(k=>{ const d=DEFAULT_LIMITS[k]; if(JSON.stringify(ov[k])===JSON.stringify({warn:d.warn||[null,null],alarm:d.alarm||[null,null]})) delete ov[k]; });
+  const r=await post('/api/thresholds',{overrides:ov});
+  if(!r.ok){ toast(r.error,true); return; }
+  applyLimits(r.overrides); toast('Alarm limits saved');
+}
+async function resetThresholds(){
+  if(!confirm('Put every alarm limit back to the built-in defaults?')) return;
+  await fetch('/api/thresholds',{method:'DELETE'}); applyLimits({}); toast('Limits back to defaults');
+}
+fetch('/api/thresholds').then(r=>r.json()).then(r=>applyLimits(r.overrides)).catch(()=>renderLimitsTable());
 
 // ============ live feed ============
 function connect(){

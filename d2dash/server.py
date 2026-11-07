@@ -56,6 +56,69 @@ def fault_reference() -> dict:
     return out
 
 
+_SIGNAL = re.compile(r"^[a-z][a-z0-9_]{0,40}$")
+
+
+def _thresholds_path(log_dir: str) -> str:
+    return os.path.join(log_dir, "state", "thresholds.json")
+
+
+def load_thresholds(log_dir: str) -> dict:
+    """User overrides of the dashboard's alarm limits: {signal: {"warn": [lo, hi], "alarm": [lo, hi]}}.
+    Values may be null (no limit on that side). The page merges them over its defaults."""
+    try:
+        with open(_thresholds_path(log_dir), encoding="utf-8") as fh:
+            return validate_thresholds(json.load(fh))
+    except (OSError, ValueError):
+        return {}
+
+
+def validate_thresholds(ov: dict) -> dict:
+    if not isinstance(ov, dict):
+        raise ValueError("overrides must be an object")
+    out: dict = {}
+    for sig, spec in ov.items():
+        if not _SIGNAL.match(str(sig)) or not isinstance(spec, dict):
+            raise ValueError(f"bad signal {sig!r}")
+        clean: dict = {}
+        for level in ("warn", "alarm"):
+            if level not in spec:
+                continue
+            pair = spec[level]
+            if not (isinstance(pair, list) and len(pair) == 2):
+                raise ValueError(f"{sig}.{level} must be [low, high]")
+            vals = []
+            for v in pair:
+                if v is None or v == "":
+                    vals.append(None)
+                else:
+                    try:
+                        vals.append(float(v))
+                    except (TypeError, ValueError):
+                        raise ValueError(f"{sig}.{level}: {v!r} is not a number") from None
+            if vals[0] is not None and vals[1] is not None and vals[0] >= vals[1]:
+                raise ValueError(f"{sig}.{level}: low must be below high")
+            clean[level] = vals
+        w, a = clean.get("warn"), clean.get("alarm")
+        if w and a:
+            if w[1] is not None and a[1] is not None and a[1] < w[1]:
+                raise ValueError(f"{sig}: red high must be at or above amber high")
+            if w[0] is not None and a[0] is not None and a[0] > w[0]:
+                raise ValueError(f"{sig}: red low must be at or below amber low")
+        if clean:
+            out[sig] = clean
+    return out
+
+
+def save_thresholds(log_dir: str, ov: dict) -> None:
+    p = _thresholds_path(log_dir)
+    os.makedirs(os.path.dirname(p), exist_ok=True)
+    tmp = p + ".tmp"
+    with open(tmp, "w", encoding="utf-8") as fh:
+        json.dump(ov, fh, indent=1)
+    os.replace(tmp, p)
+
+
 def make_handler(engine: Engine):
     class Handler(BaseHTTPRequestHandler):
         server_version = f"d2dash/{__version__}"
@@ -125,6 +188,8 @@ def make_handler(engine: Engine):
                 return self._sse()
             if path == "/api/faults/reference":
                 return self._json(fault_reference())
+            if path == "/api/thresholds":
+                return self._json({"overrides": load_thresholds(engine.cfg.log_dir)})
             if path == "/api/trips":
                 from . import trips as T
                 sessions = T.list_sessions(engine.cfg.log_dir)
@@ -207,10 +272,20 @@ def make_handler(engine: Engine):
                 res = engine.command(action, body.get("params") or {},
                                      confirm=bool(body.get("confirm", False)))
                 return self._json(res, HTTPStatus.OK if res.get("ok") else HTTPStatus.BAD_REQUEST)
+            if path == "/api/thresholds":
+                try:
+                    ov = validate_thresholds(body.get("overrides") or {})
+                except ValueError as exc:
+                    return self._json({"ok": False, "error": str(exc)}, HTTPStatus.BAD_REQUEST)
+                save_thresholds(engine.cfg.log_dir, ov)
+                return self._json({"ok": True, "overrides": ov})
             self._json({"error": "not found"}, HTTPStatus.NOT_FOUND)
 
         def do_DELETE(self) -> None:  # noqa: N802
             path = self.path.split("?", 1)[0]
+            if path == "/api/thresholds":
+                save_thresholds(engine.cfg.log_dir, {})
+                return self._json({"ok": True, "overrides": {}})
             if path.startswith("/api/logs/"):
                 p = self._log_path(path[len("/api/logs/"):])
                 if not p:

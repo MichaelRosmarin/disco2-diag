@@ -220,3 +220,30 @@ def test_trips_and_fingerprint(tmp_path):
     assert "injection" not in warn and "charging_v" not in warn
     r = T.replay(T.load_trip(str(tmp_path), trips[-1]))
     assert len(r["t"]) <= 601 and "manifold_press" in r["cols"]
+
+
+def test_thresholds_roundtrip(engine, cfg):
+    from d2dash.server import validate_thresholds
+    httpd = ThreadingHTTPServer(("127.0.0.1", 0), make_handler(engine))
+    httpd.daemon_threads = True
+    threading.Thread(target=httpd.serve_forever, daemon=True).start()
+    base = f"http://127.0.0.1:{httpd.server_address[1]}"
+    try:
+        body = json.dumps({"overrides": {"coolant_temp": {"warn": [None, 98], "alarm": [None, 104]}}}).encode()
+        req = urllib.request.Request(base + "/api/thresholds", data=body, headers={"Content-Type": "application/json"}, method="POST")
+        r = json.load(urllib.request.urlopen(req))
+        assert r["ok"] and r["overrides"]["coolant_temp"]["alarm"] == [None, 104.0]
+        assert json.load(urllib.request.urlopen(base + "/api/thresholds"))["overrides"]["coolant_temp"]["warn"] == [None, 98.0]
+        bad = json.dumps({"overrides": {"coolant_temp": {"warn": [None, 110], "alarm": [None, 104]}}}).encode()
+        req = urllib.request.Request(base + "/api/thresholds", data=bad, headers={"Content-Type": "application/json"}, method="POST")
+        with pytest.raises(urllib.error.HTTPError) as ei:
+            urllib.request.urlopen(req)
+        assert ei.value.code == 400
+        urllib.request.urlopen(urllib.request.Request(base + "/api/thresholds", method="DELETE"))
+        assert json.load(urllib.request.urlopen(base + "/api/thresholds"))["overrides"] == {}
+    finally:
+        httpd.shutdown()
+    with pytest.raises(ValueError):
+        validate_thresholds({"../x": {"warn": [1, 2]}})
+    with pytest.raises(ValueError):
+        validate_thresholds({"rpm": {"warn": [5000, 4000]}})
