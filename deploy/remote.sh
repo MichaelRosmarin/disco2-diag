@@ -58,7 +58,8 @@ RestartSec=2
 WantedBy=multi-user.target
 EOF
     systemctl daemon-reload
-    systemctl enable --now d2dash-ttyd.service
+    systemctl enable d2dash-ttyd.service >/dev/null 2>&1
+    systemctl restart d2dash-ttyd.service
     echo "==> ethernet: link-local fallback so a bare cable to a laptop works"
     for con in $(nmcli -t -f NAME,TYPE con show | awk -F: '$2=="802-3-ethernet"{print $1}'); do
       nmcli con modify "$con" ipv4.method auto ipv4.link-local enabled ipv4.may-fail yes \
