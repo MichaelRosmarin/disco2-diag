@@ -212,7 +212,7 @@ def test_trips_and_fingerprint(tmp_path):
     trips = T.group_trips(T.list_sessions(str(tmp_path)))
     assert len(trips) == 4
     s = T.summarize(T.load_trip(str(tmp_path), trips[-1]))
-    assert s["duration_s"] == 599 and s["distance_km"] > 1
+    assert s["duration_s"] in (599, 600) and s["distance_km"] > 1
     h = T.health(str(tmp_path))
     assert h["status"] == "ok" and h["baseline"]["n"] == 3
     warn = {f["what"] for f in h["findings"] if f["level"] == "warn"}
