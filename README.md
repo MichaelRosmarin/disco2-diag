@@ -60,6 +60,20 @@ sudo bash deploy/readonly.sh enable && sudo reboot   # power cuts can no longer 
 sudo bash deploy/readonly.sh disable && sudo reboot  # before any update
 ```
 
+## Working on it in the dash
+
+An RJ45 coupler in the dash panel, wired to the Pi's Ethernet port, is the maintenance port: a
+laptop on a bare cable gets a link-local address and `disco2.local` resolves over it. With
+
+```bash
+sudo bash deploy/remote.sh terminal 'a-password'
+```
+
+the Pi serves a web terminal at `http://disco2.local:7681/` (user `pi`), reachable over that
+cable or the Disco2 hotspot, never from the internet. It is how the Pi gets driven from a chat
+without pulling it out. `deploy/remote.sh connect` adds Raspberry Pi Connect for when the Pi
+has internet (a phone hotspot it knows, via `deploy/wifi.sh`).
+
 ## Run on a laptop
 
 ```bash
@@ -119,7 +133,8 @@ The same feed is what ESP32 gauges will read later (over serial from the Pi, not
 ```
 d2dash/            the service: engine.py (poller), server.py (HTTP/SSE), sensors.py (ESP32 board),
                    sim.py, static/index.html, data/ (fault dictionaries, CC BY-SA)
-deploy/            install.sh, systemd unit, udev rules, hotspot.sh, wifi.sh, datapart.sh, readonly.sh, kiosk.sh
+deploy/            install.sh, systemd unit, udev rules, hotspot.sh, wifi.sh, datapart.sh, readonly.sh,
+                   remote.sh (web terminal / Pi Connect), kiosk.sh
 esp32/sensor-board Arduino sketch + wiring notes for the EGT / oil / gearbox / fuel board
 tests/             pytest, runs against the simulator
 docs/              roadmap and the Nanocom parity map

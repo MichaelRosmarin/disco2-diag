@@ -14,7 +14,8 @@ What the Nanocom does and how far each item is: `nanocom-parity.md`.
 5. Tap *Connect SLABS*, wait for it. Heights should sit in the green band on level ground.
 6. First fault read with real codes: check the cause text makes sense; report undecoded
    `byte.bit` faults upstream.
-7. Wire the UBEC to an ignition-switched fuse tap; mount the Pi; `deploy/hotspot.sh`.
+7. Wire the UBEC to an ignition-switched fuse tap; mount the Pi. Dash panel: HDMI + USB for the
+   screen, RJ45 for the laptop (`deploy/remote.sh terminal`).
 8. Logs onto a USB stick (`deploy/datapart.sh /dev/sda`), then the read-only overlay
    (`deploy/readonly.sh enable`). Not before: with the overlay on and logs on the root
    filesystem, every drive's CSV is lost at key-off.
