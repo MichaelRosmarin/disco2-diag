@@ -88,3 +88,12 @@ fi
 echo
 echo "Done. Dashboard: http://disco2.local/  (or http://10.42.0.1/ on the hotspot)"
 echo "Logs: journalctl -u d2dash -f"
+
+# Ghostty/kitty terminals advertise a TERM the Pi does not know ("terminal is not fully
+# functional" from pagers). Fall back to xterm-256color for interactive shells.
+if ! grep -q "d2dash: unknown TERM" "/home/$SERVICE_USER/.bashrc" 2>/dev/null; then
+  cat >> "/home/$SERVICE_USER/.bashrc" <<'EOB'
+# d2dash: unknown TERM fallback
+case "$TERM" in xterm-ghostty|xterm-kitty) infocmp "$TERM" >/dev/null 2>&1 || export TERM=xterm-256color ;; esac
+EOB
+fi

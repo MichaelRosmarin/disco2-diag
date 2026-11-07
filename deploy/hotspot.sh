@@ -37,7 +37,8 @@ while IFS=: read -r name type; do
   mode=$(nmcli -g 802-11-wireless.mode con show "$name" 2>/dev/null || true)
   [[ "$mode" == "ap" ]] && continue
   nmcli con modify "$name" connection.autoconnect yes connection.autoconnect-priority 100 \
-    connection.autoconnect-retries 0
+    connection.autoconnect-retries 0 \
+    || echo "note: could not raise priority of '$name' (netplan-managed?); the hotspot may win over it"
 done < <(nmcli -t -f NAME,TYPE con show)
 
 if nmcli -t -f NAME con show | grep -qx "$CON"; then

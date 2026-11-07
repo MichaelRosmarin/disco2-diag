@@ -20,7 +20,7 @@ if [[ -z "$SSID" || ${#PSK} -lt 8 ]]; then
 fi
 
 if nmcli -t -f NAME con show | grep -qx "$SSID"; then
-  nmcli con modify "$SSID" wifi-sec.psk "$PSK"
+  nmcli con modify "$SSID" wifi-sec.psk "$PSK" || true
 else
   nmcli con add type wifi ifname wlan0 con-name "$SSID" ssid "$SSID" \
     wifi-sec.key-mgmt wpa-psk wifi-sec.psk "$PSK"
