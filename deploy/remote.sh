@@ -24,7 +24,18 @@ case "$MODE" in
     PW=${2:-}
     if [[ ${#PW} -lt 8 ]]; then echo "usage: $0 terminal '<password of 8+ chars>'" >&2; exit 1; fi
     echo "==> ttyd"
-    apt-get install -y -q ttyd
+    if ! apt-get install -y -q ttyd 2>/dev/null; then
+      # not packaged on Raspberry Pi OS Trixie: use the project's static binary, checksum verified
+      VER=${TTYD_VERSION:-1.7.7}
+      ARCH=$(uname -m); case "$ARCH" in aarch64) A=aarch64 ;; armv7l) A=armhf ;; x86_64) A=x86_64 ;; *) echo "no ttyd build for $ARCH"; exit 1 ;; esac
+      TMP=$(mktemp -d)
+      curl -fsSL -o "$TMP/ttyd" "https://github.com/tsl0922/ttyd/releases/download/$VER/ttyd.$A"
+      curl -fsSL -o "$TMP/SHA256SUMS" "https://github.com/tsl0922/ttyd/releases/download/$VER/SHA256SUMS"
+      (cd "$TMP" && grep " ttyd.$A\$" SHA256SUMS | sed "s/ttyd.$A/ttyd/" | sha256sum -c -)
+      install -m 0755 "$TMP/ttyd" /usr/bin/ttyd
+      rm -rf "$TMP"
+      echo "ttyd $VER installed to /usr/bin/ttyd"
+    fi
     install -d -m 0750 /etc/d2dash
     printf 'TTYD_CRED=%s:%s\n' "$SERVICE_USER" "$PW" > /etc/d2dash/ttyd.env
     chmod 0600 /etc/d2dash/ttyd.env
