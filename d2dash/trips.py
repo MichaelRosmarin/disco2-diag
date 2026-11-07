@@ -76,8 +76,26 @@ def list_sessions(log_dir: str) -> list[dict]:
         except OSError:
             continue
         out.append({"name": n, "module": m.group(2), "stamp": m.group(1), "size": st.st_size,
-                    "mtime": st.st_mtime, "path": p})
+                    "mtime": _last_time(p) or st.st_mtime, "path": p})
     return out
+
+
+def _last_time(path: str) -> float | None:
+    """Timestamp of the last row, read from the tail of the file (files may be copied, so
+    mtime is not trustworthy)."""
+    try:
+        with open(path, "rb") as fh:
+            fh.seek(0, os.SEEK_END)
+            size = fh.tell()
+            fh.seek(max(0, size - 4096))
+            tail = fh.read().decode("utf-8", "replace").strip().splitlines()
+        for line in reversed(tail):
+            t = _parse_time(line.split(",", 1)[0])
+            if t is not None:
+                return t
+    except OSError:
+        pass
+    return None
 
 
 def read_rows(path: str) -> list[dict]:
