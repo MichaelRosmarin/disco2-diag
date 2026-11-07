@@ -49,7 +49,7 @@ User=$SERVICE_USER
 WorkingDirectory=/home/$SERVICE_USER
 Environment=TERM=xterm-256color
 EnvironmentFile=/etc/d2dash/ttyd.env
-ExecStart=/usr/bin/ttyd -p $PORT -W -c \${TTYD_CRED} -t titleFixed="disco2" -t fontSize=15 -t disableLeaveAlert=true \\
+ExecStart=/usr/bin/ttyd -p $PORT -W -c \${TTYD_CRED} -t titleFixed="disco2" -t fontSize=15 -t disableLeaveAlert=true -t screenReaderMode=true \\
   /bin/bash --login
 Restart=always
 RestartSec=2
