@@ -47,7 +47,9 @@ sudo bash deploy/hotspot.sh Disco2 'choose-a-password'
 The Pi has one radio: when a network it knows is in range (home, office) it joins that, as
 before; anywhere else it raises the `Disco2` hotspot by itself. Join it from a phone and open
 `http://10.42.0.1/`. Running the command over SSH drops that session, which is expected.
-`sudo bash deploy/hotspot.sh off` turns the hotspot off again.
+`sudo bash deploy/hotspot.sh off` turns the hotspot off again. To teach it another network
+(a different house, a lodge): `sudo bash deploy/wifi.sh "SSID" "password"`; the Pi 3B+ also has an
+Ethernet port, which is the way in when it knows no WiFi where you are.
 
 Config lives in `/etc/d2dash/d2dash.env`. Once the install is proven in the car:
 
