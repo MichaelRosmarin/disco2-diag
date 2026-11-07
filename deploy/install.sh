@@ -26,7 +26,7 @@ if [[ $EUID -ne 0 ]]; then echo "run with sudo"; exit 1; fi
 
 echo "==> apt packages"
 apt-get update -q
-apt-get install -y -q python3 python3-venv python3-pip git network-manager
+apt-get install -y -q python3 python3-venv python3-pip git network-manager parted
 
 echo "==> serial port access for $SERVICE_USER"
 usermod -aG dialout "$SERVICE_USER"

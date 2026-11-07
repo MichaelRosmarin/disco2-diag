@@ -51,9 +51,11 @@ before; anywhere else it raises the `Disco2` hotspot by itself. Join it from a p
 (a different house, a lodge): `sudo bash deploy/wifi.sh "SSID" "password"`; the Pi 3B+ also has an
 Ethernet port, which is the way in when it knows no WiFi where you are.
 
-Config lives in `/etc/d2dash/d2dash.env`. Once the install is proven in the car:
+Config lives in `/etc/d2dash/d2dash.env`. Once the install is proven in the car, make it
+survive having the power pulled: put the logs on a USB stick, then mount the card read-only.
 
 ```bash
+sudo bash deploy/datapart.sh /dev/sda               # any USB stick, wiped; logs live there
 sudo bash deploy/readonly.sh enable && sudo reboot   # power cuts can no longer corrupt the SD
 sudo bash deploy/readonly.sh disable && sudo reboot  # before any update
 ```
@@ -117,7 +119,7 @@ The same feed is what ESP32 gauges will read later (over serial from the Pi, not
 ```
 d2dash/            the service: engine.py (poller), server.py (HTTP/SSE), sensors.py (ESP32 board),
                    sim.py, static/index.html, data/ (fault dictionaries, CC BY-SA)
-deploy/            install.sh, systemd unit, udev rules, hotspot.sh, readonly.sh, kiosk.sh
+deploy/            install.sh, systemd unit, udev rules, hotspot.sh, wifi.sh, datapart.sh, readonly.sh, kiosk.sh
 esp32/sensor-board Arduino sketch + wiring notes for the EGT / oil / gearbox / fuel board
 tests/             pytest, runs against the simulator
 docs/              roadmap and the Nanocom parity map

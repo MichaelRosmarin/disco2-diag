@@ -15,7 +15,7 @@ What the Nanocom does and how far each item is: `nanocom-parity.md`.
 6. First fault read with real codes: check the cause text makes sense; report undecoded
    `byte.bit` faults upstream.
 7. Wire the UBEC to an ignition-switched fuse tap; mount the Pi; `deploy/hotspot.sh`.
-8. Data partition for the logs (`deploy/datapart.sh`, to write), then the read-only overlay
+8. Logs onto a USB stick (`deploy/datapart.sh /dev/sda`), then the read-only overlay
    (`deploy/readonly.sh enable`). Not before: with the overlay on and logs on the root
    filesystem, every drive's CSV is lost at key-off.
 
