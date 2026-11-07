@@ -125,6 +125,30 @@ def make_handler(engine: Engine):
                 return self._sse()
             if path == "/api/faults/reference":
                 return self._json(fault_reference())
+            if path == "/api/trips":
+                from . import trips as T
+                sessions = T.list_sessions(engine.cfg.log_dir)
+                out = []
+                for t in reversed(T.group_trips(sessions)):
+                    rows = T.load_trip(engine.cfg.log_dir, t)
+                    s = T.summarize(rows)
+                    if s:
+                        out.append({"id": t["id"], "sessions": t["sessions"], "slabs": t["slabs"], **s})
+                return self._json({"trips": out})
+            if path.startswith("/api/trips/"):
+                from . import trips as T
+                tid = path[len("/api/trips/"):]
+                if not re.fullmatch(r"\d{8}-\d{6}", tid):
+                    return self._json({"error": "bad trip id"}, 404)
+                trip = next((t for t in T.group_trips(T.list_sessions(engine.cfg.log_dir)) if t["id"] == tid), None)
+                if trip is None:
+                    return self._json({"error": "no such trip"}, 404)
+                rows = T.load_trip(engine.cfg.log_dir, trip)
+                return self._json({"id": tid, "summary": T.summarize(rows), "replay": T.replay(rows),
+                                   "fingerprint": T.fingerprint(rows)})
+            if path == "/api/health":
+                from . import trips as T
+                return self._json(T.health(engine.cfg.log_dir))
             if path == "/api/logs":
                 return self._json({"logs": self._list_logs()})
             if path.startswith("/api/logs/"):

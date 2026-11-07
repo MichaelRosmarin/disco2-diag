@@ -203,6 +203,47 @@ a{color:var(--act)}
 .field label{color:var(--fg2);font-size:14px;min-width:110px}
 .field input{width:90px;padding:8px 10px;border-radius:8px;border:1px solid var(--rule2);background:var(--bg2);color:var(--fg);font-size:16px;text-align:right}
 
+/* ---------- trips ---------- */
+.trips .trip{display:grid;grid-template-columns:1fr auto;gap:2px 12px;padding:11px 0;border-bottom:1px solid var(--rule);cursor:pointer}
+.trips .trip:last-child{border-bottom:0}
+.trips .trip .d{font-weight:600}
+.trips .trip .m{color:var(--fg3);font-size:13px;grid-column:1/-1}
+.trips .trip .f{color:var(--bad);font-size:13px;grid-column:1/-1}
+.trips .trip .km{text-align:right;font-variant-numeric:tabular-nums}
+.tripsum{display:grid;grid-template-columns:repeat(3,1fr);gap:0;border-top:1px solid var(--rule);margin-bottom:8px}
+.tripsum .it{padding:10px 4px 8px;border-bottom:1px solid var(--rule)}
+.tripsum .rd{font-size:22px;line-height:1.1}
+.tripsum .rd small{font-family:"Inter T";font-weight:500;font-size:12px;color:var(--fg2);letter-spacing:0;margin-left:2px}
+.tripsum .lb{color:var(--fg3);font-size:12px;margin-top:2px}
+.scrub{position:sticky;top:0;z-index:3;background:var(--bg);padding:6px 0;color:var(--fg2);font-size:13px;min-height:28px;font-variant-numeric:tabular-nums}
+.panel{position:relative;margin-top:6px}
+.panel .ph{display:flex;justify-content:space-between;align-items:baseline;font-size:13px;color:var(--fg2)}
+.panel .ph b{font-family:"Inter D";font-weight:700;font-size:18px;color:var(--fg);letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.panel .ph b small{font-family:"Inter T";font-weight:500;font-size:12px;color:var(--fg3);letter-spacing:0;margin-left:2px}
+.panel svg{width:100%;height:84px;display:block;touch-action:pan-y}
+.panel .ln{fill:none;stroke:var(--fg);stroke-width:2;stroke-linejoin:round;stroke-linecap:round}
+.panel .ar{fill:var(--fg);opacity:.08}
+.panel .gr{stroke:var(--rule);stroke-width:1}
+.panel .zn{opacity:.18}
+.panel .cur{stroke:var(--act);stroke-width:1.5}
+.panel .fx{fill:var(--bad)}
+.health .finding{display:flex;gap:10px;padding:8px 0;border-bottom:1px solid var(--rule);font-size:14px;align-items:baseline;color:var(--fg2)}
+.health .finding:last-child{border-bottom:0}
+.health .finding i{flex:none;width:8px;height:8px;border-radius:50%;background:var(--ok);transform:translateY(-1px)}
+.health .finding.warn i{background:var(--warn)}
+.health .finding.warn{color:var(--warn)}
+.health .curves{display:grid;grid-template-columns:1fr;gap:14px;margin-top:12px}
+@media (min-width:720px){.health .curves{grid-template-columns:repeat(3,1fr)}}
+.health .cv h3{font-size:13px;font-weight:600;color:var(--fg2);margin:0 0 4px}
+.health .cv svg{width:100%;height:110px;display:block}
+.health .cv .base{fill:none;stroke:var(--fg3);stroke-width:2;stroke-dasharray:4 4}
+.health .cv .last{fill:none;stroke:var(--fg);stroke-width:2;stroke-linejoin:round}
+.health .cv .band{fill:var(--fg3);opacity:.15}
+.health .cv text{fill:var(--fg3);font-size:10px;font-family:"Inter T"}
+.health .legend{display:flex;gap:16px;font-size:12px;color:var(--fg3);margin-top:6px}
+.health .legend i{display:inline-block;width:18px;border-top:2px solid var(--fg);vertical-align:middle;margin-right:5px}
+.health .legend i.b{border-top:2px dashed var(--fg3)}
+
 /* ---------- more ---------- */
 .set{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 0;border-top:1px solid var(--rule)}
 .set:first-of-type{border-top:0}
@@ -232,6 +273,7 @@ footer{padding:14px;color:var(--fg3);font-size:12px;text-align:center}
   <button data-tab="drive" class="on">Drive</button>
   <button data-tab="engine">Engine<span id="nEng" class="n"></span></button>
   <button data-tab="slabs">SLABS<span id="nSlabs" class="n"></span></button>
+  <button data-tab="trips">Trips<span id="nTrips" class="n"></span></button>
   <button data-tab="more">More</button>
 </nav>
 <div id="alarm" onclick="snooze()"></div>
@@ -425,6 +467,25 @@ footer{padding:14px;color:var(--fg3);font-size:12px;text-align:center}
           <button class="btn amber" onclick="confirmCmd('slabs','bleed_module','Run the modulator bleed?','Four-step ABS modulator bleed, about 10 seconds.','Run bleed')">Modulator bleed</button>
         </div>
       </div>
+    </div>
+  </section>
+
+  <!-- ================= TRIPS ================= -->
+  <section id="tab-trips">
+    <div class="blk" id="healthBlk">
+      <h2>Engine health</h2>
+      <div id="health"></div>
+    </div>
+    <div class="blk" id="tripListBlk">
+      <h2>Drives</h2>
+      <div class="trips" id="tripList"></div>
+    </div>
+    <div class="blk" id="tripView" style="display:none">
+      <div class="row" style="margin:0 0 10px"><button class="btn sm" onclick="closeTrip()">← All drives</button><span id="tripTitle" style="align-self:center;color:var(--fg2);font-size:14px"></span></div>
+      <div class="tripsum" id="tripSum"></div>
+      <div class="scrub" id="scrub"></div>
+      <div id="panels"></div>
+      <p class="hint" style="margin-top:8px">Drag across any chart to read the values at that moment.</p>
     </div>
   </section>
 
@@ -767,8 +828,10 @@ document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{
   document.querySelectorAll('nav button').forEach(x=>x.classList.toggle('on',x===b));
   document.querySelectorAll('main section').forEach(s=>s.classList.toggle('on',s.id==='tab-'+b.dataset.tab));
   if(b.dataset.tab==='more') loadLogs();
+  if(b.dataset.tab==='trips') loadTrips();
   window.scrollTo(0,0);
 });
+fetch('/api/health').then(r=>r.json()).then(h=>{ if(h.findings) $('nTrips').textContent=h.findings.filter(f=>f.level==='warn').length||''; }).catch(()=>{});
 document.querySelectorAll('.sub').forEach(sub=>{
   const tab=sub.dataset.for;
   const pick=name=>{
@@ -801,6 +864,109 @@ function closeModal(){ $('modal').classList.remove('show'); pending=null; }
 $('mGo').onclick=()=>{ const a=pending; closeModal(); if(a) cmd(a,true); };
 $('engOutputs').innerHTML = TD5_OUTPUTS.map(o=>`<button class="btn amber" onclick="confirmCmd('td5','output_${o}','Test the ${nice(o)}?','Pulses the ${nice(o)} output once.','Test')">${nice(o)}</button>`).join('')
   + [1,2,3,4,5].map(n=>`<button class="btn amber" onclick="confirmCmd('td5','injector_${n}','Pulse injector ${n}?','Fires injector ${n} once. Engine running.','Pulse')">Injector ${n}</button>`).join('');
+
+// ============ trips: list, replay, engine health ============
+const REPLAY = [  // panels in order; each its own axis (never two scales on one chart)
+  ['coolant_temp','Coolant','°C',40,120],['manifold_press','Boost','bar',0.8,2.6],['sensor_egt','EGT','°C',100,900],
+  ['rpm','Revs','rpm',0,5000],['speed','Speed','km/h',0,160],['injection_qty','Injection','mg',0,70],
+  ['sensor_oil_press','Oil pressure','bar',0,6],['sensor_oil_temp','Oil temp','°C',40,150],['sensor_gearbox_temp','Gearbox','°C',40,150],
+  ['battery','Battery','V',11,16]];
+const ZONE_OF = {coolant_temp:'coolant_temp', manifold_press:'manifold_press', sensor_egt:'egt', rpm:'rpm', sensor_oil_press:'oil_press',
+  sensor_oil_temp:'oil_temp', sensor_gearbox_temp:'gearbox_temp', battery:'battery'};
+let tripData=null, tripsLoaded=false;
+const fmtDate = ts => { const d=new Date(ts*1000); return d.toLocaleDateString(undefined,{weekday:'short',day:'numeric',month:'short'})+' '+d.toLocaleTimeString(undefined,{hour:'2-digit',minute:'2-digit'}); };
+const fmtDur = s => s>=3600 ? `${Math.floor(s/3600)} h ${Math.round(s%3600/60)} min` : `${Math.round(s/60)} min`;
+
+async function loadTrips(){
+  const [tr, h] = await Promise.all([fetch('/api/trips').then(r=>r.json()), fetch('/api/health').then(r=>r.json())]);
+  tripsLoaded=true;
+  $('tripList').innerHTML = tr.trips.map(t=>`<div class="trip" onclick="openTrip('${t.id}')">
+      <span class="d">${fmtDate(t.start)}</span><span class="km num">${t.distance_km} km</span>
+      <span class="m">${fmtDur(t.duration_s)} · coolant ${t.coolant_max!=null?Math.round(t.coolant_max)+' °C':'—'}${t.egt_max!=null?' · EGT '+Math.round(t.egt_max)+' °C':''}${t.l_per_100km!=null?' · '+t.l_per_100km+' L/100':''}</span>
+      ${t.faults.length?`<span class="f">${t.faults.length} fault${t.faults.length>1?'s':''}: ${t.faults.join(', ')}</span>`:''}</div>`).join('')
+    || '<p class="hint">No drives yet. Each connection to the car becomes a drive here.</p>';
+  renderHealth(h);
+}
+function renderHealth(h){
+  const el=$('health'); el.className='health';
+  if(h.status==='no data'){ el.innerHTML='<p class="hint">Nothing to compare yet. After three drives with a few full-throttle pulls, the engine\'s own baseline appears here and every later drive is checked against it.</p>'; return; }
+  if(h.status==='learning'){ el.innerHTML=`<p class="hint">${h.note}</p>`; return; }
+  const warn=h.findings.filter(f=>f.level==='warn').length;
+  $('nTrips').textContent = warn||'';
+  el.innerHTML = `<p class="hint">Latest drive against the median of the previous ${h.baseline.n}. Full-throttle curves only use samples with the pedal past 80 %, so load is comparable.</p>`
+    + h.findings.map(f=>`<div class="finding ${f.level}"><i></i><span>${f.text}</span></div>`).join('')
+    + `<div class="curves">${Object.keys(h.curves).map(k=>curveSvg(k,h)).join('')}</div>
+       <div class="legend"><span><i></i>latest drive</span><span><i class="b"></i>baseline</span></div>`;
+}
+function curveSvg(k,h){
+  const W=320,H=110,L=34,B=18,T=6,R=6, bins=h.bins, unit=h.curves[k].unit;
+  const lat=h.latest.curves[k]||{}, base=h.baseline.curves[k]||{};
+  const vals=[...Object.values(lat),...Object.values(base)]; if(!vals.length) return `<div class="cv"><h3>${k[0].toUpperCase()+k.slice(1)}</h3><p class="hint">no full-throttle data</p></div>`;
+  let lo=Math.min(...vals), hi=Math.max(...vals);
+  const minSpan={bar:0.4, mg:8, 'kg/h':60}[unit]||1; if(hi-lo<minSpan){ const m=(hi+lo)/2; lo=m-minSpan/2; hi=m+minSpan/2; }
+  const pad=(hi-lo)*0.2; lo-=pad; hi+=pad;
+  const x=b=>L+(bins.indexOf(+b))/(bins.length-1)*(W-L-R), y=v=>T+(hi-v)/(hi-lo)*(H-T-B);
+  const path=o=>{ const ks=Object.keys(o).sort((a,b)=>a-b); return ks.map((b,i)=>(i?'L':'M')+x(b).toFixed(1)+' '+y(o[b]).toFixed(1)).join(' '); };
+  const ticks=[bins[0],bins[Math.floor(bins.length/2)],bins[bins.length-1]];
+  return `<div class="cv"><h3>${k[0].toUpperCase()+k.slice(1)} <span class="dim">${unit} vs rpm, full throttle</span></h3>
+    <svg viewBox="0 0 ${W} ${H}">
+      <line x1="${L}" y1="${y(lo)}" x2="${W-R}" y2="${y(lo)}" stroke="var(--rule)"/>
+      ${ticks.map(b=>`<text x="${x(b)}" y="${H-4}" text-anchor="middle">${b}</text>`).join('')}
+      <text x="2" y="${T+8}">${hi.toFixed(unit==='bar'?2:0)}</text><text x="2" y="${y(lo)}">${lo.toFixed(unit==='bar'?2:0)}</text>
+      <path class="base" d="${path(base)}"/><path class="last" d="${path(lat)}"/>
+    </svg></div>`;
+}
+async function openTrip(id){
+  tripData = await fetch('/api/trips/'+id).then(r=>r.json());
+  const s=tripData.summary;
+  $('tripTitle').textContent = fmtDate(s.start);
+  $('tripSum').innerHTML = [[s.distance_km,'km','Distance'],[fmtDur(s.duration_s),'','Duration'],[s.l_per_100km??'—','L/100','Economy'],
+    [s.coolant_max!=null?Math.round(s.coolant_max):'—','°C','Coolant peak'],[s.egt_max!=null?Math.round(s.egt_max):'—','°C','EGT peak'],[s.boost_max!=null?s.boost_max.toFixed(2):'—','bar','Boost peak']]
+    .map(([v,u,l])=>`<div class="it"><div class="rd num">${v}<small>${u}</small></div><div class="lb">${l}</div></div>`).join('');
+  const r=tripData.replay;
+  $('panels').innerHTML = REPLAY.filter(([k])=>r.cols[k]).map(([k,label,unit,lo,hi])=>panelSvg(k,label,unit,lo,hi,r)).join('');
+  $('tripListBlk').style.display='none'; $('healthBlk').style.display='none'; $('tripView').style.display='';
+  setScrub(null); window.scrollTo(0,0);
+  bindScrub();
+}
+function closeTrip(){ $('tripView').style.display='none'; $('tripListBlk').style.display=''; $('healthBlk').style.display=''; }
+function panelSvg(k,label,unit,lo,hi,r){
+  const W=600,H=84,T=4,B=4; const vals=r.cols[k].filter(v=>v!=null);
+  const vmin=Math.min(lo,...vals), vmax=Math.max(hi*0.5,...vals, lo+1);
+  const tmax=r.t[r.t.length-1]||1, x=t=>t/tmax*W, y=v=>T+(vmax-v)/(vmax-vmin)*(H-T-B);
+  let d='', area='', started=false;
+  r.t.forEach((t,i)=>{ const v=r.cols[k][i]; if(v==null){ started=false; return; } d+=(started?'L':'M')+x(t).toFixed(1)+' '+y(v).toFixed(1)+' '; started=true; });
+  // zone shading from the live gauge thresholds
+  const g=G[ZONE_OF[k]]; let zones='';
+  if(g){ const z=(a,b,c)=>{ if(a==null||b==null||b<=a) return; zones+=`<rect class="zn" x="0" y="${y(b)}" width="${W}" height="${Math.max(0,y(a)-y(b))}" fill="var(--${c})"/>`; };
+    if(g.warn&&g.warn[1]!=null) z(g.warn[1], g.alarm&&g.alarm[1]!=null?g.alarm[1]:vmax, 'warn');
+    if(g.alarm&&g.alarm[1]!=null) z(g.alarm[1], vmax, 'bad');
+    if(g.warn&&g.warn[0]!=null) z(g.alarm&&g.alarm[0]!=null?g.alarm[0]:vmin, g.warn[0], 'warn');
+    if(g.alarm&&g.alarm[0]!=null) z(vmin, g.alarm[0], 'bad'); }
+  const fx=(r.faults||[]).map(([t])=>`<circle class="fx" cx="${x(t)}" cy="${H-6}" r="3"/>`).join('');
+  return `<div class="panel" data-k="${k}"><div class="ph"><span>${label}</span><b data-v>—<small>${unit}</small></b></div>
+    <svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" data-tmax="${tmax}">${zones}<line class="gr" x1="0" y1="${H-B}" x2="${W}" y2="${H-B}"/><path class="ln" d="${d}"/>${fx}<line class="cur" x1="-10" y1="0" x2="-10" y2="${H}"/></svg></div>`;
+}
+function setScrub(i){
+  const r=tripData.replay;
+  if(i==null){ $('scrub').textContent='Drag across a chart'; document.querySelectorAll('.panel').forEach(p=>{ p.querySelector('[data-v]').firstChild.textContent='—'; p.querySelector('.cur').setAttribute('x1',-10); p.querySelector('.cur').setAttribute('x2',-10); }); return; }
+  const t=r.t[i], tmax=r.t[r.t.length-1]||1, xx=(t/tmax*600).toFixed(1);
+  const mm=Math.floor(t/60), ss=String(Math.round(t%60)).padStart(2,'0');
+  const fx=(r.faults||[]).find(([ft])=>Math.abs(ft-t)<5);
+  $('scrub').textContent=`${mm}:${ss} into the drive`+(fx?`  ·  fault: ${fx[1]}`:'');
+  document.querySelectorAll('.panel').forEach(p=>{ const k=p.dataset.k, v=r.cols[k][i];
+    p.querySelector('[data-v]').firstChild.textContent = v==null?'—':(Math.abs(v)<10?v.toFixed(2):Math.round(v));
+    const c=p.querySelector('.cur'); c.setAttribute('x1',xx); c.setAttribute('x2',xx); });
+}
+function bindScrub(){
+  const r=tripData.replay, n=r.t.length;
+  const pick=(svg,ev)=>{ const rect=svg.getBoundingClientRect(); const px=(ev.touches?ev.touches[0].clientX:ev.clientX)-rect.left;
+    const i=Math.max(0,Math.min(n-1,Math.round(px/rect.width*(n-1)))); setScrub(i); };
+  document.querySelectorAll('.panel svg').forEach(svg=>{
+    svg.addEventListener('mousedown',e=>{ pick(svg,e); const mv=ev=>pick(svg,ev); window.addEventListener('mousemove',mv); window.addEventListener('mouseup',()=>window.removeEventListener('mousemove',mv),{once:true}); });
+    svg.addEventListener('touchstart',e=>pick(svg,e),{passive:true}); svg.addEventListener('touchmove',e=>pick(svg,e),{passive:true});
+  });
+}
 
 async function loadLogs(){
   const r=await fetch('/api/logs').then(r=>r.json());

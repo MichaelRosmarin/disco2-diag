@@ -184,3 +184,39 @@ def test_command_pinned_to_module(engine):
     engine.request_module("slabs")
     r = engine.command("clear_faults", confirm=True)
     assert r["ok"] is False and "switch" in r["error"]
+
+
+def test_trips_and_fingerprint(tmp_path):
+    """Synthetic drives: three healthy, one with a boost leak and a drifting injector."""
+    import csv, math
+    from datetime import datetime, timedelta
+    from d2dash import trips as T
+    cols = ["accel_pedal_pct", "balance_1", "balance_5", "battery", "coolant_temp", "injection_qty",
+            "maf_sensor", "manifold_press", "rpm", "speed"]
+    for day, boost, inj5 in ((1, 1.0, 0.1), (2, 1.0, 0.1), (3, 1.0, 0.1), (5, 0.85, 0.9)):
+        t = datetime(2026, 11, day, 9, 0)
+        rows = []
+        for i in range(1200):
+            s = i / 2
+            ped = 95 if (s % 60) < 15 else 0
+            rpm = 780 + ped * 32 + (s % 15) * 40 * (ped > 0)
+            coolant = min(90, 20 + s * 0.12)
+            rows.append({"time": t.isoformat(timespec="milliseconds"), "accel_pedal_pct": ped, "balance_1": 0.1,
+                         "balance_5": inj5, "battery": 14.1, "coolant_temp": coolant,
+                         "injection_qty": 4 + 45 * ped / 100, "maf_sensor": 60 + 400 * ped / 100,
+                         "manifold_press": (1.0 + 1.1 * ped / 100) * boost, "rpm": rpm,
+                         "speed": 40 if ped else 0, "faults": ""})
+            t += timedelta(milliseconds=500)
+        with open(tmp_path / (t.strftime("%Y%m%d-%H%M%S") + "-td5.csv"), "w", newline="") as fh:
+            w = csv.DictWriter(fh, fieldnames=["time", *cols, "faults"]); w.writeheader(); w.writerows(rows)
+    trips = T.group_trips(T.list_sessions(str(tmp_path)))
+    assert len(trips) == 4
+    s = T.summarize(T.load_trip(str(tmp_path), trips[-1]))
+    assert s["duration_s"] == 599 and s["distance_km"] > 1
+    h = T.health(str(tmp_path))
+    assert h["status"] == "ok" and h["baseline"]["n"] == 3
+    warn = {f["what"] for f in h["findings"] if f["level"] == "warn"}
+    assert "boost" in warn and "balance" in warn
+    assert "injection" not in warn and "charging_v" not in warn
+    r = T.replay(T.load_trip(str(tmp_path), trips[-1]))
+    assert len(r["t"]) <= 601 and "manifold_press" in r["cols"]
