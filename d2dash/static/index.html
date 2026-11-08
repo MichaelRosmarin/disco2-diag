@@ -657,39 +657,38 @@ const SENSOR_KEYS = ['egt','oil_press','oil_temp','gearbox_temp','fuel_level','a
 const TD5_OUTPUTS = ['fuel_pump','mil_lamp','ac_clutch','ac_fan','glow_plugs','rev_counter','temp_gauge','egr_throttle','wastegate'];
 const HEIGHT = {lo:100, hi:200, band:[135,165], warn:[120,180]};
 
-// Inputs, grouped by component so a page shows one system at a time. [signal, label] — null signal = not decoded yet.
+// Inputs grouped by vehicle system — one filter pill per system, a card per sub-assembly.
+// [signal, label]; null signal = not decoded yet.
 const TD5_INPUTS = [
-  {cat:'Engine', title:'Speed and load', items:[['rpm','Engine speed'],['rpm_error','Idle speed error'],['speed','Road speed'],
-    ['injection_qty','Injection quantity'],['driver_demand','Driver demand'],['smoke_limit','Smoke limit'],['torque_limit','Torque limit']]},
-  {cat:'Pedal', title:'Accelerator pedal', items:[['accel_pedal_pct','Pedal position'],['accel_way1','Track 1'],['accel_way2','Track 2'],
-    ['accel_way3','Track 3'],['accel_supply','Pedal supply (5 V)']]},
-  {cat:'Air', title:'Air and boost', items:[['maf_sensor','Air flow (MAF)'],['maf','Air mass (modelled)'],['maf_sensor_v','MAF sensor voltage'],
-    ['manifold_press','Manifold (boost) pressure'],['ambient_press_1','Ambient pressure'],['ambient_press_2','Ambient pressure 2'],
-    ['wastegate_modulator','Wastegate modulator'],['wastegate_pos','Wastegate position']]},
-  {cat:'Air', title:'EGR', items:[['egr_modulator','EGR modulator'],['egr_inlet','EGR inlet throttle'],['egr_pos','EGR position']]},
-  {cat:'Temps', title:'Temperatures', items:[['coolant_temp','Coolant'],['coolant_sensor_v','Coolant sensor voltage'],['fuel_temp','Fuel'],
-    ['fuel_sensor_v','Fuel sensor voltage'],['air_temp','Inlet air'],['intake_sensor_v','Inlet air sensor voltage'],['ext_temp','Ambient air']]},
-  {cat:'Injectors', title:'Injector balance', items:[['balance_1','Cylinder 1'],['balance_2','Cylinder 2'],['balance_3','Cylinder 3'],
+  {cat:'Fuelling', title:'Injection', items:[['injection_qty','Injection quantity'],['driver_demand','Driver demand'],['smoke_limit','Smoke limit'],
+    ['torque_limit','Torque limit'],['fuel_temp','Fuel temperature'],['fuel_sensor_v','Fuel temp sensor voltage'],['fuel_pump_relay','Fuel pump relay']]},
+  {cat:'Fuelling', title:'Injector balance', items:[['balance_1','Cylinder 1'],['balance_2','Cylinder 2'],['balance_3','Cylinder 3'],
     ['balance_4','Cylinder 4'],['balance_5','Cylinder 5']]},
-  {cat:'Electrical', title:'Electrical', items:[['battery','Battery (ECU)'],['battery_direct','Battery (direct)'],['fuel_pump_relay','Fuel pump relay']]},
-  {cat:'Switches', title:'Switches', items:[['brake_main','Brake switch 1'],['brake_switch_2','Brake switch 2'],[null,'Clutch switch'],
-    [null,'Transfer ratio'],[null,'Gear box'],[null,'A/C clutch request'],[null,'A/C clutch drive'],[null,'A/C fan request'],[null,'A/C fan drive']]},
-  {cat:'Switches', title:'Cruise control', items:[['cruise_master','Cruise master'],['cruise_resume','Resume'],['cruise_set','Set / accelerate']]},
-  {cat:'Fuel', title:'Fuel economy', items:[['fuel_rate','Fuel rate'],['economy','Economy'],['trip_economy','Trip economy'],['lifetime_economy','Lifetime economy']]},
+  {cat:'Fuelling', title:'Economy', items:[['fuel_rate','Fuel rate'],['economy','Economy'],['trip_economy','Trip economy'],['lifetime_economy','Lifetime economy']]},
+  {cat:'Air & turbo', title:'Air flow and boost', items:[['maf_sensor','Air flow (MAF)'],['maf','Air mass (modelled)'],['maf_sensor_v','MAF sensor voltage'],
+    ['manifold_press','Manifold (boost) pressure'],['ambient_press_1','Ambient pressure'],['ambient_press_2','Ambient pressure 2'],
+    ['wastegate_modulator','Wastegate modulator'],['wastegate_pos','Wastegate position'],['air_temp','Inlet air temperature'],['intake_sensor_v','Inlet air sensor voltage'],['ext_temp','Ambient air temperature']]},
+  {cat:'Air & turbo', title:'EGR', items:[['egr_modulator','EGR modulator'],['egr_inlet','EGR inlet throttle'],['egr_pos','EGR position']]},
+  {cat:'Cooling', title:'Coolant', items:[['coolant_temp','Coolant temperature'],['coolant_sensor_v','Coolant sensor voltage'],[null,'A/C fan request'],[null,'A/C fan drive']]},
+  {cat:'Driver controls', title:'Accelerator pedal', items:[['accel_pedal_pct','Pedal position'],['accel_way1','Track 1'],['accel_way2','Track 2'],
+    ['accel_way3','Track 3'],['accel_supply','Pedal supply (5 V)']]},
+  {cat:'Driver controls', title:'Pedal switches and cruise', items:[['brake_main','Brake switch 1'],['brake_switch_2','Brake switch 2'],[null,'Clutch switch'],
+    ['cruise_master','Cruise master'],['cruise_resume','Cruise resume'],['cruise_set','Cruise set / accelerate']]},
+  {cat:'Engine & vehicle', title:'Speeds', items:[['rpm','Engine speed'],['rpm_error','Idle speed error'],['speed','Road speed'],[null,'Transfer ratio'],[null,'Gear box']]},
+  {cat:'Engine & vehicle', title:'Electrical and A/C', items:[['battery','Battery (ECU)'],['battery_direct','Battery (direct)'],[null,'A/C clutch request'],[null,'A/C clutch drive']]},
 ];
 const SLABS_INPUTS = [
-  {cat:'Wheels', title:'Wheel speed sensors', items:[['wheel_speed_fl','Front left speed'],['wheel_speed_fr','Front right speed'],
+  {cat:'Braking & ABS', title:'Wheel speed sensors', items:[['wheel_speed_fl','Front left speed'],['wheel_speed_fr','Front right speed'],
     ['wheel_speed_rl','Rear left speed'],['wheel_speed_rr','Rear right speed'],['abs_sensor_fl','Front left sensor'],['abs_sensor_fr','Front right sensor'],
     ['abs_sensor_rl','Rear left sensor'],['abs_sensor_rr','Rear right sensor']]},
-  {cat:'Brakes', title:'ABS modulator and pump', items:[[null,'Inlet valves FR/FL/RR/RL'],[null,'Outlet valves FR/FL/RR/RL'],[null,'Pump monitor'],
-    [null,'Pump relay'],[null,'Shuttle valve switch'],['brake_analog','Brake pedal signal'],[null,'HDC brake']]},
-  {cat:'Suspension', title:'Air suspension (SLS)', items:[['height_left_mm','Left height'],['height_right_mm','Right height'],
+  {cat:'Braking & ABS', title:'Modulator and pump', items:[[null,'Inlet valves FR/FL/RR/RL'],[null,'Outlet valves FR/FL/RR/RL'],[null,'Pump monitor'],
+    [null,'Pump relay'],[null,'Shuttle valve switch'],['brake_analog','Brake pedal signal']]},
+  {cat:'Traction & HDC', title:'Traction control and hill descent', items:[[null,'Engine speed (from engine ECU)'],[null,'Engine torque'],[null,'Throttle position'],[null,'HDC switch'],[null,'HDC brake']]},
+  {cat:'Suspension', title:'Self-levelling air suspension', items:[['height_left_mm','Left height'],['height_right_mm','Right height'],
     ['height_left','Left sensor count'],['height_right','Right sensor count'],[null,'Sensor supply'],[null,'Valve voltage'],[null,'Exhaust valve'],[null,'Compressor relay']]},
-  {cat:'Drivetrain', title:'Drivetrain switches', items:[['neutral_gear','Neutral'],['reverse_gear','Reverse'],['transfer_low','Low range'],
-    ['diff_lock','Diff lock'],[null,'HDC switch']]},
-  {cat:'Engine link', title:'From the engine ECU', items:[[null,'Engine speed'],[null,'Engine torque'],[null,'Throttle position']]},
-  {cat:'Electrical', title:'Electrical and body', items:[['battery','Battery'],['ecu_supply','Internal ECU supply'],[null,'Ground reference'],
-    ['any_door','Any door'],[null,'Plip signal']]},
+  {cat:'Drivetrain', title:'Gearbox and transfer box', items:[['neutral_gear','Neutral'],['reverse_gear','Reverse'],['transfer_low','Low range'],['diff_lock','Centre diff lock']]},
+  {cat:'Electrical', title:'Supply and body', items:[['battery','Battery'],['ecu_supply','Internal ECU supply'],[null,'Ground reference'],
+    ['any_door','Any door open'],[null,'Plip signal']]},
 ];
 const ENG_TILES = ['rpm','coolant_temp','manifold_press','battery','maf_sensor','injection_qty'];
 const TD5_SET_INJ = [[null,'Injector 1 code'],[null,'Injector 2 code'],[null,'Injector 3 code'],[null,'Injector 4 code'],[null,'Injector 5 code'],[null,'Injector type'],[null,'Accelerator (2-way / 3-way)']];
