@@ -418,7 +418,7 @@ footer{padding:18px var(--pad) 10px;color:var(--fg3);font-size:12px;text-align:c
         <div class="row">
           <button class="btn red" onclick="confirmCmd('td5','clear_faults','Clear engine faults?','Writes to the Td5 ECU. Logged faults are gone for good; note them first. Anything still wrong comes straight back.','Clear faults')">Clear faults</button>
         </div>
-        <p class="hint" style="margin-top:12px">Tap a fault for what it means, likely causes and fixes. Current means present right now; logged means seen on an earlier run. Codes shown as numbers (for example 25,5) are stored faults the dictionary does not name yet.</p>
+        <p class="hint" style="margin-top:12px">Tap a fault for what it means, likely causes and fixes. Current means present right now; logged means seen on an earlier run. Codes shown as numbers, for example (26,6), are the Nanocom's numbering for slots the ECU has no fault defined for.</p>
       </div>
     </div>
 
@@ -814,8 +814,9 @@ function faultBlock(el, module, faults){
   }).join('')+'</ul>';
 }
 const esc=t=>String(t).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
-// Undecoded bits come from the ECU as "byte25.bit5"; show them the way the Nanocom does: "25,5".
-const fname=n=>String(n).replace(/byte\s*(\d+)[.,]\s*bit\s*(\d+)/ig,'$1,$2').replace(/^unknown \(/i,'(');
+// Undecoded bits come from the decoder as "byte25.bit5" (counted from 0); the Nanocom and the forums
+// count from 1, so that slot is "(26,6)". Show the Nanocom numbering so a search finds it.
+const fname=n=>String(n).replace(/byte\s*(\d+)[.,]\s*bit\s*(\d+)/ig,(m,b,t)=>`(${+b+1},${+t+1})`).replace(/^unknown \(/i,'(');
 function showSheet(module, name){
   const e=entryFor(module,name)||{title:name, what:causeFor(module,name)||'No write-up for this fault yet.', causes:[], fixes:[], severity:'drive', severity_label:'', check:[]};
   const state=e.state||stateOf(name);

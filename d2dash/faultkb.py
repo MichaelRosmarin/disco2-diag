@@ -644,13 +644,19 @@ def describe(module: str, name: str) -> dict | None:
             "check": [fmt(c) for c in entry.get("check", []) if fmt(c)],
         }
         return out
-    if re.match(r"^byte\s*\d+[.,]\s*bit\s*\d+|^unknown \(byte", low):
+    mb = re.match(r"^byte\s*(\d+)[.,]\s*bit\s*(\d+)", low)
+    if mb or re.match(r"^unknown \(byte", low):
+        code = f"({int(mb.group(1)) + 1},{int(mb.group(2)) + 1})" if mb else "this slot"
         return {
             "name": name, "base": base, "state": state, "state_note": _state_note(state, base),
-            "title": "Undecoded fault bit", "severity": "drive", "severity_label": "Not yet decoded",
-            "what": "The ECU has set a fault bit that the dictionary does not yet name. It is a real stored fault; "
-                    "only its meaning is unknown. Note the byte and bit — matching it against a Nanocom reading is how the dictionary grows.",
-            "causes": [], "fixes": ["Read the same ECU with a Nanocom or Hawkeye and tell the project which fault it shows"], "check": [],
+            "title": f"Fault {code} — undefined slot", "severity": "drive", "severity_label": "Undefined",
+            "what": f"The ECU has set a bit in its fault memory at {code} (Nanocom numbering, counted from 1). The Td5 "
+                    "fault table has no fault defined for that slot — the Nanocom itself lists it as 'Invalid Fault' — so "
+                    "this is not a known fault with a known cause. It usually means noise in the fault memory, or a bit the "
+                    "ECU uses internally. Note it; it only matters if it keeps coming back after a clear.",
+            "causes": ["Fault memory noise (low voltage during cranking, oil in the ECU connector)", "An internal ECU flag with no published meaning", "A decoding offset in this tool, which a Nanocom reading would show up"],
+            "fixes": ["Clear the faults and see whether it returns", "If it keeps returning, read the ECU with a Nanocom and compare its list with this one, slot by slot"],
+            "check": [],
         }
     return None
 
