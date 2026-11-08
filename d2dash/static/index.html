@@ -616,7 +616,7 @@ footer{padding:18px var(--pad) 10px;color:var(--fg3);font-size:12px;text-align:c
     </div>
     <div class="blk">
       <h2>Alarm limits</h2>
-      <p class="hint">Amber is "watch", red is "out of range" (beeps). Leave a box empty for no limit on that side. Saved on the Pi, so the phone and the dash screen agree.</p>
+      <p class="hint">Amber is "watch", red is "out of range" (beeps). Leave a box empty for no limit on that side. Saved on the decoder, so the phone and the dash screen agree.</p>
       <table class="thr"><thead><tr><th>Signal</th><th class="r">Amber low</th><th class="r">Amber high</th><th class="r">Red low</th><th class="r">Red high</th></tr></thead><tbody id="threshTable"></tbody></table>
       <div class="row"><button class="btn act sm" onclick="saveThresholds()">Save limits</button><button class="btn sm" onclick="resetThresholds()">Back to defaults</button></div>
     </div>
@@ -876,12 +876,12 @@ function chips(el, map, sig){
 // Connection problems in plain words, each with a code we can quote to each other when troubleshooting.
 function friendlyError(msg){
   const m=msg.toLowerCase();
-  if(/could not open port|no such file|errno 2\b/.test(m)) return {code:'C1', title:'Cable not found', hint:'The K-line cable is not plugged into the Pi, or the Pi does not recognise it.'};
-  if(/permission denied|errno 13/.test(m)) return {code:'C2', title:'Pi cannot use the cable', hint:'The cable is there but the dashboard is not allowed to open it. Re-run the installer.'};
-  if(/busy|resource temporarily|errno 16|errno 11/.test(m)) return {code:'C3', title:'Cable in use', hint:'Another program on the Pi has the cable open.'};
-  if(/disconnect|input\/output|errno 5|device reports readiness/.test(m)) return {code:'C4', title:'Cable unplugged mid-session', hint:'The adapter dropped off the USB. Reseat the cable at the Pi.'};
+  if(/could not open port|no such file|errno 2\b/.test(m)) return {code:'C1', title:'Cable not found', hint:'The K-line cable is not plugged into the decoder, or the decoder does not recognise it.'};
+  if(/permission denied|errno 13/.test(m)) return {code:'C2', title:'Decoder cannot use the cable', hint:'The cable is there but the dashboard is not allowed to open it. Re-run the installer.'};
+  if(/busy|resource temporarily|errno 16|errno 11/.test(m)) return {code:'C3', title:'Cable in use', hint:'Another program on the decoder has the cable open.'};
+  if(/disconnect|input\/output|errno 5|device reports readiness/.test(m)) return {code:'C4', title:'Cable unplugged mid-session', hint:'The adapter dropped off the USB. Reseat the cable at the decoder.'};
   if(/timeout|no response|no answer|not respond|init|sync|echo/.test(m)) return {code:'C5', title:'Car not answering', hint:'Ignition on? Cable in the OBD socket, switch in the right position? Give it a few seconds.'};
-  return {code:'C9', title:'Connection problem', hint:'The Pi could not talk to the car. Try again; if it stays, send the text below.'};
+  return {code:'C9', title:'Connection problem', hint:'The decoder could not talk to the car. Try again; if it stays, send the text below.'};
 }
 
 // ============ state ============
@@ -955,21 +955,22 @@ function renderSlabs(sig){
 // Each corner: name, live speed, sensor state. Rear air springs carry the ride height.
 function buildChassis(){
   const W=[['fr',84,74,'Front right',true],['rr',276,74,'Rear right',true],['fl',84,226,'Front left',false],['rl',276,226,'Rear left',false]];
+  // tyres seen from above: long in the direction of travel (x), narrow across the car (y)
   const tyre=([k,x,y])=>`<g class="wh" data-w="${k}">
-      <rect class="halo" x="${x-21}" y="${y-37}" width="42" height="74" rx="12"/>
-      <rect class="tyre" x="${x-16}" y="${y-32}" width="32" height="64" rx="8"/>
-      <rect class="side" x="${x-12}" y="${y-28}" width="24" height="56" rx="5"/>
-      ${[-22,-14,-6,2,10,18].map(d=>`<path class="tread" d="M${x-11} ${y+d} l7 4 M${x+4} ${y+d+4} l7 -4"/>`).join('')}
-      <rect class="hub" x="${x-3}" y="${y-5}" width="6" height="10" rx="2"/></g>`;
-  const txt=([k,x,y,name,top])=>{ const n=top?y-74:y+52, v=top?y-55:y+73, t=top?y-43:y+86;
+      <rect class="halo" x="${x-37}" y="${y-21}" width="74" height="42" rx="12"/>
+      <rect class="tyre" x="${x-32}" y="${y-16}" width="64" height="32" rx="8"/>
+      <rect class="side" x="${x-28}" y="${y-12}" width="56" height="24" rx="5"/>
+      ${[-24,-16,-8,0,8,16].map(d=>`<path class="tread" d="M${x+d} ${y-11} l4 7 M${x+d+4} ${y+4} l-4 7"/>`).join('')}
+      <circle class="hub" cx="${x}" cy="${y}" r="3.5"/></g>`;
+  const txt=([k,x,y,name,top])=>{ const n=top?y-60:y+38, v=top?y-41:y+59, t=top?y-29:y+72;
     return `<text class="nm" x="${x}" y="${n}" text-anchor="middle">${name}</text>
       <text class="spd" data-w="${k}" x="${x}" y="${v}" text-anchor="middle">—</text>
       <text class="sst" data-w="${k}" x="${x}" y="${t}" text-anchor="middle">no data</text>`; };
-  $('chassis').innerHTML=`<svg viewBox="0 -10 360 330" role="img" aria-label="Wheel speeds, sensor state and ride height">
-    <rect class="body" x="36" y="40" width="288" height="220" rx="26"/>
+  $('chassis').innerHTML=`<svg viewBox="0 4 360 298" role="img" aria-label="Wheel speeds, sensor state and ride height">
+    <rect class="body" x="30" y="46" width="300" height="208" rx="26"/>
     <path class="rail" d="M56 124 H140 Q150 124 154 118 L160 110 H304"/><path class="rail" d="M56 176 H140 Q150 176 154 182 L160 190 H304"/>
     ${[56,118,208,304].map(x=>`<line class="xm" x1="${x}" y1="${x>150?110:124}" x2="${x}" y2="${x>150?190:176}"/>`).join('')}
-    <line class="axle" x1="84" y1="78" x2="84" y2="222"/><line class="axle" x1="276" y1="78" x2="276" y2="222"/>
+    <line class="axle" x1="84" y1="74" x2="84" y2="226"/><line class="axle" x1="276" y1="74" x2="276" y2="226"/>
     <rect class="blockf" x="96" y="120" width="56" height="60" rx="6"/>
     <rect class="blockf" x="152" y="135" width="40" height="30" rx="4"/>
     <rect class="blockf" x="186" y="128" width="26" height="44" rx="4"/>
