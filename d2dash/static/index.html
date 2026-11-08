@@ -183,6 +183,12 @@ a{color:var(--act);text-decoration:none}
 .faults li{cursor:pointer}
 .faults li:active{opacity:.6}
 .faults li .h .more{margin-left:auto;color:var(--fg3);font-size:15px;font-weight:400;white-space:nowrap}
+.faults details.odd{margin-top:8px;border-top:1px solid var(--rule);padding-top:4px}
+.faults details.odd summary{list-style:none;display:flex;align-items:center;gap:8px;padding:10px 0;color:var(--fg2);font-size:14px;cursor:pointer}
+.faults details.odd summary::-webkit-details-marker{display:none}
+.faults details.odd summary .more{margin-left:auto;transition:transform .2s}
+.faults details[open].odd summary .more{transform:rotate(90deg)}
+.faults details.odd li{font-size:14.5px}
 
 /* input lists */
 .list{margin:0}
@@ -264,8 +270,10 @@ a{color:var(--act);text-decoration:none}
 #sheetBg.on{display:block}
 #sheet{position:fixed;left:0;right:0;bottom:0;max-height:88vh;overflow-y:auto;background:var(--bg2);border-radius:20px 20px 0 0;padding:12px var(--pad) calc(env(safe-area-inset-bottom) + 24px);z-index:21;transform:translateY(105%);transition:transform .28s cubic-bezier(.2,.8,.2,1);max-width:760px;margin:0 auto}
 #sheet.on{transform:none}
-#sheet .grab{width:36px;height:5px;border-radius:3px;background:var(--bg4);margin:0 auto 14px}
-#sheet .x{position:absolute;top:12px;right:14px;width:30px;height:30px;border-radius:50%;border:0;background:var(--bg3);color:var(--fg2);font-size:13px;display:grid;place-items:center}
+#sheet{padding-top:0}
+#sheet .shead{position:sticky;top:0;z-index:1;background:var(--bg2);padding:10px 0 8px;display:flex;justify-content:center;min-height:44px}
+#sheet .grab{width:36px;height:5px;border-radius:3px;background:var(--bg4);margin:0}
+#sheet .x{position:absolute;right:0;top:10px;width:32px;height:32px;border-radius:50%;border:0;background:var(--bg3);color:var(--fg2);display:grid;place-items:center}
 #sheet h3{font-family:"Inter D";font-size:22px;font-weight:700;letter-spacing:-.03em;margin:0 0 8px;line-height:1.2;padding-right:40px}
 #sheet .meta{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px}
 #sheet .sev{font-size:12px;font-weight:600;padding:4px 10px;border-radius:999px;background:var(--bg3);color:var(--fg2)}
@@ -643,7 +651,7 @@ footer{padding:18px var(--pad) 10px;color:var(--fg3);font-size:12px;text-align:c
   <div class="row"><button class="btn" onclick="closeModal()">Cancel</button><button class="btn red" id="mGo">Confirm</button></div>
 </div></div>
 <div id="sheetBg" onclick="closeSheet()"></div>
-<div id="sheet"><div class="grab"></div><button class="x" onclick="closeSheet()" aria-label="Close"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button><div id="sheetBody"></div></div>
+<div id="sheet"><div class="shead"><div class="grab"></div><button class="x" onclick="closeSheet()" aria-label="Close"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div><div id="sheetBody"></div></div>
 <div class="toast" id="toast"></div>
 
 <script>
@@ -804,14 +812,21 @@ function entryFor(module, name){
   for(const k in lib){ if(lib[k].what && stripState(k)===base) return Object.assign({}, lib[k], {name, state:stateOf(name), state_note:''}); }
   return null;
 }
+const isUndefinedSlot=f=>/^byte\s*\d+[.,]\s*bit\s*\d+|^unknown \(byte/i.test(f);
+const realFaults=list=>(list||[]).filter(f=>!isUndefinedSlot(f));
+function faultRow(module, f){
+  const m=f.match(/^(.*?)\s*\((Current|Logged[^)]*)\)\s*$/), name=m?m[1]:f, tag=m?m[2]:'';
+  const e=entryFor(module,f), cause=e?e.title:causeFor(module,f);
+  return `<li data-f="${encodeURIComponent(f)}" onclick="showSheet('${module}',decodeURIComponent(this.dataset.f))"><div class="h"><span class="tag ${/Current/.test(tag)?'cur':''}">${tag||'stored'}</span><span>${fname(name)}</span><span class="more">›</span></div>${cause?`<p class="cause">${cause}</p>`:''}</li>`;
+}
 function faultBlock(el, module, faults){
-  if(!faults||!faults.length){ el.className='faults'; el.innerHTML='<div class="none">No faults stored</div>'; return; }
-  el.className='faults has';
-  el.innerHTML='<ul>'+faults.map((f,i)=>{
-    const m=f.match(/^(.*?)\s*\((Current|Logged[^)]*)\)\s*$/), name=m?m[1]:f, tag=m?m[2]:'';
-    const e=entryFor(module,f), cause=e?e.title:causeFor(module,f);
-    return `<li data-f="${encodeURIComponent(f)}" onclick="showSheet('${module}',decodeURIComponent(this.dataset.f))"><div class="h"><span class="tag ${/Current/.test(tag)?'cur':''}">${tag||'stored'}</span><span>${fname(name)}</span><span class="more">›</span></div>${cause?`<p class="cause">${cause}</p>`:''}</li>`;
-  }).join('')+'</ul>';
+  const real=realFaults(faults), odd=(faults||[]).filter(isUndefinedSlot);
+  el.className='faults'+(real.length?' has':'');
+  let html=real.length?'<ul>'+real.map(f=>faultRow(module,f)).join('')+'</ul>':'<div class="none">No faults stored</div>';
+  if(odd.length) html+=`<details class="odd"><summary>${odd.length} undefined slot${odd.length>1?'s':''} set <span class="more">›</span></summary>
+      <p class="hint">Bits the ECU has set in slots its fault table does not define (the Nanocom shows them as "Invalid Fault"). Kept apart from real faults until we know what they are.</p>
+      <ul>${odd.map(f=>faultRow(module,f)).join('')}</ul></details>`;
+  el.innerHTML=html;
 }
 const esc=t=>String(t).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
 // Undecoded bits come from the decoder as "byte25.bit5" (counted from 0); the Nanocom and the forums
@@ -935,8 +950,9 @@ function render(s){
   renderSlabs(lastSig.slabs);
   faultBlock($('engFaults'), 'td5', lastFaults.td5);
   faultBlock($('slabsFaults'), 'slabs', lastFaults.slabs);
-  $('nEng').textContent=lastFaults.td5.length||''; $('nEngF').textContent=lastFaults.td5.length||'';
-  $('nSlabs').textContent=lastFaults.slabs.length||''; $('nSlabsF').textContent=lastFaults.slabs.length||'';
+  const nT=realFaults(lastFaults.td5).length, nS=realFaults(lastFaults.slabs).length;
+  $('nEng').textContent=nT||''; $('nEngF').textContent=nT||'';
+  $('nSlabs').textContent=nS||''; $('nSlabsF').textContent=nS||'';
 
   // sensor board status
   const sb=s.sensors||{status:'none'};
@@ -1196,7 +1212,7 @@ async function loadTrips(){
   $('tripList').innerHTML = tr.trips.map(t=>`<div class="trip" onclick="openTrip('${t.id}')">
       <span class="d">${fmtDate(t.start)}</span><span class="km num">${t.distance_km} km</span>
       <span class="m">${fmtDur(t.duration_s)} · coolant ${t.coolant_max!=null?Math.round(t.coolant_max)+' °C':'—'}${t.egt_max!=null?' · EGT '+Math.round(t.egt_max)+' °C':''}${t.l_per_100km!=null?' · '+t.l_per_100km+' L/100':''}</span>
-      ${t.faults.length?`<span class="f">${t.faults.length} fault${t.faults.length>1?'s':''} recorded</span>`:''}</div>`).join('')
+      ${realFaults(t.faults).length?`<span class="f">${realFaults(t.faults).length} fault${realFaults(t.faults).length>1?'s':''} recorded</span>`:''}</div>`).join('')
     || '<p class="hint">No drives yet. Each connection to the car becomes a drive here.</p>';
   renderHealth(h);
 }
@@ -1237,10 +1253,8 @@ async function openTrip(id){
     [s.coolant_max!=null?Math.round(s.coolant_max):'—','°C','Coolant peak'],[s.egt_max!=null?Math.round(s.egt_max):'—','°C','EGT peak'],[s.boost_max!=null?s.boost_max.toFixed(2):'—','bar','Boost peak']]
     .map(([v,u,l])=>`<div class="it"><div class="rd num">${v}<small>${u}</small></div><div class="lb">${l}</div></div>`).join('');
   const r=tripData.replay;
-  const fl=$('tripFaults'); fl.className='faults'+(s.faults.length?' has':'');
-  fl.innerHTML = s.faults.length ? '<ul>'+s.faults.map(f=>{ const e=entryFor('td5',f); const m=f.match(/^(.*?)\s*\((Current|Logged[^)]*)\)\s*$/), nm=m?m[1]:f, tag=m?m[2]:'';
-      return `<li data-f="${encodeURIComponent(f)}" onclick="showSheet('td5',decodeURIComponent(this.dataset.f))"><div class="h"><span class="tag ${/Current/.test(tag)?'cur':''}">${tag||'stored'}</span><span>${fname(nm)}</span><span class="more">›</span></div>${e?`<p class="cause">${esc(e.title)}</p>`:''}</li>`; }).join('')+'</ul>'
-    : '<div class="none">No faults during this drive</div>';
+  faultBlock($('tripFaults'), 'td5', s.faults);
+  if(!realFaults(s.faults).length) $('tripFaults').querySelector('.none').textContent='No faults during this drive';
   $('panels').innerHTML = REPLAY.filter(([k])=>r.cols[k]).map(([k,label,unit,lo,hi])=>panelSvg(k,label,unit,lo,hi,r)).join('');
   $('tripListBlk').style.display='none'; $('healthBlk').style.display='none'; $('tripView').style.display='';
   setScrub(null); document.querySelector('main').scrollTop=0;
