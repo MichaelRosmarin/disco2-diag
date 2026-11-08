@@ -20,12 +20,13 @@ TD5: list[tuple[str, dict]] = [
         what="The engine coolant temperature (ECT) sensor is a thermistor in the coolant outlet elbow on top of the "
              "engine. The ECU uses it for cold-start fuelling, glow plug time, the temperature gauge and the radiator fan. "
              "Out of range means the ECU is seeing a voltage it cannot believe; it then estimates coolant temperature "
-             "from the fuel temperature sensor instead, so the engine runs but cold starts and the gauge are affected.",
+             "from the fuel temperature sensor instead, so the engine runs but cold starts and the gauge are affected and the "
+             "ECU's over-temperature protection is lost.",
         causes=["Sensor connector corroded or loose (it sits in a hot, damp spot)", "Sensor failed open or shorted",
                 "Chafed wiring to the ECU"],
         fixes=["Compare the live Coolant temp input with a cold engine: it should match ambient",
                "Unplug and inspect the connector; clean and refit",
-               "Check sensor resistance (about 2.5 kΩ at 20 °C, falling as it warms)",
+               "Check sensor resistance: a few kΩ cold (roughly 2–3 kΩ at 20 °C), a few hundred ohms hot",
                "The dash gauge is driven from this same sensor, so it cannot confirm the reading; an infrared thermometer on the outlet elbow can",
                "Replace the sensor — cheap and ten minutes"],
         severity="soon", check=["coolant_temp", "coolant_sensor_v"])),
@@ -41,7 +42,7 @@ TD5: list[tuple[str, dict]] = [
     (r"^inlet air temp", dict(
         title="Inlet air temperature sensor circuit",
         what="The inlet air temperature sensor is the temperature element of the combined MAP/IAT sensor on the inlet "
-             "manifold (the MAF meter on the air cleaner has no temperature element). The ECU uses it to correct for "
+             "manifold (the MAF meter on the air cleaner measures flow only). The ECU uses it to correct for "
              "air density. Out of range means the signal is implausible, not that the air is hot.",
         causes=["MAP/IAT sensor contaminated with oil from the breather, like the pressure side", "MAP/IAT connector loose or wet", "Wiring to the ECU"],
         fixes=["Check the live Inlet air temp: cold engine should read near ambient", "Reseat the MAP/IAT connector; clean the sensor face",
@@ -50,11 +51,11 @@ TD5: list[tuple[str, dict]] = [
     (r"^ambient air temp", dict(
         title="Ambient air temperature sensor circuit",
         what="On 2002-on (EU3) engines the barometric sensor on the air cleaner lid also carries an ambient air "
-             "temperature element (4-wire sensor); earlier engines have the 3-wire pressure-only sensor and no AAT. "
+             "temperature element (one extra wire on the plug); earlier engines have the pressure-only sensor and no AAT. "
              "If your engine is pre-2002, this fault means the ECU configuration expects a sensor that is not fitted. "
              "This is not the A/C ambient sensor behind the bumper, which feeds the heater system, not the engine ECU.",
         causes=["Configuration mismatch on an earlier engine or after an ECU swap", "4-wire sensor on the air cleaner lid failed or unplugged", "Wiring"],
-        fixes=["Count the wires at the air cleaner lid sensor: 3 means no AAT exists and the configuration is wrong", "Check the sensor and plug on the lid"],
+        fixes=["Check the air cleaner lid sensor: the pressure-only type has three wires and the configuration should then have AAT off", "Check the sensor and plug on the lid"],
         severity="drive", check=["ext_temp"])),
     (r"^air flow circuit", dict(
         title="Mass air flow meter circuit",
@@ -68,7 +69,8 @@ TD5: list[tuple[str, dict]] = [
     (r"^manifold pressure", dict(
         title="Manifold absolute pressure sensor circuit",
         what="The MAP sensor on the inlet manifold tells the ECU the boost pressure, which sets the fuelling limit "
-             "(smoke limit) and controls the wastegate. With it faulted the ECU limits fuel heavily — very flat performance.",
+             "(smoke limit) and controls the wastegate. With it faulted the ECU uses a default and caps fuelling as if boost "
+             "were only about 1 bar — very flat performance.",
         causes=["Sensor contaminated with oil from the breather (very common; the sensor face gets coated)",
                 "Connector or wiring", "Sensor failed"],
         fixes=["Compare Manifold pressure to Ambient pressure with the engine off: they should be equal",
@@ -76,8 +78,8 @@ TD5: list[tuple[str, dict]] = [
         severity="soon", check=["manifold_press", "ambient_press_1"])),
     (r"^ambient pressure", dict(
         title="Ambient (barometric) pressure sensor circuit",
-        what="The ambient air pressure sensor sits on the air cleaner lid (3-wire on early engines, 4-wire with the AAT "
-             "element from 2002). It gives altitude compensation. With it faulted the ECU uses a fixed default: no altitude "
+        what="The ambient air pressure sensor sits on the air cleaner lid (combined with the ambient temperature element "
+             "from 2002). It gives altitude compensation. With it faulted the ECU uses a fixed default: no altitude "
              "correction (black smoke at height), boost control falls back and boost is limited, EGR altitude "
              "compensation is off — the engine feels flat and smoky, especially up country.",
         causes=["Sensor connector on the air cleaner lid loose or wet", "Sensor failed", "Wiring to the ECU"],
@@ -86,17 +88,18 @@ TD5: list[tuple[str, dict]] = [
         severity="soon", check=["ambient_press_1", "ambient_press_2", "manifold_press"])),
     (r"^reference voltage", dict(
         title="Sensor reference voltage (5 V supply)",
-        what="The ECU supplies a regulated 5 V to the pedal, MAP and other sensors. If it sags or is shorted every "
-             "sensor on that supply reads wrong at once, so this fault is usually accompanied by several others.",
+        what="The ECU supplies regulated 5 V feeds to the pedal, the MAP/IAT and the ambient pressure sensor. If a feed "
+             "sags or is shorted every sensor on it reads wrong at once, so this fault is usually accompanied by others.",
         causes=["A sensor or its wiring shorting the 5 V line to earth or battery", "Water in a sensor connector", "ECU regulator fault"],
-        fixes=["Look at Accel. supply on the Inputs page: should sit at 5.0 V", "Unplug sensors one at a time (pedal, MAP, MAF) and see which one restores it",
+        fixes=["Look at Accel. supply on the Inputs page: it is one of the 5 V outputs and should sit at 5.0 V; if it is fine the fault may be on the MAP or ambient-sensor feed",
+               "Unplug sensors one at a time (pedal, MAP/IAT, ambient pressure) and see which one restores it",
                "Inspect the harness where it crosses the engine for chafe"],
         severity="soon", check=["accel_supply"])),
     (r"^battery volt", dict(
         title="Battery voltage out of range",
         what="The ECU monitors its supply. Too low while running points to charging; too high to a regulator fault. Low "
-             "voltage during cranking in cold weather can log this harmlessly on a tired battery. While the voltage is "
-             "low the ECU protects the injectors by limiting engine speed (about 2100 rpm on earlier engines, idle only on 2002-on), which feels like a limp.",
+             "voltage during cranking in cold weather can log this harmlessly on a tired battery. Fuelling is normal between "
+             "9 and 16 V; below about 9 V the ECU protects the injectors by limiting engine speed (about 2100 rpm on earlier engines, idle only on 2002-on).",
         causes=["Weak battery or poor terminals", "Alternator not charging or over-charging", "Corroded engine or body earth straps"],
         fixes=["Battery input should read 13.5–14.4 V with the engine running", "Load-test the battery; clean terminals and earths", "Check alternator output and belt"],
         severity="soon", check=["battery", "battery_direct"])),
@@ -134,7 +137,7 @@ TD5: list[tuple[str, dict]] = [
         causes=["Oil-damaged injector harness inside the rocker cover letting wires touch", "Chafed loom at the cover exit",
                 "Injector solenoid shorted internally", "Oil in the red ECU connector"],
         fixes=["Replace the under-cover injector harness; inspect the ECU red plug and clean any oil",
-               "The solenoids are well under 1 Ω, so a multimeter cannot tell a good one from a bad one: use the cylinder balance values and swap injectors to confirm before buying one"],
+               "The solenoids are about an ohm or less, so a multimeter cannot tell a good one from a bad one: use the cylinder balance values and swap injectors to confirm before buying one"],
         severity="soon", check=["balance_{n}"])),
     (r"^inj\. (\d) peak charge (long|short)", dict(
         title="Injector {n} — peak charge timing",
@@ -172,24 +175,26 @@ TD5: list[tuple[str, dict]] = [
         causes=["Boost signal hose to the modulator split, kinked or blocked", "Wastegate actuator rod or wastegate flap seized",
                 "Modulator stuck", "Over-tight actuator adjustment after a turbo rebuild", "Remapped ECU running beyond stock boost"],
         fixes=["Check the wastegate rod moves freely; free off the wastegate flap", "Inspect the boost hoses between intercooler pipe, modulator and actuator for splits",
-               "Watch Manifold pressure on a hard pull: stock peaks around 2.3 bar absolute. A reading that drops to zero is a sensor fault, not boost"],
+               "Watch Manifold pressure on a hard pull: stock peaks around 2.3 bar absolute. If it climbs past about 2.4 bar and then drops to zero as the power goes, that is the over-boost cut itself"],
         severity="soon", check=["manifold_press", "wastegate_modulator"])),
     (r"turbocharger under ?boost|under boost has occurred", dict(
         title="Turbo under-boost",
         what="Manifold pressure is below what the ECU expects for the fuel being injected. The ECU limits fuelling to "
              "avoid smoke, so the engine feels flat, and the exhaust may smoke on hard acceleration. Because the wastegate "
-             "is opened by boost pressure, a modulator that is unplugged or failed, or a split hose to the actuator, sends "
-             "full boost to the actuator and the wastegate opens early — classic under-boost.",
+             "is opened by boost pressure, a modulator that is unplugged, failed or unfused sends full boost to the actuator "
+             "and the wastegate opens at spring pressure — classic under-boost. (A split hose does the opposite: it starves "
+             "the actuator and gives over-boost.)",
         causes=["Split or blown intercooler hose (listen for a whistle or hiss under load)", "Intercooler leaking at the end tanks",
-                "Wastegate modulator unplugged or failed, or the hose from it to the actuator split", "Turbo worn", "MAP sensor reading low (oil on it)"],
-        fixes=["Inspect every boost hose and the intercooler; pressure-test the system", "Apply about 1 bar to the actuator with a hand pump: the rod should move and hold",
+                "Wastegate modulator unplugged, failed or its fuse blown (full boost reaches the actuator)", "Wastegate actuator diaphragm leaking", "Turbo worn", "MAP sensor reading low (oil on it)"],
+        fixes=["Inspect every boost hose and the intercooler; pressure-test the system", "Pressurise the actuator with a hand pump: the rod should start moving well below 1 bar and the actuator should hold pressure without leaking down",
                "Clean the MAP sensor", "Watch Manifold pressure under load"],
         severity="soon", check=["manifold_press", "wastegate_modulator", "maf_sensor"])),
     (r"wastegate (modulator )?(open load|short circuit)", dict(
         title="Wastegate modulator circuit",
         what="The wastegate modulator is a solenoid valve the ECU pulses to bleed boost pressure away from the wastegate "
              "actuator; de-energised it passes full boost to the actuator, so the failure mode is low boost. Open load means "
-             "no solenoid seen; short means too much current. It sits on a bracket on the engine near the turbo inlet pipe.",
+             "no solenoid seen; short means too much current. It is on the engine with three hoses: boost pipe in, bleed to the "
+             "turbo intake, and out to the actuator.",
         causes=["Modulator connector corroded", "Solenoid coil failed", "Wiring chafe"],
         fixes=["Check the connector and the coil resistance (about 28 Ω)", "Replace the modulator"],
         severity="soon", check=["wastegate_modulator", "manifold_press"])),
@@ -236,16 +241,17 @@ TD5: list[tuple[str, dict]] = [
     (r"^mil lamp drive", dict(
         title="Engine warning lamp drive",
         what="The ECU drives the engine malfunction indicator lamp in the instrument pack. Open load usually means "
-             "the bulb has blown or the instrument pack connection is poor.",
-        causes=["Bulb blown", "Instrument pack connector", "Wiring"],
+             "the bulb has blown or the instrument pack connection is poor. Early (pre-2002) Td5 packs may have no engine "
+             "warning lamp at all, in which case this fault is expected and harmless.",
+        causes=["Bulb blown", "No lamp fitted (early vehicles)", "Instrument pack connector", "Wiring"],
         fixes=["The lamp should light with the key on and go out once running; if it never lights, replace the bulb"],
         severity="drive")),
     (r"glow ?plug relay drive", dict(
         title="Glow plug relay drive",
         what="The ECU controls the glow plug relay for pre-heat and post-heat. Open load means the relay coil is not "
              "seen, so no glow — hard cold starts and white smoke until warm.",
-        causes=["Glow plug relay failed (position 6 in the engine compartment fuse box)", "Relay socket corroded", "Fusible link FL2 (100 A) feeding the glow circuit", "Wiring"],
-        fixes=["Check for 12 V at the glow plug bus bar for a few seconds at key-on when cold", "Swap or replace the relay; check fusible link FL2"],
+        causes=["Glow plug relay failed (position 6 in the engine compartment fuse box)", "Relay socket corroded", "The fusible link feeding the glow plug relay, in the engine bay fusible link box", "Wiring"],
+        fixes=["Check for 12 V at the glow plug bus bar for a few seconds at key-on when cold", "Swap or replace the relay; check its fusible link"],
         severity="drive")),
     (r"glow ?plug lamp drive", dict(
         title="Glow plug lamp drive",
@@ -315,21 +321,22 @@ TD5: list[tuple[str, dict]] = [
     (r"high speed crank", dict(
         title="Crankshaft signal — implausible speed",
         what="The crankshaft position sensor on the flywheel housing reported a speed the ECU considers impossible. "
-             "Noise on the sensor wiring, or a damaged reluctor, is the usual cause. Expect stalls or misfires if it is active.",
-        causes=["Crank sensor wiring picking up interference (routing near the starter cable)", "Sensor air gap or a damaged flywheel reluctor", "Sensor failing when hot"],
-        fixes=["Inspect the sensor plug and wiring on the bell housing", "Replace the sensor if intermittent when hot", "Check the flywheel ring teeth"],
+             "Noise on the sensor wiring is the usual cause. The sensor reads a ring of drilled holes in the flywheel rim, so "
+             "damage or debris there can also do it. Expect stalls or misfires if it is active.",
+        causes=["Crank sensor wiring picking up interference (routing near the starter cable)", "Sensor air gap, or damage or debris at the drilled holes in the flywheel rim", "Sensor failing when hot"],
+        fixes=["Inspect the sensor plug and wiring on the bell housing", "Replace the sensor if intermittent when hot", "Check the flywheel rim holes through the sensor aperture"],
         severity="soon", check=["rpm"])),
     (r"noisy crank signal", dict(
         title="Crankshaft signal noisy",
         what="The ECU is seeing extra or missing pulses from the crankshaft sensor. Mild cases log the fault only; worse "
              "cases cause hesitation, a misfire feel or stalling.",
-        causes=["Crank sensor connector corroded or wet", "Sensor cable chafed or routed against the starter feed", "Failing sensor", "Damaged flywheel teeth"],
+        causes=["Crank sensor connector corroded or wet", "Sensor cable chafed or routed against the starter feed", "Failing sensor", "Damage or debris at the drilled holes in the flywheel rim"],
         fixes=["Clean and reseat the sensor connector", "Re-route the cable away from high current wiring", "Replace the sensor"],
         severity="drive", check=["rpm"])),
     (r"road speed missing", dict(
         title="Road speed signal missing",
         what="The engine ECU receives road speed as a hard-wired signal from the SLABS (ABS) ECU, which derives it from "
-             "the wheel speed sensors (automatics also get a second speed from the gearbox ECU and the two are compared). "
+             "the wheel speed sensors. "
              "If the signal drops out this is logged and cruise control is disabled. Because it comes from the SLABS, an "
              "intermittent SLABS ECU supply, earth or connector — the same things that bring on the Three Amigos — will log this fault in the engine ECU too.",
         causes=["SLABS ECU connector, fuse or earth intermittent", "Wire from the SLABS ECU to the engine ECU", "SLABS ECU fault"],
@@ -373,7 +380,8 @@ SLABS: list[tuple[str, dict]] = [
         title="{pos} wheel speed sensor — weak signal",
         what="The {posl} wheel speed sensor is producing a signal, but it is too weak or dropping out. The ECU "
              "cannot trust that wheel's speed, so ABS, traction control and hill descent are switched off — the "
-             "ABS, TC and HDC lamps come on together (the Three Amigos). Weak signals are usually mechanical, not electrical.",
+             "ABS, TC and HDC lamps come on together (the Three Amigos). Weak signals are usually mechanical, not electrical. "
+             "Unlike a shuttle valve switch fault this one clears itself: after the repair the lamps go out once the vehicle exceeds about 15 km/h.",
         causes=["Air gap too large: sensor not fully seated, or rust jacking under its flange", "Reluctor ring on the hub cracked, rusted or packed with mud",
                 "Wheel bearing play letting the gap vary (often worse on bends)", "Sensor tip contaminated with metal swarf"],
         fixes=["Compare the four wheel speeds on the chassis graphic while driving slowly: the bad corner reads low or drops to zero",
@@ -382,8 +390,9 @@ SLABS: list[tuple[str, dict]] = [
     (r"^(front|rear) (left|right) sensor — electric fail", dict(
         title="{pos} wheel speed sensor — electrical failure",
         what="The {posl} wheel speed sensor circuit is open or shorted — the ECU checks each sensor's resistance and sees "
-             "no sensor at all rather than a weak one. ABS, TC and HDC are disabled until it is fixed.",
-        causes=["Sensor cable chafed or broken where it flexes with the suspension", "Connector corroded (front connectors are in the engine bay by the inner wings; rear on the chassis above the axle)",
+             "no sensor at all rather than a weak one. ABS, TC and HDC are disabled until it is fixed; once repaired the lamps "
+             "clear themselves on the first drive above about 15 km/h.",
+        causes=["Sensor cable chafed or broken where it flexes with the suspension", "Fly-lead connector corroded (the fronts are typically in the engine bay; the rears on the chassis near the axle)",
                 "Sensor coil failed", "Rodent damage"],
         fixes=["Measure the sensor resistance at its connector: about 1 kΩ (spec 950–1100 Ω); open or short confirms the sensor or its tail",
                "Trace the cable along the axle for damage", "Replace the sensor"],
@@ -404,10 +413,10 @@ SLABS: list[tuple[str, dict]] = [
         title="Shuttle valve switch — long-term failure",
         what="The ECU has not seen the shuttle valve switches change state over many brake applications. Either the "
              "switches are stuck, or the shuttle valves themselves are not moving — the brake fluid side rather than the electrics.",
-        causes=["Shuttle valve seized in the modulator (old fluid, corrosion)", "Switch stuck", "Brake light switch not telling the ECU the pedal is pressed, so it never expects movement"],
-        fixes=["Bleed the ABS modulator with fresh fluid using the pump test on the Outputs page, keeping the reservoir topped up so the pump never draws air", "Check the brake light switch and the Brake signal input",
+        causes=["Shuttle valve seized in the modulator (old fluid, corrosion)", "Switch stuck or its connector open"],
+        fixes=["Bleed the ABS modulator with fresh fluid using the pump test on the Outputs page, keeping the reservoir topped up so the pump never draws air",
                "Replace the switches if not already done, then clear the fault"],
-        severity="soon", check=["brake_analog"])),
+        severity="soon")),
     (r"shuttle valve switch dynamic failure", dict(
         title="Shuttle valve switch — dynamic failure",
         what="The switches changed state when the ECU did not expect them to, or failed to change under ABS operation. "
@@ -435,7 +444,7 @@ SLABS: list[tuple[str, dict]] = [
         what="The ECU switched the pump on and the monitor line says it did not run. Without the pump there is no ABS "
              "or traction control intervention; normal braking is unaffected.",
         causes=["Pump relay or its fuse", "Pump motor failed (brushes)", "Pump supply or earth"],
-        fixes=["Check the ABS pump fuse and relay", "Run Pump on from the Outputs page: silence means the motor or its feed",
+        fixes=["Check the pump fuse and the return pump relay", "Run Pump on from the Outputs page: silence means the motor or its feed",
                "Check the pump earth strap"],
         severity="soon")),
     (r"pump fail — pump sticking", dict(
@@ -449,13 +458,13 @@ SLABS: list[tuple[str, dict]] = [
         title="ABS pump running uncommanded",
         what="The monitor line says the pump is running when the ECU has not switched it on. Either the relay has stuck "
              "closed or the monitor line is shorted.",
-        causes=["Pump relay contacts welded", "Monitor wire shorted to supply", "ECU internal relay"],
+        causes=["Pump relay contacts welded", "Monitor wire shorted to supply", "ECU pump-relay driver stuck on"],
         fixes=["Pull the pump relay with the key on: if the pump stops, replace the relay", "Check the monitor wiring"],
         severity="soon")),
     (r"ecu internal valve relay bad", dict(
         title="ECU internal valve relay",
         what="The relay inside the ABS ECU that powers the solenoid valves has failed its self-test. This is inside the "
-             "ECU; ABS and TC are disabled. Occasionally logged spuriously on low battery voltage.",
+             "ECU; ABS, TC and HDC are disabled. Occasionally logged spuriously on low battery voltage.",
         causes=["Low battery or poor earth during the self-test at key-on", "ABS ECU internal fault"],
         fixes=["Check battery voltage and the ECU earths first, clear, and retest", "If it returns with good voltage, the ECU needs repair or replacement"],
         severity="soon", check=["battery", "ecu_supply"])),
@@ -485,14 +494,17 @@ SLABS: list[tuple[str, dict]] = [
         severity="drive")),
     (r"gear info not valid", dict(
         title="Gearbox information not valid",
-        what="The ABS ECU uses the neutral, reverse and low-range switch inputs to decide how to run traction control "
-             "and hill descent. It is seeing a combination that makes no sense (for example reverse and neutral at once).",
-        causes=["Reverse or neutral switch on the gearbox faulty", "Low range switch on the transfer box faulty or disconnected", "Wiring"],
-        fixes=["Watch the Switches inputs while selecting each gear and range: each should change cleanly", "Replace the switch that does not respond"],
+        what="The ABS ECU works out which gear is engaged from the engine data signal, engine speed and road speed, "
+             "together with reverse (the reverse-lamp switch on a manual, the BCU on an automatic), neutral (BCU, automatics "
+             "only) and the transfer box range switch. It uses this for traction control and hill descent. This fault means "
+             "those inputs disagree.",
+        causes=["Engine data or engine speed signal to the ABS ECU corrupt (check for Engine PWM Signal Bad)", "Reverse-lamp switch (manual) or selector position from the BCU (automatic)",
+                "Transfer box range switch faulty or disconnected", "Wiring"],
+        fixes=["Watch the Drivetrain switches inputs while selecting reverse, neutral and low range: each should change cleanly", "Check the engine faults as well", "Replace the switch that does not respond"],
         severity="drive", check=["neutral_gear", "reverse_gear", "transfer_low"])),
     (r"(front|rear) (left|right) (in|out) valve — open circuit", dict(
         title="{pos} {io}let valve — open circuit",
-        what="The {posl} {io}let solenoid valve in the ABS modulator is not drawing current when driven. ABS and TC are "
+        what="The {posl} {io}let solenoid valve in the ABS modulator is not drawing current when driven. ABS, TC and HDC are "
              "disabled; normal braking continues. The valves themselves rarely fail; the connector is the usual culprit.",
         causes=["Modulator connector not fully latched or corroded", "Harness to the modulator chafed", "Solenoid coil open"],
         fixes=["Unplug the modulator connector, inspect and clean, refit firmly", "Measure the coil resistance at the modulator pins", "If all valves fault together it is the connector or the ECU relay, not the valves"],
@@ -500,15 +512,15 @@ SLABS: list[tuple[str, dict]] = [
     (r"(front|rear) (left|right) (in|out) valve — (short to gnd|short to supply|drive short to supply)", dict(
         title="{pos} {io}let valve — short circuit",
         what="The {posl} {io}let solenoid valve circuit is shorted — to earth, to supply, or within the driver. The ECU "
-             "shuts the valve driver down and disables ABS and TC.",
+             "shuts the valve driver down and disables ABS, TC and HDC.",
         causes=["Chafed modulator harness", "Water in the modulator connector", "Solenoid coil shorted", "ECU driver stage (if several valves fault together)"],
         fixes=["Inspect the modulator harness and connector for damage and moisture", "Measure each coil resistance; they should all match", "Several valves at once points to the ECU or connector"],
         severity="soon")),
     (r"pump relay — (open circuit|short to gnd|short to supply|drive short to supply)", dict(
         title="ABS pump relay circuit",
-        what="The pump relay coil circuit is open or shorted. Without the relay the pump cannot run, so ABS and TC are off.",
+        what="The pump relay coil circuit is open or shorted. Without the relay the pump cannot run, so ABS, TC and HDC are off.",
         causes=["Relay failed or missing", "Relay socket corroded", "Wiring to the relay"],
-        fixes=["Check the pump relay in the engine bay fuse box; swap with an identical relay", "Clean the socket"],
+        fixes=["Find the return pump relay (an external relay driven by the ABS ECU) and swap it with an identical one", "Clean the socket"],
         severity="soon")),
     (r"brake light relay — (open circuit|short to gnd|short to supply|drive short to supply)", dict(
         title="Brake light relay circuit",
@@ -568,7 +580,7 @@ _OVER_TEMP = ("The ECU reports the output driver stage overheating, which means 
 def describe(module: str, name: str) -> dict | None:
     """Full write-up for one fault name, or None if the knowledge base has nothing for it."""
     base, state = _strip_state(name)
-    low = base.lower()
+    low = re.sub(r"\s+[-–]\s+", " — ", base.lower())   # tolerate hyphen/en-dash variants of the SLABS names
     table = TD5 if module == "td5" else SLABS
     if module == "td5" and re.match(r"^inj\. 6\b", low):
         return {
