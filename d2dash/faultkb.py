@@ -53,15 +53,15 @@ TD5: list[tuple[str, dict]] = [
         what="On 2002-on (EU3) engines the barometric sensor on the air cleaner lid also carries an ambient air "
              "temperature element (one extra wire on the plug); earlier engines have the pressure-only sensor and no AAT. "
              "If your engine is pre-2002, this fault means the ECU configuration expects a sensor that is not fitted. "
-             "This is not the A/C ambient sensor behind the bumper, which feeds the heater system, not the engine ECU.",
+             "This is not the climate control's own ambient sensor at the front of the vehicle, which feeds the heater system, not the engine ECU.",
         causes=["Configuration mismatch on an earlier engine or after an ECU swap", "4-wire sensor on the air cleaner lid failed or unplugged", "Wiring"],
         fixes=["Check the air cleaner lid sensor: the pressure-only type has three wires and the configuration should then have AAT off", "Check the sensor and plug on the lid"],
         severity="drive", check=["ext_temp"])),
     (r"^air flow circuit", dict(
         title="Mass air flow meter circuit",
         what="The hot-film MAF meter on the air cleaner outlet measures the air entering the engine. The Td5 uses it mainly "
-             "to control EGR and to limit smoke; with it faulted the ECU drops to a model, EGR is disabled and power may be "
-             "reduced. A lazy MAF (reading low without a fault) is the classic cause of a flat Td5.",
+             "for EGR control (and for fuelling corrections on later engines); with it faulted the ECU uses a fixed default value, "
+             "EGR is disabled and power may be reduced. A lazy MAF (reading low without a fault) is the classic cause of a flat Td5.",
         causes=["MAF meter failed or contaminated (oiled foam filters are a known killer)", "Connector or wiring", "Air leak between MAF and turbo giving an implausible reading"],
         fixes=["Watch Air flow: hot idle should be about 50–60 kg/h (below about 40 is a lazy meter) and full load should reach 550–650 kg/h",
                "Unplug the MAF and drive: if the car feels better, the MAF is lazy — or the EGR it controls was the problem, since unplugging disables both", "Replace with a genuine or Bosch meter; pattern parts are poor"],
@@ -83,7 +83,7 @@ TD5: list[tuple[str, dict]] = [
              "compensation is off — the engine feels flat and smoky, especially up country.",
         causes=["Sensor connector on the air cleaner lid loose or wet", "Sensor failed", "Wiring to the ECU"],
         fixes=["With the engine off, Ambient pressure and Manifold pressure should read the same: about 1.01 bar at sea level, roughly 0.11 bar less for every 1000 m of altitude",
-               "Reseat the connector; replace the sensor (it is an O-ring push fit in the lid)"],
+               "Reseat the connector; replace the sensor in the lid"],
         severity="soon", check=["ambient_press_1", "ambient_press_2", "manifold_press"])),
     (r"^reference voltage", dict(
         title="Sensor reference voltage (5 V supply)",
@@ -91,7 +91,7 @@ TD5: list[tuple[str, dict]] = [
              "sags or is shorted every sensor on it reads wrong at once, so this fault is usually accompanied by others.",
         causes=["A sensor or its wiring shorting the 5 V line to earth or battery", "Water in a sensor connector", "ECU regulator fault"],
         fixes=["Look at Accel. supply on the Inputs page: it is one of the 5 V outputs and should sit at 5.0 V; if it is fine the fault may be on the MAP or ambient-sensor feed",
-               "Unplug sensors one at a time (pedal, MAP/IAT, ambient pressure) and see which one restores it",
+               "Unplug sensors one at a time (pedal, MAP/IAT, ambient pressure, fuel temperature) and see which one restores it",
                "Inspect the harness where it crosses the engine for chafe"],
         severity="soon", check=["accel_supply"])),
     (r"^battery volt", dict(
@@ -128,7 +128,8 @@ TD5: list[tuple[str, dict]] = [
                 "The red ECU connector or the harness connector on the cover corroded or oily", "Injector solenoid failed"],
         fixes=["Check the injector harness under the rocker cover for cracked insulation and oil",
                "Pull the red ECU plug and look for oil wicked up the loom — if present, clean it and fit a new injector harness",
-               "Swap injectors between cylinders to see if the fault follows the injector"],
+               "Under the rocker cover, swap the harness plugs between injector {n} and its neighbour and see whether the fault moves with the plug (harness) or stays with the cylinder (injector)",
+               "If you do physically swap injectors, their five-letter codes must be re-entered in the new positions with a Nanocom"],
         severity="soon", check=["balance_{n}"])),
     (r"^inj\. (\d) (partial )?short circuit", dict(
         title="Injector {n} — short circuit",
@@ -137,7 +138,7 @@ TD5: list[tuple[str, dict]] = [
         causes=["Oil-damaged injector harness inside the rocker cover letting wires touch", "Chafed loom at the cover exit",
                 "Injector solenoid shorted internally", "Oil in the red ECU connector"],
         fixes=["Replace the under-cover injector harness; inspect the ECU red plug and clean any oil",
-               "The solenoids are very low resistance (around an ohm), so a multimeter cannot tell a good one from a bad one: use the cylinder balance values and swap injectors to confirm before buying one"],
+               "The solenoids are very low resistance (around an ohm), so a multimeter cannot tell a good one from a bad one: use the cylinder balance values, and swap the harness plugs between neighbouring injectors to see if the fault moves, before buying one (physically swapped injectors need their codes re-entered)"],
         severity="soon", check=["balance_{n}"])),
     (r"^inj\. (\d) peak charge (long|short)", dict(
         title="Injector {n} — peak charge timing",
@@ -194,10 +195,10 @@ TD5: list[tuple[str, dict]] = [
         title="Wastegate modulator circuit",
         what="The wastegate modulator is a solenoid valve the ECU pulses to bleed boost pressure away from the wastegate "
              "actuator; de-energised it passes full boost to the actuator, so the failure mode is low boost. Open load means "
-             "no solenoid seen; short means too much current. It sits on a bracket on the right-hand (turbo) side of the engine "
-             "near the A/C compressor, with three hoses: boost signal from the lower intercooler pipe, bleed to the turbo intake, and out to the actuator.",
+             "no solenoid seen; short means too much current. It sits on the left-hand (turbo and exhaust) side of the engine, on the "
+             "A/C compressor bracket beside the air-intake pipe to the turbo, with three hoses: boost signal from the lower intercooler pipe, bleed to the turbo intake, and out to the actuator.",
         causes=["Modulator connector corroded", "Solenoid coil failed", "Wiring chafe"],
-        fixes=["Check the connector and the coil resistance (about 28 Ω)", "Replace the modulator"],
+        fixes=["Check the connector and the coil resistance (roughly 25–30 Ω)", "Replace the modulator"],
         severity="soon", check=["wastegate_modulator", "manifold_press"])),
     (r"wastegate diagnostics", dict(
         title="Wastegate control not responding",
@@ -296,13 +297,13 @@ TD5: list[tuple[str, dict]] = [
         fixes=["If there is no trip computer, ignore or have the configuration corrected"],
         severity="drive")),
     (r"gearbox/abs drive", dict(
-        title="Engine data signal to SLABS and gearbox",
-        what="The ECU sends a multiplexed PWM 'engine data' signal (throttle position, torque, engine and gearbox type) "
-             "to the SLABS ECU and, as the fault name suggests, the automatic gearbox ECU. Open load means the line is not loaded as "
+        title="Engine data signal to the SLABS ECU",
+        what="The ECU sends a multiplexed PWM 'engine data' signal (throttle position, torque, engine type and gearbox type — "
+             "hence 'gearbox' in the fault name; the automatic gearbox ECU itself talks to the engine over CAN) to the SLABS ECU. Open load means the line is not loaded as "
              "expected. **When the SLABS ECU loses this signal it logs 'Engine PWM Signal Bad' and lights the TC and HDC "
              "lamps (ABS itself stays active)**, so check it when those two come on without the ABS lamp. The SLABS treats a "
              "throttle-signal fault as permanent, so expect to clear it with a tool after the wire is fixed.",
-        causes=["Connector at the SLABS ECU (behind the passenger glovebox) or the gearbox ECU loose or corroded", "Wiring between the ECUs chafed", "SLABS ECU failed"],
+        causes=["Connector at the SLABS ECU (behind the passenger glovebox) loose or corroded", "Wire between the two ECUs chafed", "SLABS ECU failed"],
         fixes=["Read the SLABS faults for Engine PWM Signal Bad", "Check the signal wire from the engine ECU to the SLABS ECU for continuity", "Clear both ECUs and see if it returns"],
         severity="soon")),
     (r"cruise (control )?lamp drive", dict(
@@ -314,8 +315,8 @@ TD5: list[tuple[str, dict]] = [
         severity="drive")),
     (r"active engine mount", dict(
         title="Active engine mounting drive",
-        what="An ECU output for a vacuum-switched engine mount used on some other Td5 applications. It is not believed "
-             "to be fitted to the Discovery, so on this vehicle the fault is a configuration setting or a spurious bit rather than a part.",
+        what="An ECU output for a vacuum-switched engine mount that no Td5 vehicle actually uses. On this vehicle the fault "
+             "is a configuration setting or a spurious bit rather than a part.",
         causes=["Configuration mismatch, typically after an ECU swap or remap", "Spurious"],
         fixes=["Have the active engine mount configuration set off if a Nanocom shows it on; otherwise ignore"],
         severity="drive")),
@@ -409,7 +410,7 @@ SLABS: list[tuple[str, dict]] = [
              "permanent fault: even after a repair the lamps stay on until the fault is cleared with a tool.",
         causes=["Shuttle valve switch failed (very common; often intermittent when hot)", "Switch connector corroded",
                 "Wiring to the modulator chafed"],
-        fixes=["Check the switch circuit resistance to earth at the modulator connector: both switches open (brakes off) about 3.0 kΩ, pedal pressed about 1.0 kΩ; out of range means the switch pack or its wiring",
+        fixes=["Check the switch circuit resistance to earth at the modulator connector: brakes off about 3.0 kΩ (Land Rover's window 2555–4088 Ω), pedal pressed about 1.0 kΩ (511–1532 Ω); out of range means the switch pack or its wiring",
                "Check the modulator earth stud behind the left-hand headlamp — a known cause of this code",
                "Replace both shuttle valve switches on the modulator — they are cheap and fitted together",
                "Clear the fault afterwards; it does not clear itself",
@@ -479,7 +480,7 @@ SLABS: list[tuple[str, dict]] = [
         what="The ECU lost its main power feed while running, or saw it outside the 10–16 V it expects. On an intermittent "
              "fault this is the fingerprint of a bad connection in the ECU's supply — and brings on all three lamps plus the red brake lamp at once.",
         causes=["ABS ECU fuse or fuse holder corroded", "ECU multiplug not fully latched or with a spread pin", "Main feed wire chafed", "Battery terminals"],
-        fixes=["Check and clean the ABS fuses in the engine bay fuse box", "Unplug and inspect the ECU connector (behind the passenger glovebox); check each pin's tension", "Wiggle-test the harness with the key on while watching the Battery input"],
+        fixes=["Check and clean the SLABS battery-feed fuse in the engine bay fuse box and its ignition-feed fuse in the passenger compartment fuse box", "Unplug and inspect the ECU connector (behind the passenger glovebox); check each pin's tension", "Wiggle-test the harness with the key on while watching the Battery input"],
         severity="soon", check=["battery", "ecu_supply"])),
     (r"ecu gnd or reference gnd bad", dict(
         title="ABS ECU earth fault",
