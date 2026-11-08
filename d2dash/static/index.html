@@ -271,6 +271,8 @@ a{color:var(--act);text-decoration:none}
 .chassis .side{fill:var(--ch-side);stroke:var(--ch-side-s);stroke-width:1}
 .chassis .tread{fill:none;stroke:var(--ch-tread);stroke-width:1.6;stroke-linecap:round}
 .chassis .hub{fill:var(--ch-hub)}
+.chassis .treads{animation:roll .6s linear infinite;animation-play-state:paused;will-change:transform}
+@keyframes roll{from{transform:translateX(0)}to{transform:translateX(8px)}}
 .chassis .halo{fill:none;stroke-width:3;stroke:transparent;transition:stroke .3s}
 .chassis .halo.ok{stroke:var(--ok)}.chassis .halo.warn{stroke:var(--warn)}.chassis .halo.bad{stroke:var(--bad)}
 .chassis .spring{fill:none;stroke:var(--act);stroke-width:2.2}
@@ -1015,11 +1017,14 @@ function renderSlabs(sig){
 function buildChassis(){
   const W=[['fr',84,74,'Front right',true],['rr',276,74,'Rear right',true],['fl',84,226,'Front left',false],['rl',276,226,'Rear left',false]];
   // tyres seen from above: long in the direction of travel (x), narrow across the car (y)
+  // The tread is a repeating 8 px chevron pattern inside a clip; CSS slides it along the tyre at a rate
+  // set from the wheel speed, so the wheels visibly roll while driving. Runs on the phone's GPU, not the decoder.
   const tyre=([k,x,y])=>`<g class="wh" data-w="${k}">
+      <defs><clipPath id="clip-${k}"><rect x="${x-28}" y="${y-12}" width="56" height="24" rx="5"/></clipPath></defs>
       <rect class="halo" x="${x-37}" y="${y-21}" width="74" height="42" rx="12"/>
       <rect class="tyre" x="${x-32}" y="${y-16}" width="64" height="32" rx="8"/>
       <rect class="side" x="${x-28}" y="${y-12}" width="56" height="24" rx="5"/>
-      ${[-24,-16,-8,0,8,16].map(d=>`<path class="tread" d="M${x+d} ${y-11} l4 7 M${x+d+4} ${y+4} l-4 7"/>`).join('')}
+      <g clip-path="url(#clip-${k})"><g class="treads">${[-40,-32,-24,-16,-8,0,8,16,24,32].map(d=>`<path class="tread" d="M${x+d} ${y-11} l4 7 M${x+d+4} ${y+4} l-4 7"/>`).join('')}</g></g>
       <circle class="hub" cx="${x}" cy="${y}" r="3.5"/></g>`;
   const txt=([k,x,y,name,top])=>{ const n=top?y-60:y+38, v=top?y-41:y+59, t=top?y-29:y+72;
     return `<text class="nm" x="${x}" y="${n}" text-anchor="middle">${name}</text>
@@ -1051,13 +1056,15 @@ function renderChassis(sig){
     const g=document.querySelector(`#chassis .wh[data-w="${k}"]`), txt=document.querySelector(`#chassis .spd[data-w="${k}"]`), st=document.querySelector(`#chassis .sst[data-w="${k}"]`);
     if(!g||!txt) return;
     const halo=g.querySelector('.halo');
-    if(!v){ halo.setAttribute('class','halo'); txt.textContent='—'; txt.setAttribute('class','spd dim'); st.textContent='no data'; st.setAttribute('class','sst dim'); return; }
+    if(!v){ halo.setAttribute('class','halo'); const tr=g.querySelector('.treads'); if(tr) tr.style.animationPlayState='paused'; txt.textContent='—'; txt.setAttribute('class','spd dim'); st.textContent='no data'; st.setAttribute('class','sst dim'); return; }
     const n=Number(v.v); let cls='ok', label='sensor OK';
     if(moving && med>0 && Math.abs(n-med)/med>0.15){ cls='warn'; label='weak signal'; }
     if(moving && n<1){ cls='bad'; label='no signal'; }
     if(sn && (sn.s==='high'||sn.s==='low')){ cls='bad'; label='sensor fault'; }
     if(!moving && cls==='ok') label='stationary';
     halo.setAttribute('class','halo '+cls);
+    // roll the tread: one 8 px pattern step per frame-ish at speed; stop below 1 km/h
+    const treads=g.querySelector('.treads'); if(treads){ if(n>=1){ treads.style.animationDuration=Math.max(0.12, 1.6/Math.sqrt(n)).toFixed(2)+'s'; treads.style.animationPlayState='running'; } else treads.style.animationPlayState='paused'; }
     txt.innerHTML=(v.c==='candidate'?'≈':'')+Math.round(n)+`<tspan class="u"> ${v.u||'km/h'}</tspan>`; txt.setAttribute('class','spd '+(cls==='ok'?'':cls));
     st.textContent=label; st.setAttribute('class','sst '+(cls==='ok'?(moving?'ok':'dim'):cls));
   });
