@@ -407,6 +407,29 @@ SLABS: list[tuple[str, dict]] = [
         fixes=["Measure the sensor resistance at its connector: about 1 kΩ (spec 950–1100 Ω); open or short confirms the sensor or its tail",
                "Trace the cable along the axle for damage", "Replace the sensor"],
         severity="now", check=["wheel_speed_{k}", "abs_sensor_{k}"])),
+    (r"^(front|rear) (left|right) sensor — signal lost while driving", dict(
+        title="{pos} wheel speed sensor — signal lost while driving",
+        what="The {posl} wheel speed signal was present and then dropped out while the vehicle was moving — an "
+             "intermittent, not a dead sensor. ABS, TC and HDC switch off (all four lamps) until the next drive above "
+             "15 km/h with a good signal. Known from Hawkeye readouts; the Nanocom does not list it separately.",
+        causes=["Sensor fly-lead or its connector making and breaking with suspension movement", "Chafed wire where the lead crosses the axle or inner wing", "Sensor loose in its bore"],
+        fixes=["Flex the fly-lead along its length with the key on while watching the wheel speed on the chassis view", "Check the connector pins for tension and corrosion", "Replace the sensor if its lead is damaged"],
+        severity="now", check=["wheel_speed_{k}", "abs_sensor_{k}"])),
+    (r"^engine speed input — short or open", dict(
+        title="Engine speed input to the ABS ECU",
+        what="The ABS ECU's engine speed input is shorted or open. It uses engine speed with the engine data signal "
+             "and road speed to work out the gear for traction control and hill descent, so TC and HDC are affected. "
+             "Known from Hawkeye readouts.",
+        causes=["Wire or connector between the engine ECU and the ABS ECU", "ABS ECU connector pin"],
+        fixes=["Check the engine speed wire at the ABS ECU multiplug (behind the passenger glovebox)", "Read the engine faults for an output fault on the same signal"],
+        severity="soon")),
+    (r"^pump motor failed", dict(
+        title="ABS pump motor failed",
+        what="The ABS ECU could not run the return pump at all. Without the pump there is no ABS or traction control "
+             "intervention (all four lamps); the pedal brakes work as before, with EBD reduced. Known from Hawkeye readouts.",
+        causes=["Pump motor brushes worn out", "Pump fuse or relay", "Pump supply or earth"],
+        fixes=["Check the pump fuse and the return pump relay", "Run Pump on from the Outputs page: silence means the motor or its feed", "Replace the pump motor"],
+        severity="now")),
     (r"^shuttle valve switch(es)? — electrical failure|^shuttle valve switch electrical failure", dict(
         title="Shuttle valve switch — electrical failure",
         what="The two shuttle valve switches on the ABS modulator (wired in series) tell the ECU when brake pressure has "

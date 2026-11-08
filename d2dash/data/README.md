@@ -8,3 +8,6 @@ reduced to the fields the dashboard shows.
 They are licensed CC BY-SA 4.0 by the Ostler project (see that repository's `LICENSE-DATA`),
 separately from this repository's AGPL-3.0 code. When `d2diag` is installed, its own copy is
 used in preference to these, so a newer dictionary upstream shows up after a reinstall.
+
+Five SLABS codes (`rsw-084`, `rsw-085`, `rsw-086`, `rsw-134`, `rsw-167`) were added here as `candidate`
+from Hawkeye readouts quoted on owner forums; see `docs/hawkeye-parity.md` for the sources.
