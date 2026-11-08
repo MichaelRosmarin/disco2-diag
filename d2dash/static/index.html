@@ -1200,22 +1200,25 @@ const TAB_TITLES={drive:'Drive',engine:'Engine',slabs:'SLABS',trips:'Trips',more
 document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{
   document.querySelectorAll('nav button').forEach(x=>x.classList.toggle('on',x===b));
   $('pageTitle').textContent=TAB_TITLES[b.dataset.tab]||'Disco 2';
+  if(SUBPICK[b.dataset.tab]) SUBPICK[b.dataset.tab]('live');
   document.querySelectorAll('main section').forEach(s=>s.classList.toggle('on',s.id==='tab-'+b.dataset.tab));
   if(b.dataset.tab==='more') loadLogs();
   if(b.dataset.tab==='trips') loadTrips();
   document.querySelector('main').scrollTop=0;
 });
 fetch('/api/health').then(r=>r.json()).then(h=>{ if(h.findings) $('nTrips').textContent=h.findings.filter(f=>f.level==='warn').length||''; }).catch(()=>{});
+// Sub-sections always open on Live; switching main tabs resets them (no remembered sub-tab).
+const SUBPICK={};
 document.querySelectorAll('.sub').forEach(sub=>{
   const tab=sub.dataset.for;
   const pick=name=>{
     sub.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x.dataset.sub===name));
     document.querySelectorAll(`#tab-${tab} .pane`).forEach(p=>p.classList.toggle('on',p.id===`${tab}-${name}`));
-    try{ localStorage.setItem('d2dash.sub.'+tab,name); }catch(e){}
   };
+  SUBPICK[tab]=pick;
   sub.querySelectorAll('button').forEach(b=>b.onclick=()=>pick(b.dataset.sub));
-  let saved=null; try{ saved=localStorage.getItem('d2dash.sub.'+tab); }catch(e){}
-  if(saved && sub.querySelector(`button[data-sub="${saved}"]`)) pick(saved);
+  pick('live');
+  try{ localStorage.removeItem('d2dash.sub.'+tab); }catch(e){}
 });
 
 // ============ actions ============
