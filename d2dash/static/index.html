@@ -194,6 +194,11 @@ a{color:var(--act);text-decoration:none}
 .list .li .v.on{color:var(--ok);font-weight:600}.list .li .v.off{color:var(--fg3)}
 .list .li .v.warn{color:var(--warn);font-weight:600}.list .li .v.bad{color:var(--bad);font-weight:600}
 .list .li .t{grid-column:1/-1;font-size:12.5px;color:var(--fg3)}
+.list .li.act{grid-template-columns:1fr auto;align-items:center;gap:0 14px}
+.list .li.act .t{grid-column:auto;display:block;margin-top:2px}
+.list .li.act .k{display:block}
+.injrow{margin-top:4px}
+.injrow .btn{flex:1;min-width:0;font-family:"Inter D";font-size:18px;font-weight:600;min-height:48px}
 .list .li.pend .k{color:var(--fg3)}
 .list .li.pend .v{color:var(--fg3);font-weight:400;font-size:13px}
 .list.two{display:grid;grid-template-columns:1fr;gap:0 32px}
@@ -438,11 +443,8 @@ footer{padding:18px var(--pad) 10px;color:var(--fg3);font-size:12px;text-align:c
     </div>
 
     <div class="pane" id="engine-outputs">
-      <div class="blk hazard">
-        <h2>Output tests</h2>
-        <p class="hint">Each button pulses a real part once. Engine running, handbrake on, nobody near the fan. These frames were decoded from captures and have not yet been fired from this software on a car: treat the first use of each as a test.</p>
-        <div class="row" id="engOutputs"></div>
-      </div>
+      <div class="note warn show" style="margin-top:12px">Each test works a real part once. Engine running, handbrake on, nobody near the fan. These commands were decoded from captures and have not yet been fired from this software on a car, so treat the first use of each as a test.</div>
+      <div id="engOutputs"></div>
     </div>
 
     <div class="pane" id="engine-utilities">
@@ -1117,9 +1119,24 @@ function confirmCmd(module, action, title, text, verb){
 }
 function closeModal(){ $('modal').classList.remove('show'); pending=null; }
 $('mGo').onclick=()=>{ const a=pending; closeModal(); if(a) cmd(a,true); };
-const OUT_LABELS={fuel_pump:'Fuel pump',mil_lamp:'Engine warning lamp',ac_clutch:'A/C clutch',ac_fan:'A/C fan',glow_plugs:'Glow plugs',rev_counter:'Rev counter',temp_gauge:'Temperature gauge',egr_throttle:'EGR throttle',wastegate:'Wastegate'};
-$('engOutputs').innerHTML = TD5_OUTPUTS.map(o=>{ const l=OUT_LABELS[o]||nice(o); return `<button class="btn amber" onclick="confirmCmd('td5','output_${o}','Test the ${l.toLowerCase()}?','Pulses the ${l.toLowerCase()} output once.','Test')">${l}</button>`; }).join('')
-  + [1,2,3,4,5].map(n=>`<button class="btn amber" onclick="confirmCmd('td5','injector_${n}','Pulse injector ${n}?','Fires injector ${n} once. Engine running.','Pulse')">Injector ${n}</button>`).join('');
+// Output tests as grouped rows: what it is, what you should see, one Test button each.
+const OUT_GROUPS=[
+  {title:'Fuel and starting', items:[
+    ['fuel_pump','Fuel pump relay','You should hear the in-tank pump run for a moment'],
+    ['glow_plugs','Glow plug relay','Relay clicks; the glow lamp may light briefly']]},
+  {title:'Instruments', items:[
+    ['mil_lamp','Engine warning lamp','The amber engine lamp should light'],
+    ['rev_counter','Rev counter','The needle should move'],
+    ['temp_gauge','Temperature gauge','The needle should move']]},
+  {title:'Air and boost', items:[
+    ['wastegate','Wastegate modulator','A click from the modulator by the turbo inlet pipe'],
+    ['egr_throttle','EGR inlet throttle','The inlet flap should move'],
+    ['ac_clutch','A/C compressor clutch','A click from the compressor; idle may dip'],
+    ['ac_fan','A/C condenser fan','The fan behind the grille should spin']]},
+];
+$('engOutputs').innerHTML = OUT_GROUPS.map(g=>`<div class="blk"><h2>${g.title}</h2><div class="list">${g.items.map(([o,l,d])=>
+    `<div class="li act"><span><span class="k">${l}</span><span class="t">${d}</span></span><button class="btn sm amber" onclick="confirmCmd('td5','output_${o}','Test the ${l.toLowerCase()}?','Works the ${l.toLowerCase()} once. ${d}.','Test')">Test</button></div>`).join('')}</div></div>`).join('')
+  + `<div class="blk"><h2>Injectors</h2><p class="hint">Fires one injector once with the engine running. Listen for the cylinder.</p><div class="row injrow">${[1,2,3,4,5].map(n=>`<button class="btn amber" onclick="confirmCmd('td5','injector_${n}','Pulse injector ${n}?','Fires injector ${n} once. Engine running.','Pulse')">${n}</button>`).join('')}</div></div>`;
 
 // ============ trips: list, replay, engine health ============
 const REPLAY = [  // panels in order; each its own axis (never two scales on one chart)
