@@ -291,7 +291,8 @@ footer{padding:14px;color:var(--fg3);font-size:12px;text-align:center}
 
   <!-- ================= DRIVE ================= -->
   <section id="tab-drive" class="on">
-    <div class="note warn" id="driveNote">Engine data paused: SLABS is the active module. <button class="link" onclick="switchModule('td5')">Connect engine</button></div>
+    <div class="note warn" id="driveNote">Engine data paused: SLABS is the active module. Reconnecting takes a few seconds.
+      <div class="row"><button class="btn act" onclick="switchModule('td5')">Connect engine</button></div></div>
     <div class="heroes">
       <div class="hero" data-g="coolant_temp"></div>
       <div class="hero" data-g="manifold_press"></div>
@@ -312,7 +313,8 @@ footer{padding:14px;color:var(--fg3);font-size:12px;text-align:center}
       <button data-sub="faults" class="on">Faults</button><button data-sub="inputs">Inputs</button>
       <button data-sub="settings">Settings</button><button data-sub="outputs">Outputs</button><button data-sub="utilities">Utilities</button>
     </div>
-    <div class="note" id="engNote">The engine ECU is not the active module. <button class="link" onclick="switchModule('td5')">Connect engine</button></div>
+    <div class="note" id="engNote">The K-line carries one ECU at a time: SLABS is active, so engine data is paused. Reconnecting takes a few seconds; the ABS lights go out as it does.
+      <div class="row"><button class="btn act" onclick="switchModule('td5')">Connect engine</button></div></div>
 
     <div class="pane on" id="engine-faults">
       <div class="blk">
