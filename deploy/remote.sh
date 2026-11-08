@@ -2,6 +2,7 @@
 # Remote hands on the Pi without pulling it out of the dash.
 #
 #   sudo bash deploy/remote.sh terminal '<password>'   web terminal on port 7681 (ttyd)
+#   sudo bash deploy/remote.sh eth                     just the Ethernet link fix (100 Mb/s, EEE off)
 #   sudo bash deploy/remote.sh connect                 Raspberry Pi Connect (needs internet + a Pi ID)
 #   sudo bash deploy/remote.sh off                     stop the web terminal
 #
@@ -18,6 +19,29 @@ set -euo pipefail
 SERVICE_USER=${SERVICE_USER:-pi}
 PORT=${TTYD_PORT:-7681}
 MODE=${1:-}
+
+stable_eth() {
+    echo "==> ethernet: hold the Pi 3B+ port at 100 Mb/s with EEE off (its gigabit link to a laptop drops every few minutes)"
+    apt-get install -y -q ethtool >/dev/null 2>&1 || true
+    cat > /etc/systemd/system/d2dash-eth.service <<'EOF'
+[Unit]
+Description=d2dash: stable Ethernet link (100 Mb/s, EEE off) for the laptop port
+After=sys-subsystem-net-devices-eth0.device
+BindsTo=sys-subsystem-net-devices-eth0.device
+
+[Service]
+Type=oneshot
+ExecStart=-/usr/sbin/ethtool --set-eee eth0 eee off
+ExecStart=-/usr/sbin/ethtool -s eth0 advertise 0x008
+RemainAfterExit=yes
+
+[Install]
+WantedBy=sys-subsystem-net-devices-eth0.device
+EOF
+    systemctl daemon-reload
+    systemctl enable d2dash-eth.service >/dev/null 2>&1
+    systemctl start d2dash-eth.service 2>/dev/null || true
+}
 
 case "$MODE" in
   terminal)
@@ -66,6 +90,7 @@ EOF
         ipv4.dhcp-timeout 10 connection.autoconnect yes 2>/dev/null \
         || echo "note: could not modify '$con' (netplan-managed?)"
     done
+    stable_eth
     echo "web terminal: http://disco2.local:$PORT/  (user $SERVICE_USER)"
     echo "laptop on a bare cable: plug in, wait ~15 s, same address"
     ;;
@@ -76,9 +101,12 @@ EOF
     su - "$SERVICE_USER" -c "rpi-connect on && rpi-connect signin"
     echo "open the link above once to pair; then connect.raspberrypi.com → disco2 → Remote shell"
     ;;
+  eth)
+    stable_eth
+    ;;
   off)
     systemctl disable --now d2dash-ttyd.service 2>/dev/null || true
     echo "web terminal stopped"
     ;;
-  *) echo "usage: $0 terminal '<password>' | connect | off"; exit 1 ;;
+  *) echo "usage: $0 terminal '<password>' | eth | connect | off"; exit 1 ;;
 esac
