@@ -908,7 +908,9 @@ function renderSlabs(sig){
 // Top-down Discovery 2: ladder chassis, beam axles, props to the transfer box, rear air springs.
 // Wheel rims colour by sensor state; numbers are wheel speeds; rear corners show ride height.
 function buildChassis(){
-  const W=[['fl',62,52],['fr',62,188],['rl',248,52],['rr',248,188]];   // [key, x, y]  (front on the left)
+  // [key, x, y]. Front is on the left, so the driver faces left and the driver's RIGHT is the top of the
+  // picture — Land Rover's left/right is always as seen from the driver's seat.
+  const W=[['fr',62,52],['fl',62,188],['rr',248,52],['rl',248,188]];
   const tyre=([k,x,y])=>`<g class="wh" data-w="${k}"><rect class="tyre" x="${x-16}" y="${y-30}" width="32" height="60" rx="9"/>
       ${[-18,-6,6,18].map(d=>`<line class="tread" x1="${x-11}" y1="${y+d}" x2="${x+11}" y2="${y+d}"/>`).join('')}
       <circle class="glow" cx="${x}" cy="${y}" r="3"/></g>`;
@@ -925,9 +927,11 @@ function buildChassis(){
     <rect class="blockf" x="150" y="112" width="26" height="36" rx="4"/>
     <line class="prop" x1="150" y1="130" x2="68" y2="120"/><line class="prop" x1="176" y1="130" x2="242" y2="120"/>
     <circle class="blockf" cx="62" cy="120" r="9"/><circle class="blockf" cx="248" cy="120" r="10"/>
-    <g class="sp" data-s="L"><circle class="spring" cx="248" cy="88" r="8"/><circle class="spring" cx="248" cy="88" r="3.5"/></g>
-    <g class="sp" data-s="R"><circle class="spring" cx="248" cy="152" r="8"/><circle class="spring" cx="248" cy="152" r="3.5"/></g>
-    <text class="hgt" data-s="L" x="266" y="92" font-size="11">—</text><text class="hgt" data-s="R" x="266" y="156" font-size="11">—</text>
+    <g class="sp" data-s="R"><circle class="spring" cx="248" cy="88" r="8"/><circle class="spring" cx="248" cy="88" r="3.5"/></g>
+    <g class="sp" data-s="L"><circle class="spring" cx="248" cy="152" r="8"/><circle class="spring" cx="248" cy="152" r="3.5"/></g>
+    <text class="hgt" data-s="R" x="266" y="92" font-size="11">—</text><text class="hgt" data-s="L" x="266" y="156" font-size="11">—</text>
+    <text class="lb" x="160" y="-8" font-size="9" text-anchor="middle">RIGHT (driver's side)</text>
+    <text class="lb" x="160" y="266" font-size="9" text-anchor="middle">LEFT (passenger side)</text>
     <text class="lb" x="14" y="122" font-size="9" text-anchor="middle" transform="rotate(-90 14 122)">FRONT</text>
     ${W.map(tyre).join('')}${W.map(label).join('')}</svg>`;
 }
