@@ -172,8 +172,8 @@ TD5: list[tuple[str, dict]] = [
         what="Manifold pressure exceeded the limit — roughly 2.4 bar absolute on a standard map, which is about 1.4 bar "
              "of boost at the coast but nearer 1.6 bar up on the Highveld. The ECU cuts fuel to protect the "
              "engine, which feels like a sudden loss of power under hard acceleration that returns after lifting off. The "
-             "Td5 wastegate is worked by boost pressure: the modulator bleeds the boost signal to the actuator, so a "
-             "blocked or split signal line to the modulator lets boost run away.",
+             "Td5 wastegate is worked by boost pressure: the modulator bleeds pressure away from the actuator line when "
+             "commanded, so a blocked or split supply line to the modulator starves the actuator and lets boost run away.",
         causes=["Boost signal hose to the modulator split, kinked or blocked", "Wastegate actuator rod or wastegate flap seized",
                 "Modulator stuck", "Over-tight actuator adjustment after a turbo rebuild", "Remapped ECU running beyond stock boost"],
         fixes=["Check the wastegate rod moves freely; free off the wastegate flap", "Inspect the boost hoses between intercooler pipe, modulator and actuator for splits",
@@ -324,8 +324,8 @@ TD5: list[tuple[str, dict]] = [
         title="Crankshaft signal — implausible speed",
         what="The crankshaft position sensor on the flywheel housing reported a speed the ECU considers impossible. "
              "Noise on the sensor wiring is the usual cause. The sensor reads a ring of drilled holes in the flywheel rim, so "
-             "damage or debris there can also do it. Expect stalls or misfires if it is active.",
-        causes=["Crank sensor wiring picking up interference (routing near the starter cable)", "Sensor loose or not seated (it is a fixed bolt-on sensor; there is no gap adjustment)", "Damage or debris at the drilled holes in the flywheel rim", "Sensor failing when hot"],
+             "damage or debris there can also do it. There is no back-up strategy for this sensor: if it is active the engine stalls or will not start.",
+        causes=["Crank sensor wiring picking up interference (routing near the starter cable)", "Sensor loose, or the wrong shim behind its flange (the gap to the flywheel is set by 0.5 mm spacers to about 1.5 mm; the manual lists 'incorrect spacer fitted' as a cause)", "Damage or debris at the drilled holes in the flywheel rim", "Sensor failing when hot"],
         fixes=["Inspect the sensor plug and wiring on the bell housing", "Replace the sensor if intermittent when hot", "Check the flywheel rim holes through the sensor aperture"],
         severity="soon", check=["rpm"])),
     (r"noisy crank signal", dict(
@@ -384,7 +384,7 @@ SLABS: list[tuple[str, dict]] = [
              "cannot trust that wheel's speed, so ABS, traction control and hill descent are switched off — the "
              "ABS, TC and HDC lamps come on together (the Three Amigos; the manual also lists the red brake lamp, since EBD "
              "is reduced). Braking itself still works. Weak signals are usually mechanical, not electrical. "
-             "Unlike a shuttle valve switch fault this one clears itself: after the repair the lamps go out once the vehicle exceeds about 15 km/h.",
+             "Unlike a shuttle valve switch fault this one clears itself: after the repair the ABS lamp stays on until the vehicle first exceeds 15 km/h, then goes out.",
         causes=["Sensor not pushed fully home in its bore, or corroded in it (on the Discovery 2 the sensor is a push fit into the hub and reads a toothed ring sealed inside the wheel bearing)",
                 "Wheel bearing worn or with play, which moves the ring away from the sensor (often worse on bends); a damaged ring means a new hub bearing",
                 "Sensor tip contaminated with metal swarf", "Fly-lead damaged"],
@@ -394,8 +394,8 @@ SLABS: list[tuple[str, dict]] = [
     (r"^(front|rear) (left|right) sensor — electric fail", dict(
         title="{pos} wheel speed sensor — electrical failure",
         what="The {posl} wheel speed sensor circuit is open or shorted — the ECU checks each sensor's resistance and sees "
-             "no sensor at all rather than a weak one. ABS, TC and HDC are disabled until it is fixed; once repaired the lamps "
-             "clear themselves on the first drive above about 15 km/h.",
+             "no sensor at all rather than a weak one. ABS, TC and HDC are disabled until it is fixed; once repaired the ABS lamp "
+             "clears itself the first time the vehicle exceeds 15 km/h.",
         causes=["Sensor cable chafed or broken where it flexes with the suspension", "Fly-lead connector corroded (the fronts are typically in the engine bay; the rears on the chassis near the axle)",
                 "Sensor coil failed", "Rodent damage"],
         fixes=["Measure the sensor resistance at its connector: about 1 kΩ (spec 950–1100 Ω); open or short confirms the sensor or its tail",
@@ -410,7 +410,7 @@ SLABS: list[tuple[str, dict]] = [
              "permanent fault: even after a repair the lamps stay on until the fault is cleared with a tool.",
         causes=["Shuttle valve switch failed (very common; often intermittent when hot)", "Switch connector corroded",
                 "Wiring to the modulator chafed"],
-        fixes=["Check the switch circuit resistance to earth at the modulator connector: brakes off about 3.0 kΩ (Land Rover's test procedure gives 3020 ±30 Ω with a good switch pack), about 2 kΩ with one switch closed, about 1.0 kΩ with the pedal pressed; out of range means the switch pack or its wiring",
+        fixes=["Check the switch circuit resistance to earth at the modulator connector against the manual's windows: 2977–3067 Ω brakes off, 1992–2052 Ω with one switch closed, 1007–1037 Ω with the pedal pressed; out of range means the switch pack or its wiring",
                "Check the modulator earth stud behind the left-hand headlamp — a known cause of this code",
                "Replace both shuttle valve switches on the modulator — they are cheap and fitted together",
                "Clear the fault afterwards; it does not clear itself",
@@ -514,14 +514,14 @@ SLABS: list[tuple[str, dict]] = [
         what="The {posl} {io}let solenoid valve in the ABS modulator is not drawing current when driven. ABS, TC and HDC are "
              "disabled and EBD is reduced (all four lamps, including the red brake lamp); the pedal brakes work as before. The valves themselves rarely fail; the connector is the usual culprit.",
         causes=["Modulator connector not fully latched or corroded", "Harness to the modulator chafed", "Solenoid coil open"],
-        fixes=["Unplug the modulator connector, inspect and clean, refit firmly", "Measure the coils at the modulator pins and compare like with like: the four inlets must match each other and the four outlets each other (figures quoted for the Wabco unit are roughly 6–7 Ω inlet, 3–3.5 Ω outlet)", "If all valves fault together it is the connector or the ECU relay, not the valves"],
+        fixes=["Unplug the modulator connector, inspect and clean, refit firmly", "Measure the coils at the modulator pins: the manual gives 5.9–7.3 Ω for inlet valves and 3.0–3.6 Ω for outlet valves; the four of each type should match", "If all valves fault together it is the connector or the ECU relay, not the valves"],
         severity="soon")),
     (r"(front|rear) (left|right) (in|out) valve — (short to gnd|short to supply|drive short to supply)", dict(
         title="{pos} {io}let valve — short circuit",
         what="The {posl} {io}let solenoid valve circuit is shorted — to earth, to supply, or within the driver. The ECU "
              "shuts the valve driver down and disables ABS, TC and HDC (all three lamps plus the red brake lamp, since EBD is disabled).",
         causes=["Chafed modulator harness", "Water in the modulator connector", "Solenoid coil shorted", "ECU driver stage (if several valves fault together)"],
-        fixes=["Inspect the modulator harness and connector for damage and moisture", "Measure the coils and compare like with like: the four inlets must match each other and the four outlets each other (roughly 6–7 Ω inlet, 3–3.5 Ω outlet are the figures quoted for the Wabco unit)", "Several valves at once points to the ECU or connector"],
+        fixes=["Inspect the modulator harness and connector for damage and moisture", "Measure the coils: the manual gives 5.9–7.3 Ω for inlet valves and 3.0–3.6 Ω for outlet valves; the four of each type should match", "Several valves at once points to the ECU or connector"],
         severity="soon")),
     (r"pump relay — (open circuit|short to gnd|short to supply|drive short to supply)", dict(
         title="ABS pump relay circuit",
@@ -545,7 +545,7 @@ SLABS: list[tuple[str, dict]] = [
              "The manual classes a throttle position signal fault as permanent: the lamps stay on until it is cleared with a tool.",
         causes=["Engine data signal to the ABS ECU corrupt", "Accelerator pedal sensor fault (see engine faults)"],
         fixes=["Read the engine ECU faults for pedal or gearbox/abs drive faults", "Check the pedal returns freely"],
-        severity="drive")),
+        severity="soon")),
     (r"internal ecu comms error", dict(
         title="ABS ECU internal communication error",
         what="The ABS ECU's internal self-check failed (all four lamps). Can be a one-off from low voltage at key-on; if it "
