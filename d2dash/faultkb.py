@@ -87,7 +87,7 @@ TD5: list[tuple[str, dict]] = [
         severity="soon", check=["ambient_press_1", "ambient_press_2", "manifold_press"])),
     (r"^reference voltage", dict(
         title="Sensor reference voltage (5 V supply)",
-        what="The ECU supplies regulated 5 V feeds to the pedal, the MAP/IAT and the ambient pressure sensor. If a feed "
+        what="The ECU supplies regulated 5 V feeds to the pedal, the MAP/IAT, the ambient pressure sensor and the fuel temperature sensor. If a feed "
              "sags or is shorted every sensor on it reads wrong at once, so this fault is usually accompanied by others.",
         causes=["A sensor or its wiring shorting the 5 V line to earth or battery", "Water in a sensor connector", "ECU regulator fault"],
         fixes=["Look at Accel. supply on the Inputs page: it is one of the 5 V outputs and should sit at 5.0 V; if it is fine the fault may be on the MAP or ambient-sensor feed",
@@ -175,7 +175,7 @@ TD5: list[tuple[str, dict]] = [
              "Td5 wastegate is worked by boost pressure: the modulator bleeds pressure away from the actuator line when "
              "commanded, so a blocked or split supply line to the modulator starves the actuator and lets boost run away.",
         causes=["Boost signal hose to the modulator split, kinked or blocked", "Wastegate actuator rod or wastegate flap seized",
-                "Modulator stuck", "Over-tight actuator adjustment after a turbo rebuild", "Remapped ECU running beyond stock boost"],
+                "Modulator stuck in its bleed position or leaking internally", "Over-tight actuator adjustment after a turbo rebuild", "Remapped ECU running beyond stock boost"],
         fixes=["Check the wastegate rod moves freely; free off the wastegate flap", "Inspect the boost hoses between intercooler pipe, modulator and actuator for splits",
                "Watch Manifold pressure on a hard pull: stock peaks around 2.3 bar absolute. If it climbs to about 2.4–2.5 bar and then falls back towards 1 bar as the power goes, that is the over-boost cut itself"],
         severity="soon", check=["manifold_press", "wastegate_modulator"])),
@@ -201,11 +201,13 @@ TD5: list[tuple[str, dict]] = [
         fixes=["Check the connector and the coil resistance (roughly 25–30 Ω)", "Replace the modulator"],
         severity="soon", check=["wastegate_modulator", "manifold_press"])),
     (r"wastegate diagnostics", dict(
-        title="Wastegate control not responding",
-        what="The ECU commanded the wastegate and did not see the boost pressure respond as expected — the modulator "
-             "circuit is electrically fine but the pneumatic or mechanical side is not doing what it is told.",
-        causes=["Boost signal hoses split, kinked or wrongly routed", "Actuator diaphragm leaking", "Wastegate flap seized", "Modulator stuck"],
-        fixes=["Apply air pressure to the actuator by hand and watch the rod move", "Check and re-route the hoses", "Free the wastegate"],
+        title="Wastegate modulator diagnostic",
+        what="The ECU's diagnostic on the wastegate modulator output failed — the output read high or low when the ECU "
+             "tested it. The same 'diagnostics' state exists for the EGR and temperature gauge outputs, so treat it like "
+             "the open-load and short-circuit entries first; and since the ECU can only judge the wastegate by the boost "
+             "it sees, check the hoses and actuator as well.",
+        causes=["Modulator connector or coil", "Wiring to the modulator", "Boost signal hoses split, kinked or wrongly routed", "Actuator diaphragm leaking", "Wastegate flap seized"],
+        fixes=["Check the modulator connector and coil as for the open-load fault", "Apply air pressure to the actuator by hand and watch the rod move", "Check and re-route the hoses", "Free the wastegate"],
         severity="soon", check=["manifold_press", "wastegate_modulator"])),
     (r"egr (vacuum )?modulator (open load|short circuit)|egr vacuum diagnostics", dict(
         title="EGR vacuum modulator circuit",
@@ -242,11 +244,12 @@ TD5: list[tuple[str, dict]] = [
         severity="soon", check=["fuel_pump_relay"])),
     (r"^mil lamp drive", dict(
         title="Engine warning lamp drive",
-        what="The ECU drives the engine malfunction indicator lamp in the instrument pack. Open load usually means "
-             "the bulb has blown or the instrument pack connection is poor. Early (pre-2002) Td5 packs may have no engine "
-             "warning lamp at all, in which case this fault is expected and harmless.",
-        causes=["Bulb blown", "No lamp fitted (early vehicles)", "Instrument pack connector", "Wiring"],
-        fixes=["The lamp should light with the key on and go out once running; if it never lights, replace the bulb"],
+        what="The ECU drives the engine malfunction indicator lamp in the instrument pack. On the Discovery 2 the warning "
+             "lamps are LEDs on the pack's circuit board, not replaceable bulbs, so open load means the pack is not loading "
+             "the ECU's output: the pack connector, the wire from the ECU, or a failed LED in the pack. Early (pre-2002) Td5 "
+             "packs may have no engine warning lamp at all, in which case this fault is expected and harmless.",
+        causes=["Instrument pack connector", "Wire from the ECU to the pack", "No lamp fitted (early vehicles)", "LED failed inside the pack (pack repair)"],
+        fixes=["The lamp should light with the key on and go out once running; if it never lights, check the pack connector and wiring before condemning the pack"],
         severity="drive")),
     (r"glow ?plug relay drive", dict(
         title="Glow plug relay drive",
@@ -257,9 +260,10 @@ TD5: list[tuple[str, dict]] = [
         severity="drive")),
     (r"glow ?plug lamp drive", dict(
         title="Glow plug lamp drive",
-        what="The glow plug warning lamp in the instrument pack is not drawing current when driven — normally a blown bulb.",
-        causes=["Bulb blown", "Instrument pack connector"],
-        fixes=["Replace the bulb"],
+        what="The glow plug warning lamp in the instrument pack is not drawing current when driven. On the Discovery 2 the "
+             "lamp is an LED on the pack board, so this is the pack connector, the wire from the ECU, or the pack itself.",
+        causes=["Instrument pack connector", "Wire from the ECU to the pack", "LED failed inside the pack"],
+        fixes=["Check the lamp lights at key-on when cold; if not, check the pack connector and wiring"],
         severity="drive")),
     (r"radiator fan drive", dict(
         title="Radiator (auxiliary) fan drive",
@@ -308,10 +312,10 @@ TD5: list[tuple[str, dict]] = [
         severity="soon")),
     (r"cruise (control )?lamp drive", dict(
         title="Cruise control lamp drive",
-        what="The cruise 'on' lamp in the instrument pack is not drawing current — a blown bulb, or no cruise control "
-             "fitted while the ECU is configured for it.",
-        causes=["Bulb blown", "No cruise fitted", "Instrument pack connector"],
-        fixes=["Replace the bulb, or correct the configuration"],
+        what="The cruise 'on' lamp in the instrument pack is not drawing current. On the Discovery 2 it is an LED on the "
+             "pack board, so this is the pack connector or wiring — or no cruise control fitted while the ECU is configured for it.",
+        causes=["No cruise fitted (configuration)", "Instrument pack connector", "Wire from the ECU to the pack"],
+        fixes=["Correct the configuration if no cruise is fitted; otherwise check the pack connector and wiring"],
         severity="drive")),
     (r"active engine mount", dict(
         title="Active engine mounting drive",
@@ -325,7 +329,7 @@ TD5: list[tuple[str, dict]] = [
         what="The crankshaft position sensor on the flywheel housing reported a speed the ECU considers impossible. "
              "Noise on the sensor wiring is the usual cause. The sensor reads a ring of drilled holes in the flywheel rim, so "
              "damage or debris there can also do it. There is no back-up strategy for this sensor: if it is active the engine stalls or will not start.",
-        causes=["Crank sensor wiring picking up interference (routing near the starter cable)", "Sensor loose, or the wrong shim behind its flange (the gap to the flywheel is set by 0.5 mm spacers to about 1.5 mm; the manual lists 'incorrect spacer fitted' as a cause)", "Damage or debris at the drilled holes in the flywheel rim", "Sensor failing when hot"],
+        causes=["Crank sensor wiring picking up interference (routing near the starter cable)", "Sensor loose, or the wrong spacer behind its flange (the gap to the flywheel is set by a shim; the manual lists 'incorrect spacer fitted' as a cause)", "Damage or debris at the drilled holes in the flywheel rim", "Sensor failing when hot"],
         fixes=["Inspect the sensor plug and wiring on the bell housing", "Replace the sensor if intermittent when hot", "Check the flywheel rim holes through the sensor aperture"],
         severity="soon", check=["rpm"])),
     (r"noisy crank signal", dict(
@@ -512,14 +516,14 @@ SLABS: list[tuple[str, dict]] = [
     (r"(front|rear) (left|right) (in|out) valve — open circuit", dict(
         title="{pos} {io}let valve — open circuit",
         what="The {posl} {io}let solenoid valve in the ABS modulator is not drawing current when driven. ABS, TC and HDC are "
-             "disabled and EBD is reduced (all four lamps, including the red brake lamp); the pedal brakes work as before. The valves themselves rarely fail; the connector is the usual culprit.",
+             "disabled and EBD partly disabled (all four lamps, including the red brake lamp); the pedal brakes work as before. The valves themselves rarely fail; the connector is the usual culprit.",
         causes=["Modulator connector not fully latched or corroded", "Harness to the modulator chafed", "Solenoid coil open"],
         fixes=["Unplug the modulator connector, inspect and clean, refit firmly", "Measure the coils at the modulator pins: the manual gives 5.9–7.3 Ω for inlet valves and 3.0–3.6 Ω for outlet valves; the four of each type should match", "If all valves fault together it is the connector or the ECU relay, not the valves"],
         severity="soon")),
     (r"(front|rear) (left|right) (in|out) valve — (short to gnd|short to supply|drive short to supply)", dict(
         title="{pos} {io}let valve — short circuit",
         what="The {posl} {io}let solenoid valve circuit is shorted — to earth, to supply, or within the driver. The ECU "
-             "shuts the valve driver down and disables ABS, TC and HDC (all three lamps plus the red brake lamp, since EBD is disabled).",
+             "shuts the valve driver down and disables ABS, TC and HDC (all three lamps plus the red brake lamp, since EBD is partly disabled).",
         causes=["Chafed modulator harness", "Water in the modulator connector", "Solenoid coil shorted", "ECU driver stage (if several valves fault together)"],
         fixes=["Inspect the modulator harness and connector for damage and moisture", "Measure the coils: the manual gives 5.9–7.3 Ω for inlet valves and 3.0–3.6 Ω for outlet valves; the four of each type should match", "Several valves at once points to the ECU or connector"],
         severity="soon")),
