@@ -57,9 +57,71 @@ nav button .n{position:absolute;top:9px;margin-left:4px;min-width:18px;height:18
 nav button .n:empty{display:none}
 
 /* sub-navigation inside Engine / SLABS: the Nanocom's five sections */
-.sub{display:flex;gap:4px;margin:10px var(--pad) 0;padding:3px;border-radius:10px;background:var(--bg2);overflow-x:auto}
-.sub button{flex:1;min-height:36px;padding:0 10px;border:0;border-radius:8px;background:none;color:var(--fg3);font-size:13.5px;font-weight:600;white-space:nowrap}
+.sub{display:flex;gap:4px;margin:10px var(--pad) 0;padding:3px;border-radius:10px;background:var(--bg2);overflow-x:auto;scrollbar-width:none}
+.sub::-webkit-scrollbar{display:none}
+.sub button{flex:1 0 auto;min-height:36px;padding:0 12px;border:0;border-radius:8px;background:none;color:var(--fg3);font-size:13.5px;font-weight:600;white-space:nowrap;position:relative}
 .sub button.on{background:var(--bg3);color:var(--fg)}
+.sub button .n{display:inline-block;margin-left:5px;min-width:17px;height:17px;padding:0 5px;border-radius:9px;background:var(--bad);color:#fff;font-size:11px;line-height:17px;text-align:center}
+.sub button .n:empty{display:none}
+.cats{display:flex;gap:6px;margin:12px var(--pad) 0;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}
+.cats::-webkit-scrollbar{display:none}
+.cats button{flex:none;padding:7px 12px;border-radius:999px;border:1px solid var(--rule2);background:none;color:var(--fg2);font-size:13px;font-weight:600;white-space:nowrap}
+.cats button.on{border-color:var(--act);color:var(--act);background:rgba(124,196,255,.1)}
+.tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:12px var(--pad) 0}
+@media (min-width:720px){.tiles{grid-template-columns:repeat(6,1fr)}}
+.tiles .it{padding:12px 12px 10px;border-radius:12px;background:var(--bg2)}
+.tiles .rd{font-size:24px;line-height:1.1}
+.tiles .rd small{font-family:"Inter T";font-weight:500;font-size:12px;color:var(--fg2);letter-spacing:0;margin-left:2px}
+.tiles .lb{color:var(--fg3);font-size:12.5px;margin-top:3px}
+.tiles .warn .rd{color:var(--warn)}.tiles .bad .rd{color:var(--bad)}
+/* chassis graphic */
+.chassis{margin:12px var(--pad) 0;padding:10px 6px 4px;border-radius:14px;background:radial-gradient(ellipse at 50% 40%,#182028,var(--bg2) 70%)}
+.chassis svg{width:100%;height:auto;display:block;max-height:330px;margin:0 auto}
+.chassis .rail{fill:none;stroke:#3a4652;stroke-width:7;stroke-linecap:round;stroke-linejoin:round}
+.chassis .rail2{fill:none;stroke:#4a5866;stroke-width:3;stroke-linecap:round}
+.chassis .axle{stroke:#55636f;stroke-width:9;stroke-linecap:round}
+.chassis .prop{stroke:#6b7a88;stroke-width:4;stroke-linecap:round;stroke-dasharray:6 5}
+.chassis .blockf{fill:#232c36;stroke:#4a5866;stroke-width:1.5}
+.chassis .tyre{fill:#11161b;stroke:#5c6a78;stroke-width:3;transition:stroke .3s}
+.chassis .tyre.ok{stroke:var(--ok)}.chassis .tyre.warn{stroke:var(--warn)}.chassis .tyre.bad{stroke:var(--bad)}.chassis .tyre.dim{stroke:#3a4652}
+.chassis .tread{stroke:#2a333d;stroke-width:1.5}
+.chassis .spring{fill:none;stroke:#7cc4ff;stroke-width:2.5;opacity:.85}
+.chassis .spring.warn{stroke:var(--warn)}.chassis .spring.bad{stroke:var(--bad)}
+.chassis text{font-family:"Inter D","Inter T",sans-serif;font-weight:700;fill:var(--fg);font-variant-numeric:tabular-nums}
+.chassis text.u{font-family:"Inter T";font-weight:500;fill:var(--fg3)}
+.chassis text.lb{font-family:"Inter T";font-weight:600;fill:var(--fg3);letter-spacing:.06em}
+.chassis text.warn{fill:var(--warn)}.chassis text.bad{fill:var(--bad)}.chassis text.dim{fill:var(--fg3)}
+.chassis .glow{fill:var(--ok);opacity:0}
+.chassis .glow.on{opacity:.9}
+/* fault sheet */
+.faults li{cursor:pointer}
+.faults li:active{opacity:.7}
+.faults li .h .more{margin-left:auto;color:var(--fg3);font-size:12px;font-weight:600;white-space:nowrap}
+#sheetBg{position:fixed;inset:0;background:rgba(0,0,0,.55);display:none;z-index:20}
+#sheetBg.on{display:block}
+#sheet{position:fixed;left:0;right:0;bottom:0;max-height:88vh;overflow-y:auto;background:var(--bg2);border-radius:18px 18px 0 0;padding:14px var(--pad) calc(env(safe-area-inset-bottom) + 20px);z-index:21;transform:translateY(105%);transition:transform .25s ease;max-width:760px;margin:0 auto}
+#sheet.on{transform:none}
+#sheet .grab{width:40px;height:4px;border-radius:2px;background:var(--rule2);margin:0 auto 12px}
+#sheet .x{position:absolute;top:10px;right:12px;width:34px;height:34px;border-radius:50%;border:0;background:var(--bg3);color:var(--fg2);font-size:15px}
+#sheet h3{padding-right:40px}
+#sheet h3{font-family:"Inter D";font-size:20px;letter-spacing:-.02em;margin:0 0 6px;line-height:1.2}
+#sheet .meta{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+#sheet .sev{font-size:12px;font-weight:700;padding:3px 9px;border-radius:6px;background:var(--bg3);color:var(--fg2)}
+#sheet .sev.soon{background:var(--warnbg);color:var(--warn)}#sheet .sev.stop{background:var(--badbg);color:var(--bad)}
+#sheet p{color:var(--fg2);font-size:14.5px;margin:0 0 10px;line-height:1.5}
+#sheet p.raw{font-size:12.5px;color:var(--fg3)}
+#sheet h4{font-size:12px;font-weight:600;color:var(--fg3);text-transform:uppercase;letter-spacing:.06em;margin:14px 0 6px}
+#sheet ol{margin:0;padding-left:20px;color:var(--fg);font-size:14.5px}
+#sheet ol li{margin:4px 0;line-height:1.45}
+#sheet .watch{display:flex;flex-wrap:wrap;gap:6px}
+#sheet .watch span{padding:5px 10px;border-radius:999px;background:var(--bg3);font-size:13px;color:var(--act)}
+.libsearch{margin:12px var(--pad) 0}
+.libsearch input{width:100%;min-height:44px;padding:0 14px;border-radius:10px;border:1px solid var(--rule2);background:var(--bg2);color:var(--fg);font-size:15px}
+.lib{margin:8px var(--pad) 0}
+.lib .li{padding:11px 0;border-bottom:1px solid var(--rule);cursor:pointer;display:flex;gap:10px;align-items:baseline}
+.lib .li b{font-weight:600;font-size:15px}
+.lib .li small{color:var(--fg3);font-size:12.5px;margin-left:auto;white-space:nowrap}
+.lib h2{font-size:12px;font-weight:600;color:var(--fg3);text-transform:uppercase;letter-spacing:.06em;margin:16px 0 4px}
 .pane{display:none}.pane.on{display:block}
 
 /* ---------- alarm band ---------- */
@@ -310,20 +372,14 @@ footer{padding:14px;color:var(--fg3);font-size:12px;text-align:center}
   <!-- ================= ENGINE ================= -->
   <section id="tab-engine">
     <div class="sub" data-for="engine">
-      <button data-sub="faults" class="on">Faults</button><button data-sub="inputs">Inputs</button>
-      <button data-sub="settings">Settings</button><button data-sub="outputs">Outputs</button><button data-sub="utilities">Utilities</button>
+      <button data-sub="live" class="on">Live</button><button data-sub="faults">Faults<span class="n" id="nEngF"></span></button><button data-sub="inputs">Inputs</button>
+      <button data-sub="outputs">Outputs</button><button data-sub="settings">Settings</button><button data-sub="utilities">Utilities</button><button data-sub="library">Library</button>
     </div>
     <div class="note" id="engNote">The K-line carries one ECU at a time: SLABS is active, so engine data is paused. Reconnecting takes a few seconds; the ABS lights go out as it does.
       <div class="row"><button class="btn act" onclick="switchModule('td5')">Connect engine</button></div></div>
 
-    <div class="pane on" id="engine-faults">
-      <div class="blk">
-        <div class="faults" id="engFaults"></div>
-        <div class="row">
-          <button class="btn red" onclick="confirmCmd('td5','clear_faults','Clear engine faults?','Writes to the Td5 ECU. Logged faults are gone for good; note them first. Anything still wrong comes straight back.','Clear faults')">Clear faults</button>
-        </div>
-        <p class="hint" style="margin-top:12px">Current means the fault is present right now; logged means it was seen on an earlier run. Undecoded bits show as byte.bit until the dictionary names them.</p>
-      </div>
+    <div class="pane on" id="engine-live">
+      <div class="tiles" id="engTiles"></div>
       <div class="blk">
         <h2>Injector balance</h2>
         <p class="hint">Fuel correction per cylinder. Healthy injectors sit near zero and stay put; one that drifts away from the others is tired.</p>
@@ -331,8 +387,24 @@ footer{padding:14px;color:var(--fg3);font-size:12px;text-align:center}
       </div>
     </div>
 
+    <div class="pane" id="engine-faults">
+      <div class="blk">
+        <div class="faults" id="engFaults"></div>
+        <div class="row">
+          <button class="btn red" onclick="confirmCmd('td5','clear_faults','Clear engine faults?','Writes to the Td5 ECU. Logged faults are gone for good; note them first. Anything still wrong comes straight back.','Clear faults')">Clear faults</button>
+        </div>
+        <p class="hint" style="margin-top:12px">Tap a fault for what it means, likely causes and fixes. Current means present right now; logged means seen on an earlier run. Undecoded bits show as byte.bit until the dictionary names them.</p>
+      </div>
+    </div>
+
     <div class="pane" id="engine-inputs">
+      <div class="cats" id="engCats"></div>
       <div id="engInputs"></div>
+    </div>
+
+    <div class="pane" id="engine-library">
+      <div class="libsearch"><input id="engLibQ" placeholder="Search engine faults — e.g. injector, boost, pedal" oninput="renderLib('td5')"></div>
+      <div class="lib" id="engLib"></div>
     </div>
 
     <div class="pane" id="engine-settings">
@@ -379,19 +451,14 @@ footer{padding:14px;color:var(--fg3);font-size:12px;text-align:center}
   <!-- ================= SLABS ================= -->
   <section id="tab-slabs">
     <div class="sub" data-for="slabs">
-      <button data-sub="faults" class="on">Faults</button><button data-sub="inputs">Inputs</button>
-      <button data-sub="settings">Settings</button><button data-sub="outputs">Outputs</button><button data-sub="utilities">Utilities</button>
+      <button data-sub="live" class="on">Live</button><button data-sub="faults">Faults<span class="n" id="nSlabsF"></span></button><button data-sub="inputs">Inputs</button>
+      <button data-sub="outputs">Outputs</button><button data-sub="settings">Settings</button><button data-sub="utilities">Utilities</button><button data-sub="library">Library</button>
     </div>
     <div class="note" id="slabsNote">SLABS shares the K-line with the engine, so connecting pauses engine data and can take up to 30 s of bus silence. Vehicle stationary, ignition on.
       <div class="row"><button class="btn act" onclick="switchModule('slabs')">Connect SLABS</button></div></div>
 
-    <div class="pane on" id="slabs-faults">
-      <div class="blk">
-        <div class="faults" id="slabsFaults"></div>
-        <div class="row">
-          <button class="btn red" onclick="confirmCmd('slabs','clear_faults','Clear SLABS faults?','Clears logged and current ABS and suspension faults.','Clear faults')">Clear faults</button>
-        </div>
-      </div>
+    <div class="pane on" id="slabs-live">
+      <div class="chassis" id="chassis"></div>
       <div class="heights">
         <div class="hgt" id="hgtL"><div class="scale"><div class="band"></div><div class="fill"></div><div class="mk"></div></div>
           <div class="txt"><div class="lb">Left height</div><div class="rd num">—</div><div class="mm"></div><div class="st"></div></div></div>
@@ -399,16 +466,28 @@ footer{padding:14px;color:var(--fg3);font-size:12px;text-align:center}
           <div class="txt"><div class="lb">Right height</div><div class="rd num">—</div><div class="mm"></div><div class="st"></div></div></div>
       </div>
       <div class="blk">
-        <h2>Wheel speeds</h2>
-        <div class="wheels" id="wheels"></div>
-      </div>
-      <div class="blk">
         <h2>Switches</h2>
         <div class="chips" id="slabsChips"></div>
       </div>
     </div>
 
+    <div class="pane" id="slabs-faults">
+      <div class="blk">
+        <div class="faults" id="slabsFaults"></div>
+        <div class="row">
+          <button class="btn red" onclick="confirmCmd('slabs','clear_faults','Clear SLABS faults?','Clears logged and current ABS and suspension faults.','Clear faults')">Clear faults</button>
+        </div>
+        <p class="hint" style="margin-top:12px">Tap a fault for what it means, likely causes and fixes. The ABS, TC and HDC lamps come on together for most of these.</p>
+      </div>
+    </div>
+
+    <div class="pane" id="slabs-library">
+      <div class="libsearch"><input id="slabsLibQ" placeholder="Search SLABS faults — e.g. shuttle, pump, sensor" oninput="renderLib('slabs')"></div>
+      <div class="lib" id="slabsLib"></div>
+    </div>
+
     <div class="pane" id="slabs-inputs">
+      <div class="cats" id="slabsCats"></div>
       <div id="slabsInputs"></div>
       <p class="hint" style="margin:12px var(--pad)">SLS and switch values stop updating above about 8 km/h; that is the ECU, not the tool.</p>
     </div>
@@ -457,7 +536,7 @@ footer{padding:14px;color:var(--fg3);font-size:12px;text-align:center}
     <div class="pane" id="slabs-utilities">
       <div class="blk">
         <h2>Height</h2>
-        <p class="hint">Each press runs the compressor or exhaust for one corner for a moment. Watch the height on the Faults page.</p>
+        <p class="hint">Each press runs the compressor or exhaust for one corner for a moment. Watch the height on the Live page.</p>
         <div class="row" style="margin-top:0">
           <button class="btn" onclick="confirmCmd('slabs','raise_left','Raise left?','Runs the compressor with the left valve open.','Raise left')">Raise left</button>
           <button class="btn" onclick="confirmCmd('slabs','raise_right','Raise right?','Runs the compressor with the right valve open.','Raise right')">Raise right</button>
@@ -535,6 +614,8 @@ footer{padding:14px;color:var(--fg3);font-size:12px;text-align:center}
   <h3 id="mTitle"></h3><p id="mText"></p>
   <div class="row"><button class="btn" onclick="closeModal()">Cancel</button><button class="btn red" id="mGo">Confirm</button></div>
 </div></div>
+<div id="sheetBg" onclick="closeSheet()"></div>
+<div id="sheet"><div class="grab"></div><button class="x" onclick="closeSheet()" aria-label="Close">✕</button><div id="sheetBody"></div></div>
 <div class="toast" id="toast"></div>
 
 <script>
@@ -561,35 +642,41 @@ const SENSOR_KEYS = ['egt','oil_press','oil_temp','gearbox_temp','fuel_level','a
 const TD5_OUTPUTS = ['fuel_pump','mil_lamp','ac_clutch','ac_fan','glow_plugs','rev_counter','temp_gauge','egr_throttle','wastegate'];
 const HEIGHT = {lo:100, hi:200, band:[135,165], warn:[120,180]};
 
-// Nanocom "Inputs" pages, in the Nanocom's order. [signal, label] — null signal = not decoded yet.
+// Inputs, grouped by component so a page shows one system at a time. [signal, label] — null signal = not decoded yet.
 const TD5_INPUTS = [
-  {title:'Fuelling', items:[['rpm','Engine speed'],['rpm_error','Idle speed error'],['speed','Road speed'],['battery','Battery'],
-    ['accel_way1','Accel. way 1'],['accel_way2','Accel. way 2'],['accel_way3','Accel. way 3'],['accel_supply','Accel. supply'],
-    ['coolant_temp','Coolant temp'],['fuel_temp','Fuel temp'],['air_temp','Air inlet temp'],['maf_sensor','Air flow'],
-    ['ambient_press_1','Ambient pressure'],['manifold_press','Manifold turbo pressure'],['egr_modulator','EGR modulator'],
-    ['egr_inlet','EGR inlet'],['wastegate_modulator','Wastegate modulator'],['balance_1','Cylinder 1 balance'],
-    ['balance_2','Cylinder 2 balance'],['balance_3','Cylinder 3 balance'],['balance_4','Cylinder 4 balance'],['balance_5','Cylinder 5 balance']]},
-  {title:'Switches', items:[['brake_main','Brake switch 1'],['brake_switch_2','Brake switch 2'],[null,'Clutch switch'],
-    [null,'Transfer ratio'],[null,'Gear box'],['cruise_master','Cruise control'],['cruise_resume','Cruise resume'],
-    ['cruise_set','Set / accelerate'],[null,'A/C clutch request'],[null,'A/C clutch drive'],[null,'A/C fan request'],[null,'A/C fan drive']]},
-  {title:'Extra (not on the Nanocom)', items:[['accel_pedal_pct','Accelerator pedal'],['injection_qty','Injection quantity'],
-    ['driver_demand','Driver demand'],['smoke_limit','Smoke limit'],['torque_limit','Torque limit'],['maf','Air mass (modelled)'],
-    ['maf_sensor_v','Air flow sensor'],['coolant_sensor_v','Coolant sensor'],['intake_sensor_v','Intake air sensor'],
-    ['fuel_sensor_v','Fuel temp sensor'],['ambient_press_2','Ambient pressure 2'],['battery_direct','Battery direct'],
-    ['egr_pos','EGR position (native)'],['wastegate_pos','Wastegate position (native)'],['fuel_pump_relay','Fuel pump relay'],
-    ['ext_temp','External temp'],['fuel_rate','Fuel rate'],['economy','Economy'],['trip_economy','Trip economy'],['lifetime_economy','Lifetime economy']]},
+  {cat:'Engine', title:'Speed and load', items:[['rpm','Engine speed'],['rpm_error','Idle speed error'],['speed','Road speed'],
+    ['injection_qty','Injection quantity'],['driver_demand','Driver demand'],['smoke_limit','Smoke limit'],['torque_limit','Torque limit']]},
+  {cat:'Pedal', title:'Accelerator pedal', items:[['accel_pedal_pct','Pedal position'],['accel_way1','Track 1'],['accel_way2','Track 2'],
+    ['accel_way3','Track 3'],['accel_supply','Pedal supply (5 V)']]},
+  {cat:'Air', title:'Air and boost', items:[['maf_sensor','Air flow (MAF)'],['maf','Air mass (modelled)'],['maf_sensor_v','MAF sensor voltage'],
+    ['manifold_press','Manifold (boost) pressure'],['ambient_press_1','Ambient pressure'],['ambient_press_2','Ambient pressure 2'],
+    ['wastegate_modulator','Wastegate modulator'],['wastegate_pos','Wastegate position']]},
+  {cat:'Air', title:'EGR', items:[['egr_modulator','EGR modulator'],['egr_inlet','EGR inlet throttle'],['egr_pos','EGR position']]},
+  {cat:'Temps', title:'Temperatures', items:[['coolant_temp','Coolant'],['coolant_sensor_v','Coolant sensor voltage'],['fuel_temp','Fuel'],
+    ['fuel_sensor_v','Fuel sensor voltage'],['air_temp','Inlet air'],['intake_sensor_v','Inlet air sensor voltage'],['ext_temp','Ambient air']]},
+  {cat:'Injectors', title:'Injector balance', items:[['balance_1','Cylinder 1'],['balance_2','Cylinder 2'],['balance_3','Cylinder 3'],
+    ['balance_4','Cylinder 4'],['balance_5','Cylinder 5']]},
+  {cat:'Electrical', title:'Electrical', items:[['battery','Battery (ECU)'],['battery_direct','Battery (direct)'],['fuel_pump_relay','Fuel pump relay']]},
+  {cat:'Switches', title:'Switches', items:[['brake_main','Brake switch 1'],['brake_switch_2','Brake switch 2'],[null,'Clutch switch'],
+    [null,'Transfer ratio'],[null,'Gear box'],[null,'A/C clutch request'],[null,'A/C clutch drive'],[null,'A/C fan request'],[null,'A/C fan drive']]},
+  {cat:'Switches', title:'Cruise control', items:[['cruise_master','Cruise master'],['cruise_resume','Resume'],['cruise_set','Set / accelerate']]},
+  {cat:'Fuel', title:'Fuel economy', items:[['fuel_rate','Fuel rate'],['economy','Economy'],['trip_economy','Trip economy'],['lifetime_economy','Lifetime economy']]},
 ];
 const SLABS_INPUTS = [
-  {title:'ABS', items:[['abs_sensor_fr','Sensor FR'],['abs_sensor_fl','Sensor FL'],['abs_sensor_rr','Sensor RR'],['abs_sensor_rl','Sensor RL'],
-    ['wheel_speed_fr','Wheel speed FR'],['wheel_speed_fl','Wheel speed FL'],['wheel_speed_rr','Wheel speed RR'],['wheel_speed_rl','Wheel speed RL'],
-    [null,'Inlet valves FR/FL/RR/RL'],[null,'Outlet valves FR/FL/RR/RL'],[null,'Pump monitor'],[null,'Pump relay'],
-    ['battery','Battery'],['ecu_supply','Internal ECU supply'],[null,'Ground reference'],[null,'Engine speed'],[null,'Engine torque'],
-    [null,'Throttle position'],[null,'HDC brake'],[null,'Shuttle switch']]},
-  {title:'SLS', items:[['height_left','Left sensor value'],['height_right','Right sensor value'],['height_left_mm','Left height'],
-    ['height_right_mm','Right height'],[null,'Left / right sensor supply'],[null,'Left / right valve voltage'],[null,'Exhaust valve'],[null,'Compressor relay']]},
-  {title:'Switches', items:[['neutral_gear','Neutral switch'],['transfer_low','Low range switch'],['diff_lock','Diff lock switch'],
-    ['reverse_gear','Reverse switch'],[null,'HDC switch'],['any_door','Any door switch'],['brake_analog','Brake signal'],[null,'Plip signal']]},
+  {cat:'Wheels', title:'Wheel speed sensors', items:[['wheel_speed_fl','Front left speed'],['wheel_speed_fr','Front right speed'],
+    ['wheel_speed_rl','Rear left speed'],['wheel_speed_rr','Rear right speed'],['abs_sensor_fl','Front left sensor'],['abs_sensor_fr','Front right sensor'],
+    ['abs_sensor_rl','Rear left sensor'],['abs_sensor_rr','Rear right sensor']]},
+  {cat:'Brakes', title:'ABS modulator and pump', items:[[null,'Inlet valves FR/FL/RR/RL'],[null,'Outlet valves FR/FL/RR/RL'],[null,'Pump monitor'],
+    [null,'Pump relay'],[null,'Shuttle valve switch'],['brake_analog','Brake pedal signal'],[null,'HDC brake']]},
+  {cat:'Suspension', title:'Air suspension (SLS)', items:[['height_left_mm','Left height'],['height_right_mm','Right height'],
+    ['height_left','Left sensor count'],['height_right','Right sensor count'],[null,'Sensor supply'],[null,'Valve voltage'],[null,'Exhaust valve'],[null,'Compressor relay']]},
+  {cat:'Drivetrain', title:'Drivetrain switches', items:[['neutral_gear','Neutral'],['reverse_gear','Reverse'],['transfer_low','Low range'],
+    ['diff_lock','Diff lock'],[null,'HDC switch']]},
+  {cat:'Engine link', title:'From the engine ECU', items:[[null,'Engine speed'],[null,'Engine torque'],[null,'Throttle position']]},
+  {cat:'Electrical', title:'Electrical and body', items:[['battery','Battery'],['ecu_supply','Internal ECU supply'],[null,'Ground reference'],
+    ['any_door','Any door'],[null,'Plip signal']]},
 ];
+const ENG_TILES = ['rpm','coolant_temp','manifold_press','battery','maf_sensor','injection_qty'];
 const TD5_SET_INJ = [[null,'Injector 1 code'],[null,'Injector 2 code'],[null,'Injector 3 code'],[null,'Injector 4 code'],[null,'Injector 5 code'],[null,'Injector type'],[null,'Accelerator (2-way / 3-way)']];
 const TD5_SET_CFG = ['Config tune ID','Fuel tune ID','Homologation','VIN','Temperature gauge','Tachometer','SLABS link','Road speed','Radiator fan','MIL lamp','Fuel used','Fuel temperature','EGR modulator','EGR inlet','Cruise lamp','Cruise control','Clutch switch','CAN bus','Auxiliary fan','Auto gearbox','Air conditioning','Active engine mount','Ambient sensor','Wastegate modulator','ECU status'];
 const SLABS_SET_CFG = ['Test status','ECU calibrated','Transport mode','Suspension type (SLABS / ABS only)'];
@@ -679,14 +766,53 @@ function causeFor(module, name){
   if(/^byte\s*\d+[.,]\s*bit\s*\d+|^unknown \(byte/i.test(name)) return 'Not in the dictionary yet. Note the byte and bit; it still counts as a stored fault.';
   return '';
 }
+let FAULT_LIB={td5:{},slabs:{}};
+fetch('/api/faults/library').then(r=>r.json()).then(r=>{ FAULT_LIB=r; renderLib('td5'); renderLib('slabs'); if(snap) render(snap); }).catch(()=>{});
+const stripState=n=>n.replace(/\s*\((Current|Logged[^)]*)\)\s*$/,'').trim().toLowerCase();
+const stateOf=n=>(n.match(/\((Current|Logged[^)]*)\)\s*$/)||[])[1]||'';
+function entryFor(module, name){
+  const lib=FAULT_LIB[module]||{};
+  if(lib[name]&&lib[name].what) return lib[name];
+  const base=stripState(name);
+  for(const k in lib){ if(lib[k].what && stripState(k)===base) return Object.assign({}, lib[k], {name, state:stateOf(name), state_note:''}); }
+  return null;
+}
 function faultBlock(el, module, faults){
   if(!faults||!faults.length){ el.className='faults'; el.innerHTML='<div class="none">No faults stored</div>'; return; }
   el.className='faults has';
-  el.innerHTML='<ul>'+faults.map(f=>{
+  el.innerHTML='<ul>'+faults.map((f,i)=>{
     const m=f.match(/^(.*?)\s*\((Current|Logged[^)]*)\)\s*$/), name=m?m[1]:f, tag=m?m[2]:'';
-    const cause=causeFor(module,f);
-    return `<li><div class="h"><span class="tag ${/Current/.test(tag)?'cur':''}">${tag||'stored'}</span><span>${name}</span></div>${cause?`<p class="cause">${cause}</p>`:''}</li>`;
+    const e=entryFor(module,f), cause=e?e.title:causeFor(module,f);
+    return `<li data-f="${encodeURIComponent(f)}" onclick="showSheet('${module}',decodeURIComponent(this.dataset.f))"><div class="h"><span class="tag ${/Current/.test(tag)?'cur':''}">${tag||'stored'}</span><span>${name}</span><span class="more">details ›</span></div>${cause?`<p class="cause">${cause}</p>`:''}</li>`;
   }).join('')+'</ul>';
+}
+const esc=t=>String(t).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+function showSheet(module, name){
+  const e=entryFor(module,name)||{title:name, what:causeFor(module,name)||'No write-up for this fault yet.', causes:[], fixes:[], severity:'drive', severity_label:'', check:[]};
+  const state=e.state||stateOf(name);
+  const labels={}; [].concat(TD5_INPUTS,SLABS_INPUTS).forEach(g=>g.items.forEach(([k,l])=>{ if(k) labels[k]=l; }));
+  const md=t=>esc(t).replace(/\*\*(.+?)\*\*/g,'<b style="color:var(--fg)">$1</b>');
+  $('sheetBody').innerHTML=`<h3>${esc(e.title)}</h3>
+    <div class="meta">${e.severity_label?`<span class="sev ${e.severity}">${esc(e.severity_label)}</span>`:''}${state?`<span class="sev">${esc(state)}</span>`:''}<span class="sev" style="background:none;color:var(--fg3)">${module==='td5'?'Engine ECU':'SLABS ECU'}</span></div>
+    ${e.state_note?`<p class="raw">${esc(e.state_note)}</p>`:''}
+    <p>${md(e.what)}</p>
+    ${e.causes&&e.causes.length?`<h4>Likely causes</h4><ol>${e.causes.map(c=>`<li>${md(c)}</li>`).join('')}</ol>`:''}
+    ${e.fixes&&e.fixes.length?`<h4>What to do</h4><ol>${e.fixes.map(c=>`<li>${md(c)}</li>`).join('')}</ol>`:''}
+    ${e.check&&e.check.length?`<h4>Watch on the Inputs page</h4><div class="watch">${e.check.map(k=>`<span>${esc(labels[k]||nice(k))}</span>`).join('')}</div>`:''}
+    <p class="raw" style="margin-top:14px">ECU text: ${esc(name)}</p>`;
+  $('sheetBg').classList.add('on'); $('sheet').classList.add('on'); $('sheet').scrollTop=0;
+}
+function closeSheet(){ $('sheetBg').classList.remove('on'); $('sheet').classList.remove('on'); }
+function renderLib(module){
+  const el=$(module==='td5'?'engLib':'slabsLib'), q=($(module==='td5'?'engLibQ':'slabsLibQ').value||'').trim().toLowerCase();
+  const lib=FAULT_LIB[module]||{}; const seen={}; const groups={};
+  Object.keys(lib).forEach(n=>{ const e=lib[n]; if(!e.what) return; if(seen[e.title]) return; if(/^inj\. 6/i.test(n)) return; seen[e.title]=1;   // the Td5 has five cylinders; slot 6 is unused
+    const hay=(e.title+' '+e.what+' '+e.causes.join(' ')+' '+n).toLowerCase(); if(q && !hay.includes(q)) return;
+    (groups[e.severity]=groups[e.severity]||[]).push([e,n]); });
+  const order=[['stop','Do not drive'],['soon','Fix soon'],['drive','Fix when convenient']];
+  el.innerHTML=order.filter(([k])=>groups[k]).map(([k,lab])=>`<h2>${lab} · ${groups[k].length}</h2>`+groups[k].sort((a,b)=>a[0].title.localeCompare(b[0].title))
+      .map(([e,n])=>`<div class="li" data-f="${encodeURIComponent(n)}" onclick="showSheet('${module}',decodeURIComponent(this.dataset.f))"><b>${esc(e.title)}</b><small>details ›</small></div>`).join('')).join('')
+    || `<p class="hint" style="margin-top:12px">${Object.keys(lib).length?'Nothing matches.':'Loading the fault library…'}</p>`;
 }
 
 // ============ input lists ============
@@ -699,9 +825,16 @@ function listRow(k, label, sig, all){
   if(sig.c==='candidate') v='<span class="dim" title="scaling not yet verified">≈ </span>'+v;
   return `<div class="li"><span class="k">${label}</span><span class="v ${cls}">${v}</span></div>`;
 }
-function renderInputs(el, groups, sig, all){
-  el.innerHTML=groups.map(gp=>`<div class="blk"><h2>${gp.title}</h2><div class="list two">${gp.items.map(([k,l])=>listRow(k,l,sig[k],all)).join('')}</div></div>`).join('')
-    + '<p class="hint" style="margin:12px 0 0">≈ means the value is read but its scaling is not yet verified against a reference tool.</p>';
+const CAT_PICK={engine:'All', slabs:'All'};
+function renderCats(tab, groups){
+  const el=$(tab==='engine'?'engCats':'slabsCats'); const cats=['All']; groups.forEach(g=>{ if(!cats.includes(g.cat)) cats.push(g.cat); });
+  el.innerHTML=cats.map(c=>`<button class="${CAT_PICK[tab]===c?'on':''}" onclick="CAT_PICK['${tab}']='${c}';if(snap)render(snap)">${c}</button>`).join('');
+}
+function renderInputs(el, groups, sig, all, tab){
+  if(tab) renderCats(tab, groups);
+  const pick=tab?CAT_PICK[tab]:'All';
+  el.innerHTML=groups.filter(gp=>pick==='All'||gp.cat===pick).map(gp=>`<div class="blk"><h2>${gp.title}</h2><div class="list two">${gp.items.map(([k,l])=>listRow(k,l,sig[k],all)).join('')}</div></div>`).join('')
+    + '<p class="hint" style="margin:12px var(--pad) 0">≈ means the value is read but its scaling is not yet verified against a reference tool.</p>';
 }
 function pendList(el, names){ el.innerHTML=names.map(n=>`<div class="li pend"><span class="k">${n}</span><span class="v">not decoded yet</span></div>`).join(''); }
 pendList($('engSetInj'), TD5_SET_INJ.map(x=>x[1])); pendList($('engSetCfg'), TD5_SET_CFG);
@@ -747,7 +880,8 @@ function render(s){
     const l=level(k,all[k],gateCtx); if(l&&(l==='bad'||!worst.lvl)&&worst.lvl!=='bad'){ worst={lvl:l,txt:`${G[k].label} ${G[k].fmt(all[k].v)} ${G[k].unit}`}; } });
 
   // Engine pages
-  renderInputs($('engInputs'), TD5_INPUTS, eng, eng);
+  renderInputs($('engInputs'), TD5_INPUTS, eng, eng, 'engine');
+  $('engTiles').innerHTML=ENG_TILES.map(k=>eng[k]?stripItem(k,eng[k],gateCtx):`<div class="it"><div class="rd num dim">—</div><div class="lb">${(G[k]||{label:nice(k)}).label}</div></div>`).join('');
   $('inj').innerHTML=[1,2,3,4,5].map(i=>{ const b=eng['balance_'+i]; if(!b) return ''; const v=Number(b.v), h=Math.min(45,Math.abs(v)*30), warn=Math.abs(v)>1;
     return `<div><div class="col ${warn?'warn':''}"><i></i><b style="height:${h}%;${v>=0?'bottom:50%':'top:50%'}"></b></div><div class="rd num">${v>0?'+':''}${v.toFixed(2)}</div><div class="lb">cyl ${i}</div></div>`; }).join('') || '<p class="hint">No balance data yet.</p>';
 
@@ -755,8 +889,8 @@ function render(s){
   renderSlabs(lastSig.slabs);
   faultBlock($('engFaults'), 'td5', lastFaults.td5);
   faultBlock($('slabsFaults'), 'slabs', lastFaults.slabs);
-  $('nEng').textContent=lastFaults.td5.length||'';
-  $('nSlabs').textContent=lastFaults.slabs.length||'';
+  $('nEng').textContent=lastFaults.td5.length||''; $('nEngF').textContent=lastFaults.td5.length||'';
+  $('nSlabs').textContent=lastFaults.slabs.length||''; $('nSlabsF').textContent=lastFaults.slabs.length||'';
 
   // sensor board status
   const sb=s.sensors||{status:'none'};
@@ -766,10 +900,62 @@ function render(s){
 }
 function renderSlabs(sig){
   setHeight('L', sig.height_left, sig.height_left_mm); setHeight('R', sig.height_right, sig.height_right_mm);
-  $('wheels').innerHTML=['fl','fr','rl','rr'].map(w=>{ const v=sig['wheel_speed_'+w]; return `<div class="w"><span class="lb">${w.toUpperCase()}</span><span class="rd num">${v?Number(v.v).toFixed(0):'—'}<small style="font-family:'Inter T';font-size:12px;color:var(--fg3);margin-left:3px">${v?v.u||'':''}</small></span></div>`; }).join('');
+  renderChassis(sig);
   chips($('slabsChips'), SLABS_CHIPS, sig);
-  renderInputs($('slabsInputs'), SLABS_INPUTS, sig, sig);
+  renderInputs($('slabsInputs'), SLABS_INPUTS, sig, sig, 'slabs');
   $('slabsSetH').innerHTML=listRow('height_left','Left current height',sig.height_left,sig)+listRow('height_right','Right current height',sig.height_right,sig);
+}
+// Top-down Discovery 2: ladder chassis, beam axles, props to the transfer box, rear air springs.
+// Wheel rims colour by sensor state; numbers are wheel speeds; rear corners show ride height.
+function buildChassis(){
+  const W=[['fl',62,52],['fr',62,188],['rl',248,52],['rr',248,188]];   // [key, x, y]  (front on the left)
+  const tyre=([k,x,y])=>`<g class="wh" data-w="${k}"><rect class="tyre" x="${x-16}" y="${y-30}" width="32" height="60" rx="9"/>
+      ${[-18,-6,6,18].map(d=>`<line class="tread" x1="${x-11}" y1="${y+d}" x2="${x+11}" y2="${y+d}"/>`).join('')}
+      <circle class="glow" cx="${x}" cy="${y}" r="3"/></g>`;
+  const label=([k,x,y])=>{ const up=y<120, ty=up?y-44:y+58; return `<text class="lb" x="${x}" y="${up?ty-15:ty+15}" font-size="9" text-anchor="middle">${k.toUpperCase()}</text>
+      <text class="spd" data-w="${k}" x="${x}" y="${ty}" font-size="20" text-anchor="middle">—</text>`; };
+  $('chassis').innerHTML=`<svg viewBox="0 -26 320 298" role="img" aria-label="wheel speeds and ride height">
+    <defs><linearGradient id="gf" x1="0" x2="1"><stop offset="0" stop-color="#2a3440"/><stop offset="1" stop-color="#1c242c"/></linearGradient></defs>
+    <path class="rail" d="M38 96 H120 Q128 96 132 90 L140 82 H290"/><path class="rail" d="M38 144 H120 Q128 144 132 150 L140 158 H290"/>
+    <line class="rail2" x1="38" y1="96" x2="38" y2="144"/><line class="rail2" x1="290" y1="82" x2="290" y2="158"/>
+    <line class="rail2" x1="100" y1="96" x2="100" y2="144"/><line class="rail2" x1="200" y1="82" x2="200" y2="158"/>
+    <line class="axle" x1="62" y1="58" x2="62" y2="182"/><line class="axle" x1="248" y1="58" x2="248" y2="182"/>
+    <rect class="blockf" x="78" y="100" width="46" height="40" rx="5" fill="url(#gf)"/>
+    <rect class="blockf" x="124" y="107" width="40" height="26" rx="4"/>
+    <rect class="blockf" x="150" y="112" width="26" height="36" rx="4"/>
+    <line class="prop" x1="150" y1="130" x2="68" y2="120"/><line class="prop" x1="176" y1="130" x2="242" y2="120"/>
+    <circle class="blockf" cx="62" cy="120" r="9"/><circle class="blockf" cx="248" cy="120" r="10"/>
+    <g class="sp" data-s="L"><circle class="spring" cx="248" cy="88" r="8"/><circle class="spring" cx="248" cy="88" r="3.5"/></g>
+    <g class="sp" data-s="R"><circle class="spring" cx="248" cy="152" r="8"/><circle class="spring" cx="248" cy="152" r="3.5"/></g>
+    <text class="hgt" data-s="L" x="266" y="92" font-size="11">—</text><text class="hgt" data-s="R" x="266" y="156" font-size="11">—</text>
+    <text class="lb" x="14" y="122" font-size="9" text-anchor="middle" transform="rotate(-90 14 122)">FRONT</text>
+    ${W.map(tyre).join('')}${W.map(label).join('')}</svg>`;
+}
+buildChassis();
+function renderChassis(sig){
+  const ws=['fl','fr','rl','rr'].map(k=>sig['wheel_speed_'+k]).filter(Boolean).map(v=>Number(v.v));
+  const moving=ws.length===4 && Math.max(...ws)>8;
+  const med=ws.length?ws.slice().sort((a,b)=>a-b)[Math.floor(ws.length/2)]:0;
+  ['fl','fr','rl','rr'].forEach(k=>{
+    const v=sig['wheel_speed_'+k], s=sig['abs_sensor_'+k];
+    const g=document.querySelector(`#chassis .wh[data-w="${k}"]`), txt=document.querySelector(`#chassis .spd[data-w="${k}"]`);
+    if(!g||!txt) return;
+    const rim=g.querySelector('.tyre'), glow=g.querySelector('.glow');
+    if(!v){ rim.setAttribute('class','tyre dim'); glow.classList.remove('on'); txt.textContent='—'; txt.setAttribute('class','spd dim'); return; }
+    const n=Number(v.v); let cls='ok';
+    if(moving && med>0 && Math.abs(n-med)/med>0.15) cls='warn';
+    if(moving && n<1) cls='bad';
+    if(s && (s.s==='high'||s.s==='low')) cls='bad';
+    rim.setAttribute('class','tyre '+cls); glow.classList.toggle('on', moving && cls==='ok');
+    txt.textContent=(v.c==='candidate'?'≈':'')+Math.round(n); txt.setAttribute('class','spd '+(cls==='ok'?'':cls));
+  });
+  [['L','height_left','height_left_mm'],['R','height_right','height_right_mm']].forEach(([side,k,km])=>{
+    const v=sig[k], mm=sig[km], sp=document.querySelector(`#chassis .sp[data-s="${side}"]`), t=document.querySelector(`#chassis .hgt[data-s="${side}"]`);
+    if(!v){ t.textContent='—'; sp.querySelectorAll('.spring').forEach(c=>c.setAttribute('class','spring')); return; }
+    let cls=''; if(v.v<HEIGHT.warn[0]||v.v>HEIGHT.warn[1]) cls='bad'; else if(v.v<HEIGHT.band[0]||v.v>HEIGHT.band[1]) cls='warn';
+    sp.querySelectorAll('.spring').forEach(c=>c.setAttribute('class','spring '+cls));
+    t.textContent=mm?Math.round(mm.v)+' mm':Math.round(v.v); t.setAttribute('class','hgt '+cls);
+  });
 }
 renderSlabs({});
 function setHeight(side, sig, mm){

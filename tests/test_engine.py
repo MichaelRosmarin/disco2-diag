@@ -247,3 +247,22 @@ def test_thresholds_roundtrip(engine, cfg):
         validate_thresholds({"../x": {"warn": [1, 2]}})
     with pytest.raises(ValueError):
         validate_thresholds({"rpm": {"warn": [5000, 4000]}})
+
+
+def test_fault_library_covers_every_fault(engine):
+    from d2dash.server import fault_library, fault_reference
+    lib, ref = fault_library(), fault_reference()
+    for mod in ("td5", "slabs"):
+        assert set(lib[mod]) == set(ref[mod])
+        missing = [n for n, v in lib[mod].items() if not v.get("what")]
+        assert not missing, missing[:5]
+    e = lib["slabs"]["Front Right Sensor — Output Low"]
+    assert e["title"].startswith("Front right") and e["severity"] in ("drive", "soon", "stop") and e["check"]
+    httpd = ThreadingHTTPServer(("127.0.0.1", 0), make_handler(engine))
+    httpd.daemon_threads = True
+    threading.Thread(target=httpd.serve_forever, daemon=True).start()
+    try:
+        r = json.load(urllib.request.urlopen(f"http://127.0.0.1:{httpd.server_address[1]}/api/faults/library"))
+        assert r["td5"]["road speed missing (Logged)"]["state_note"].startswith("Seen on an earlier run")
+    finally:
+        httpd.shutdown()

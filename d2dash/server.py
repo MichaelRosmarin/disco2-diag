@@ -9,6 +9,7 @@ Routes:
     POST /api/module            {"module": "td5"|"slabs"}  switch the active ECU
     POST /api/command           {"action": "...", "params": {}, "confirm": true}
     GET  /api/faults/reference  {module: {fault name: likely cause}}
+    GET  /api/faults/library    {module: {fault name: full write-up}} (see faultkb.py)
     GET  /api/logs              list session CSVs
     GET  /api/logs/<name>       download one
     DELETE /api/logs/<name>     remove one
@@ -54,6 +55,19 @@ def fault_reference() -> dict:
         out[mod] = {r["name"]: r.get("cause", "") for r in rows if r.get("name")}
     _fault_ref_cache = out
     return out
+
+
+_fault_lib_cache: dict | None = None
+
+
+def fault_library() -> dict:
+    """{module: {fault name: write-up}} for every fault the dictionaries name."""
+    global _fault_lib_cache
+    if _fault_lib_cache is None:
+        from . import faultkb
+        ref = fault_reference()
+        _fault_lib_cache = {mod: faultkb.library(mod, list(names)) for mod, names in ref.items()}
+    return _fault_lib_cache
 
 
 _SIGNAL = re.compile(r"^[a-z][a-z0-9_]{0,40}$")
@@ -188,6 +202,8 @@ def make_handler(engine: Engine):
                 return self._sse()
             if path == "/api/faults/reference":
                 return self._json(fault_reference())
+            if path == "/api/faults/library":
+                return self._json(fault_library())
             if path == "/api/thresholds":
                 return self._json({"overrides": load_thresholds(engine.cfg.log_dir)})
             if path == "/api/trips":

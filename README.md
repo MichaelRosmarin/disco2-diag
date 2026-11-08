@@ -11,6 +11,12 @@ It is a thin layer (`d2dash`) over two open-source projects that did the hard wo
 - [openostler/ostler-pack-lr-d2](https://github.com/openostler/ostler-pack-lr-d2) (`d2diag`): the
   Discovery 2 vehicle pack, with the Td5 seed/key, signal maps and fault decoding
 
+## What the dashboard shows
+
+- **Fault library**: every fault the Td5 and SLABS ECUs can report has a write-up — what it means, likely causes, what to do, how urgent — drawn from the workshop manual and owner experience. Tap any stored fault for its page, or browse and search the whole library under each ECU's Library tab.
+- **Engine and SLABS tabs** each split into Live · Faults · Inputs · Outputs · Settings · Utilities · Library; Inputs are grouped by component (pedal, air and boost, temperatures, wheel speed sensors, air suspension …) with a category filter.
+- **Chassis view**: a top-down Discovery 2 on the SLABS Live page, each wheel coloured by its speed-sensor state with its live speed, rear air springs showing ride height.
+
 ## Hardware
 
 | Part | Notes |
