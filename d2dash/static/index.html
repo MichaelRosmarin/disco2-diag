@@ -26,7 +26,7 @@
 html,body{margin:0;background:var(--bg);color:var(--fg);
   font:16px/1.4 "Inter T",-apple-system,"SF Pro Text","Segoe UI",Roboto,Helvetica,Arial,sans-serif;font-weight:400;
   -webkit-user-select:none;user-select:none;overscroll-behavior:none;-webkit-font-smoothing:antialiased;letter-spacing:-.01em}
-body{display:flex;flex-direction:column;min-height:100vh;min-height:100dvh}
+body{display:flex;flex-direction:column;height:100vh;height:100dvh;overflow:hidden}
 button{font:inherit;color:inherit;cursor:pointer;letter-spacing:inherit}
 input{font:inherit}
 :focus-visible{outline:2px solid var(--act);outline-offset:2px}
@@ -52,9 +52,8 @@ header .state span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 #sound .off{display:none}#sound:not(.on) .off{display:block}
 
 /* ---------- tab bar: bottom on phones, top on wide screens ---------- */
-nav{display:flex;justify-content:space-around;position:fixed;left:0;right:0;bottom:0;z-index:6;
-  padding:6px 4px calc(env(safe-area-inset-bottom) + 4px);background:rgba(28,28,30,.86);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);
-  border-top:1px solid var(--rule)}
+nav{display:flex;justify-content:space-around;flex:none;order:9;z-index:6;
+  padding:6px 4px calc(env(safe-area-inset-bottom) + 4px);background:var(--bg2);border-top:1px solid var(--rule)}
 nav button{flex:1;max-width:120px;min-height:44px;background:none;border:0;color:var(--fg3);font-size:10.5px;font-weight:500;letter-spacing:0;
   display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;position:relative;padding:0}
 nav button svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
@@ -62,16 +61,15 @@ nav button.on{color:var(--act)}
 nav button .n{position:absolute;top:0;left:calc(50% + 6px);min-width:17px;height:17px;padding:0 5px;border-radius:9px;
   background:var(--bad);color:#fff;font-size:11px;line-height:17px;font-weight:600}
 nav button .n:empty{display:none}
-main{flex:1;width:100%;max-width:1040px;margin:0 auto;padding-bottom:calc(var(--tabbar) + 8px)}
+main{flex:1;min-height:0;width:100%;max-width:1040px;margin:0 auto;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;padding-bottom:16px}
 @media (min-width:720px){
-  nav{position:sticky;top:0;bottom:auto;border-top:0;border-bottom:1px solid var(--rule);justify-content:center;gap:8px;padding:6px var(--pad)}
+  nav{order:0;border-top:0;border-bottom:1px solid var(--rule);justify-content:center;gap:8px;padding:6px var(--pad)}
   nav button{flex-direction:row;gap:8px;font-size:14px;max-width:none;flex:none;padding:0 14px;border-radius:999px;min-height:38px}
   nav button svg{width:18px;height:18px}
   nav button.on{background:var(--actbg)}
   nav button .n{position:static;margin-left:2px}
   main{padding-bottom:24px}
   header{order:-1}
-  body{display:block}
 }
 section{display:none}section.on{display:block}
 
@@ -92,6 +90,9 @@ section{display:none}section.on{display:block}
 .note{margin:12px var(--pad) 0;padding:12px 14px;border-radius:var(--r2);background:var(--bg2);color:var(--fg2);font-size:14px;display:none;line-height:1.45}
 .note.show{display:block}.note.bad{background:var(--badbg);color:#ffb4ae}.note.warn{background:var(--warnbg);color:#ffd08a}
 .note a,.note button.link{color:var(--act);background:none;border:0;padding:0;font:inherit;font-weight:600;text-decoration:none}
+.note b{color:var(--fg);font-weight:600}
+.note .code{display:inline-block;margin-left:6px;padding:1px 7px;border-radius:6px;background:rgba(255,255,255,.12);font-size:12px;font-weight:600;color:var(--fg)}
+.note small.raw{display:block;margin-top:6px;font-size:12px;opacity:.7;word-break:break-word}
 #alarm{display:none;align-items:center;gap:12px;margin:10px var(--pad) 0;padding:12px 16px;border-radius:var(--r);font-size:16px;font-weight:600;cursor:pointer}
 #alarm.warn{display:flex;background:var(--warn);color:#1a1200}
 #alarm.bad{display:flex;background:var(--bad);color:#fff;animation:pulse 1s infinite}
@@ -142,8 +143,7 @@ section{display:none}section.on{display:block}
 .blk{margin:14px var(--pad) 0;padding:12px 16px 14px;background:var(--bg2);border-radius:var(--r)}
 .blk h2{font-size:13px;font-weight:500;color:var(--fg2);margin:0 0 8px;letter-spacing:0}
 .blk p.hint,p.hint{color:var(--fg2);font-size:13.5px;margin:0 0 10px;line-height:1.45}
-.blk.hazard{box-shadow:inset 3px 0 0 var(--warn)}
-.blk.hazard h2{color:var(--warn)}
+
 
 .row{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
 .btn{min-height:44px;padding:0 18px;border-radius:12px;border:0;background:var(--bg3);color:var(--act);font-size:15px;font-weight:600;transition:transform .08s,opacity .15s}
@@ -198,6 +198,7 @@ a{color:var(--act);text-decoration:none}
 .list .li.act .t{grid-column:auto;display:block;margin-top:2px}
 .list .li.act .k{display:block}
 .injrow{margin-top:4px}
+.pair{display:flex;gap:6px}
 .injrow .btn{flex:1;min-width:0;font-family:"Inter D";font-size:18px;font-weight:600;min-height:48px}
 .list .li.pend .k{color:var(--fg3)}
 .list .li.pend .v{color:var(--fg3);font-weight:400;font-size:13px}
@@ -233,25 +234,31 @@ a{color:var(--act);text-decoration:none}
 .field input{width:90px;padding:9px 10px;border-radius:9px;border:0;background:var(--bg3);color:var(--fg);font-size:16px;text-align:right}
 
 /* chassis */
-.chassis{margin:10px var(--pad) 0;padding:6px 6px 2px;border-radius:var(--r);background:var(--bg2)}
-.chassis svg{width:100%;height:auto;display:block;max-height:330px;margin:0 auto}
-.chassis .rail{fill:none;stroke:#48484a;stroke-width:7;stroke-linecap:round;stroke-linejoin:round}
-.chassis .rail2{fill:none;stroke:#545456;stroke-width:3;stroke-linecap:round}
-.chassis .axle{stroke:#636366;stroke-width:9;stroke-linecap:round}
-.chassis .prop{stroke:#7c7c80;stroke-width:4;stroke-linecap:round;stroke-dasharray:6 5}
-.chassis .blockf{fill:#2c2c2e;stroke:#545456;stroke-width:1.5}
-.chassis .tyre{fill:#0f0f10;stroke:#636366;stroke-width:3;transition:stroke .3s}
-.chassis .tyre.ok{stroke:var(--ok)}.chassis .tyre.warn{stroke:var(--warn)}.chassis .tyre.bad{stroke:var(--bad)}.chassis .tyre.dim{stroke:#3a3a3c}
-.chassis .tread{stroke:#2c2c2e;stroke-width:1.5}
-.chassis .spring{fill:none;stroke:var(--act);stroke-width:2.5;opacity:.9}
+.chassis{margin:10px var(--pad) 0;padding:8px 4px 2px;border-radius:var(--r);background:var(--bg2)}
+.chassis svg{width:100%;height:auto;display:block;max-height:360px;margin:0 auto}
+.chassis .body{fill:none;stroke:#2c2c2e;stroke-width:1.5;stroke-dasharray:4 5}
+.chassis .rail{fill:none;stroke:#4a4a4d;stroke-width:6;stroke-linecap:round;stroke-linejoin:round}
+.chassis .xm{stroke:#3f3f42;stroke-width:3;stroke-linecap:round}
+.chassis .axle{stroke:#5a5a5e;stroke-width:7;stroke-linecap:round}
+.chassis .prop{stroke:#6a6a6e;stroke-width:3.5;stroke-linecap:round;stroke-dasharray:5 5}
+.chassis .blockf{fill:#262628;stroke:#4a4a4d;stroke-width:1.5}
+.chassis .diff{fill:#2e2e31;stroke:#5a5a5e;stroke-width:1.5}
+.chassis .tyre{fill:#151517;stroke:#3d3d40;stroke-width:1.5}
+.chassis .side{fill:#1e1e21;stroke:#2a2a2d;stroke-width:1}
+.chassis .tread{fill:none;stroke:#0b0b0c;stroke-width:1.6;stroke-linecap:round}
+.chassis .hub{fill:#4a4a4d}
+.chassis .halo{fill:none;stroke-width:3;stroke:transparent;transition:stroke .3s}
+.chassis .halo.ok{stroke:var(--ok)}.chassis .halo.warn{stroke:var(--warn)}.chassis .halo.bad{stroke:var(--bad)}
+.chassis .spring{fill:none;stroke:var(--act);stroke-width:2.2}
 .chassis .spring.warn{stroke:var(--warn)}.chassis .spring.bad{stroke:var(--bad)}
-.chassis text{font-family:"Inter D","Inter T",sans-serif;font-weight:600;fill:var(--fg);font-variant-numeric:tabular-nums;letter-spacing:-.02em}
-.chassis text.u{font-family:"Inter T";font-weight:500;fill:var(--fg3)}
-.chassis text.lb{font-family:"Inter T";font-weight:500;fill:var(--fg3);letter-spacing:.02em}
-.chassis text.warn{fill:var(--warn)}.chassis text.bad{fill:var(--bad)}.chassis text.dim{fill:var(--fg3)}
-.chassis .glow{fill:var(--ok);opacity:0}
-.chassis .glow.on{opacity:.9}
-
+.chassis text{font-family:"Inter T",sans-serif;fill:var(--fg2);font-size:10.5px;font-weight:500;letter-spacing:0}
+.chassis text.spd{font-family:"Inter D","Inter T",sans-serif;font-size:22px;font-weight:600;fill:var(--fg);letter-spacing:-.03em;font-variant-numeric:tabular-nums}
+.chassis text.spd .u{font-family:"Inter T";font-size:10px;font-weight:500;fill:var(--fg2);letter-spacing:0}
+.chassis text.hgt{font-family:"Inter D","Inter T",sans-serif;font-size:12px;font-weight:600;fill:var(--fg);letter-spacing:-.02em}
+.chassis text.sst{font-size:10px}
+.chassis text.axis{fill:var(--fg3);font-size:9.5px;letter-spacing:.08em}
+.chassis text.ok{fill:var(--ok)}.chassis text.warn{fill:var(--warn)}.chassis text.bad{fill:var(--bad)}.chassis text.dim{fill:var(--fg3)}
+.chassis text.spd.warn{fill:var(--warn)}.chassis text.spd.bad{fill:var(--bad)}.chassis text.spd.dim{fill:var(--fg3)}
 /* fault sheet */
 #sheetBg{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;z-index:20}
 #sheetBg.on{display:block}
@@ -262,7 +269,7 @@ a{color:var(--act);text-decoration:none}
 #sheet h3{font-family:"Inter D";font-size:22px;font-weight:700;letter-spacing:-.03em;margin:0 0 8px;line-height:1.2;padding-right:40px}
 #sheet .meta{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px}
 #sheet .sev{font-size:12px;font-weight:600;padding:4px 10px;border-radius:999px;background:var(--bg3);color:var(--fg2)}
-#sheet .sev.soon{background:var(--warnbg);color:var(--warn)}#sheet .sev.stop{background:var(--badbg);color:var(--bad)}
+#sheet .sev.soon{background:var(--warnbg);color:var(--warn)}#sheet .sev.now,#sheet .sev.stop{background:var(--badbg);color:var(--bad)}
 #sheet p{color:var(--fg);font-size:15px;margin:0 0 10px;line-height:1.5}
 #sheet p.raw{font-size:12.5px;color:var(--fg3)}
 #sheet h4{font-size:13px;font-weight:500;color:var(--fg2);margin:16px 0 6px}
@@ -411,7 +418,7 @@ footer{padding:18px var(--pad) 10px;color:var(--fg3);font-size:12px;text-align:c
         <div class="row">
           <button class="btn red" onclick="confirmCmd('td5','clear_faults','Clear engine faults?','Writes to the Td5 ECU. Logged faults are gone for good; note them first. Anything still wrong comes straight back.','Clear faults')">Clear faults</button>
         </div>
-        <p class="hint" style="margin-top:12px">Tap a fault for what it means, likely causes and fixes. Current means present right now; logged means seen on an earlier run. Undecoded bits show as byte.bit until the dictionary names them.</p>
+        <p class="hint" style="margin-top:12px">Tap a fault for what it means, likely causes and fixes. Current means present right now; logged means seen on an earlier run. Codes shown as numbers (for example 25,5) are stored faults the dictionary does not name yet.</p>
       </div>
     </div>
 
@@ -450,11 +457,10 @@ footer{padding:18px var(--pad) 10px;color:var(--fg3);font-size:12px;text-align:c
     <div class="pane" id="engine-utilities">
       <div class="blk">
         <h2>Security</h2>
-        <div class="row" style="margin-top:0">
-          <button class="btn" onclick="cmd('security_status')">Immobiliser status</button>
-          <button class="btn" disabled title="Not available yet">Learn security code</button>
+        <div class="list">
+          <div class="li act"><span><span class="k">Immobiliser status</span><span class="t">Asks the ECU whether it is paired with the body control unit</span></span><button class="btn sm" onclick="cmd('security_status')">Read</button></div>
+          <div class="li act"><span><span class="k">Learn security code</span><span class="t">Not available: a failed learn leaves the car immobilised, and this command has never been sent from this software</span></span><button class="btn sm" disabled>Learn</button></div>
         </div>
-        <p class="hint" style="margin-top:10px">Learn security code puts the ECU into learn mode so it re-pairs with the BCU. It is not wired up yet: the library has never sent that frame, and a failed learn leaves the car immobilised.</p>
       </div>
       <div class="blk">
         <h2>Fuel maps</h2>
@@ -527,19 +533,20 @@ footer{padding:18px var(--pad) 10px;color:var(--fg3);font-size:12px;text-align:c
     </div>
 
     <div class="pane" id="slabs-outputs">
+      <div class="note warn show" style="margin-top:12px">Each test works a real part. Parked, handbrake on.</div>
       <div class="blk">
         <h2>Air suspension</h2>
-        <div class="row" style="margin-top:0">
-          <button class="btn" onclick="confirmCmd('slabs','compressor','Run the compressor?','Short compressor test.','Run')">Compressor</button>
-          <button class="btn" onclick="confirmCmd('slabs','exhaust','Open the exhaust valve?','Short exhaust valve test. The rear may drop a little.','Open')">Exhaust valve</button>
-          <button class="btn" onclick="confirmCmd('slabs','buzzer','Sound the buzzer?','The suspension buzzer in the cabin.','Sound')">Buzzer</button>
+        <div class="list">
+          <div class="li act"><span><span class="k">Compressor</span><span class="t">Runs the compressor for a moment; you should hear it under the vehicle</span></span><button class="btn sm amber" onclick="confirmCmd('slabs','compressor','Run the compressor?','Short compressor test.','Run')">Test</button></div>
+          <div class="li act"><span><span class="k">Exhaust valve</span><span class="t">Opens the exhaust valve briefly; the rear may drop a little</span></span><button class="btn sm amber" onclick="confirmCmd('slabs','exhaust','Open the exhaust valve?','Short exhaust valve test. The rear may drop a little.','Open')">Test</button></div>
+          <div class="li act"><span><span class="k">Suspension buzzer</span><span class="t">The warning buzzer in the cabin</span></span><button class="btn sm amber" onclick="confirmCmd('slabs','buzzer','Sound the buzzer?','The suspension buzzer in the cabin.','Sound')">Test</button></div>
         </div>
       </div>
       <div class="blk">
-        <h2>ABS</h2>
-        <div class="row" style="margin-top:0">
-          <button class="btn" onclick="confirmCmd('slabs','pump_on','Start the ABS pump?','Runs until you press Pump off.','Start')">Pump on</button>
-          <button class="btn" onclick="confirmCmd('slabs','pump_off','Stop the ABS pump?','','Stop')">Pump off</button>
+        <h2>ABS pump</h2>
+        <div class="list">
+          <div class="li act"><span><span class="k">Pump on</span><span class="t">Runs the return pump until you press Stop. Keep the reservoir topped up</span></span><button class="btn sm amber" onclick="confirmCmd('slabs','pump_on','Start the ABS pump?','Runs until you press Stop.','Start')">Start</button></div>
+          <div class="li act"><span><span class="k">Pump off</span><span class="t">Stops the pump</span></span><button class="btn sm" onclick="confirmCmd('slabs','pump_off','Stop the ABS pump?','','Stop')">Stop</button></div>
         </div>
       </div>
       <div class="blk">
@@ -550,26 +557,29 @@ footer{padding:18px var(--pad) 10px;color:var(--fg3);font-size:12px;text-align:c
 
     <div class="pane" id="slabs-utilities">
       <div class="blk">
-        <h2>Height</h2>
-        <p class="hint">Each press runs the compressor or exhaust for one corner for a moment. Watch the height on the Live page.</p>
-        <div class="row" style="margin-top:0">
-          <button class="btn" onclick="confirmCmd('slabs','raise_left','Raise left?','Runs the compressor with the left valve open.','Raise left')">Raise left</button>
-          <button class="btn" onclick="confirmCmd('slabs','raise_right','Raise right?','Runs the compressor with the right valve open.','Raise right')">Raise right</button>
-          <button class="btn" onclick="confirmCmd('slabs','lower_left','Lower left?','Opens the left exhaust valve.','Lower left')">Lower left</button>
-          <button class="btn" onclick="confirmCmd('slabs','lower_right','Lower right?','Opens the right exhaust valve.','Lower right')">Lower right</button>
+        <h2>Ride height</h2>
+        <p class="hint">Each press moves one side for a moment. Watch the heights on the Live page.</p>
+        <div class="list">
+          <div class="li act"><span><span class="k">Left side</span><span class="t">Compressor with the left valve open, or the left exhaust valve</span></span><span class="pair"><button class="btn sm" onclick="confirmCmd('slabs','raise_left','Raise left?','Runs the compressor with the left valve open.','Raise')">Raise</button><button class="btn sm" onclick="confirmCmd('slabs','lower_left','Lower left?','Opens the left exhaust valve.','Lower')">Lower</button></span></div>
+          <div class="li act"><span><span class="k">Right side</span><span class="t">Compressor with the right valve open, or the right exhaust valve</span></span><span class="pair"><button class="btn sm" onclick="confirmCmd('slabs','raise_right','Raise right?','Runs the compressor with the right valve open.','Raise')">Raise</button><button class="btn sm" onclick="confirmCmd('slabs','lower_right','Lower right?','Opens the right exhaust valve.','Lower')">Lower</button></span></div>
         </div>
       </div>
-      <div class="blk hazard">
-        <h2>ABS bleeding</h2>
-        <p class="hint">Needs the brake system open, fluid topped up and a helper on the pedal. Read the workshop procedure first. Wheel tests cycle one corner's valves and are safe parked.</p>
-        <div class="row" style="margin-top:0">
-          <button class="btn" onclick="confirmCmd('slabs','wheel_fl','Test FL?','Cycles the front-left ABS valves.','Test')">Test FL</button>
-          <button class="btn" onclick="confirmCmd('slabs','wheel_fr','Test FR?','Cycles the front-right ABS valves.','Test')">Test FR</button>
-          <button class="btn" onclick="confirmCmd('slabs','wheel_rl','Test RL?','Cycles the rear-left ABS valves.','Test')">Test RL</button>
-          <button class="btn" onclick="confirmCmd('slabs','wheel_rr','Test RR?','Cycles the rear-right ABS valves.','Test')">Test RR</button>
-          <button class="btn amber" onclick="confirmCmd('slabs','bleed_power_on','Start power bleed?','Opens all ABS valves and runs the pump until you press Stop.','Start bleed')">Power bleed start</button>
-          <button class="btn" onclick="confirmCmd('slabs','bleed_power_off','Stop power bleed?','','Stop bleed')">Power bleed stop</button>
-          <button class="btn amber" onclick="confirmCmd('slabs','bleed_module','Run the modulator bleed?','Four-step ABS modulator bleed, about 10 seconds.','Run bleed')">Modulator bleed</button>
+      <div class="blk">
+        <h2>ABS valve tests</h2>
+        <p class="hint">Cycles one corner's inlet and outlet valves. Safe when parked; you should hear the modulator click.</p>
+        <div class="row injrow">
+          <button class="btn" onclick="confirmCmd('slabs','wheel_fl','Test front left?','Cycles the front-left ABS valves.','Test')">FL</button>
+          <button class="btn" onclick="confirmCmd('slabs','wheel_fr','Test front right?','Cycles the front-right ABS valves.','Test')">FR</button>
+          <button class="btn" onclick="confirmCmd('slabs','wheel_rl','Test rear left?','Cycles the rear-left ABS valves.','Test')">RL</button>
+          <button class="btn" onclick="confirmCmd('slabs','wheel_rr','Test rear right?','Cycles the rear-right ABS valves.','Test')">RR</button>
+        </div>
+      </div>
+      <div class="blk">
+        <h2>Brake bleeding</h2>
+        <p class="hint">Only with the brake system open, the reservoir topped up and a helper on the pedal. Read the workshop procedure first.</p>
+        <div class="list">
+          <div class="li act"><span><span class="k">Power bleed</span><span class="t">Opens all ABS valves and runs the pump until you press Stop</span></span><span class="pair"><button class="btn sm amber" onclick="confirmCmd('slabs','bleed_power_on','Start power bleed?','Opens all ABS valves and runs the pump until you press Stop.','Start')">Start</button><button class="btn sm" onclick="confirmCmd('slabs','bleed_power_off','Stop power bleed?','','Stop')">Stop</button></span></div>
+          <div class="li act"><span><span class="k">Modulator bleed</span><span class="t">The four-step modulator bleed sequence, about ten seconds</span></span><button class="btn sm amber" onclick="confirmCmd('slabs','bleed_module','Run the modulator bleed?','Four-step ABS modulator bleed, about 10 seconds.','Run')">Run</button></div>
         </div>
       </div>
     </div>
@@ -588,6 +598,9 @@ footer{padding:18px var(--pad) 10px;color:var(--fg3);font-size:12px;text-align:c
     <div class="blk" id="tripView" style="display:none">
       <div class="row" style="margin:0 0 10px"><button class="btn sm" onclick="closeTrip()">← All drives</button><span id="tripTitle" style="align-self:center;color:var(--fg2);font-size:14px"></span></div>
       <div class="tripsum" id="tripSum"></div>
+      <h2 style="margin-top:4px">Faults during this drive</h2>
+      <div class="faults" id="tripFaults"></div>
+      <h2 style="margin-top:14px">Replay</h2>
       <div class="scrub" id="scrub"></div>
       <div id="panels"></div>
       <p class="hint" style="margin-top:8px">Drag across any chart to read the values at that moment.</p>
@@ -622,8 +635,8 @@ footer{padding:18px var(--pad) 10px;color:var(--fg3);font-size:12px;text-align:c
       <dl class="kv" id="sysInfo"></dl>
     </div>
   </section>
-</main>
 <footer id="foot">d2dash</footer>
+</main>
 
 <div class="modal" id="modal"><div class="box">
   <h3 id="mTitle"></h3><p id="mText"></p>
@@ -679,8 +692,8 @@ const TD5_INPUTS = [
 ];
 const SLABS_INPUTS = [
   {cat:'Braking & ABS', title:'Wheel speed sensors', items:[['wheel_speed_fl','Front left speed'],['wheel_speed_fr','Front right speed'],
-    ['wheel_speed_rl','Rear left speed'],['wheel_speed_rr','Rear right speed'],['abs_sensor_fl','Front left sensor'],['abs_sensor_fr','Front right sensor'],
-    ['abs_sensor_rl','Rear left sensor'],['abs_sensor_rr','Rear right sensor']]},
+    ['wheel_speed_rl','Rear left speed'],['wheel_speed_rr','Rear right speed'],['abs_sensor_fl','Front left sensor signal (raw)'],['abs_sensor_fr','Front right sensor signal (raw)'],
+    ['abs_sensor_rl','Rear left sensor signal (raw)'],['abs_sensor_rr','Rear right sensor signal (raw)']]},
   {cat:'Braking & ABS', title:'Modulator and pump', items:[[null,'Inlet valves FR/FL/RR/RL'],[null,'Outlet valves FR/FL/RR/RL'],[null,'Pump monitor'],
     [null,'Pump relay'],[null,'Shuttle valve switch'],['brake_analog','Brake pedal signal']]},
   {cat:'Traction & HDC', title:'Traction control and hill descent', items:[[null,'Engine speed (from engine ECU)'],[null,'Engine torque'],[null,'Throttle position'],[null,'HDC switch'],[null,'HDC brake']]},
@@ -797,23 +810,25 @@ function faultBlock(el, module, faults){
   el.innerHTML='<ul>'+faults.map((f,i)=>{
     const m=f.match(/^(.*?)\s*\((Current|Logged[^)]*)\)\s*$/), name=m?m[1]:f, tag=m?m[2]:'';
     const e=entryFor(module,f), cause=e?e.title:causeFor(module,f);
-    return `<li data-f="${encodeURIComponent(f)}" onclick="showSheet('${module}',decodeURIComponent(this.dataset.f))"><div class="h"><span class="tag ${/Current/.test(tag)?'cur':''}">${tag||'stored'}</span><span>${name}</span><span class="more">details ›</span></div>${cause?`<p class="cause">${cause}</p>`:''}</li>`;
+    return `<li data-f="${encodeURIComponent(f)}" onclick="showSheet('${module}',decodeURIComponent(this.dataset.f))"><div class="h"><span class="tag ${/Current/.test(tag)?'cur':''}">${tag||'stored'}</span><span>${fname(name)}</span><span class="more">›</span></div>${cause?`<p class="cause">${cause}</p>`:''}</li>`;
   }).join('')+'</ul>';
 }
 const esc=t=>String(t).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+// Undecoded bits come from the ECU as "byte25.bit5"; show them the way the Nanocom does: "25,5".
+const fname=n=>String(n).replace(/byte\s*(\d+)[.,]\s*bit\s*(\d+)/ig,'$1,$2').replace(/^unknown \(/i,'(');
 function showSheet(module, name){
   const e=entryFor(module,name)||{title:name, what:causeFor(module,name)||'No write-up for this fault yet.', causes:[], fixes:[], severity:'drive', severity_label:'', check:[]};
   const state=e.state||stateOf(name);
   const labels={}; [].concat(TD5_INPUTS,SLABS_INPUTS).forEach(g=>g.items.forEach(([k,l])=>{ if(k) labels[k]=l; }));
   const md=t=>esc(t).replace(/\*\*(.+?)\*\*/g,'<b style="color:var(--fg)">$1</b>');
-  $('sheetBody').innerHTML=`<h3>${esc(e.title)}</h3>
+  $('sheetBody').innerHTML=`<h3>${esc(e.title.replace(/Undecoded fault bit/,'Fault '+fname(name).replace(/\s*\(.*$/,'')))}</h3>
     <div class="meta">${e.severity_label?`<span class="sev ${e.severity}">${esc(e.severity_label)}</span>`:''}${state?`<span class="sev">${esc(state)}</span>`:''}<span class="sev" style="background:none;color:var(--fg3)">${module==='td5'?'Engine ECU':'SLABS ECU'}</span></div>
     ${e.state_note?`<p class="raw">${esc(e.state_note)}</p>`:''}
     <p>${md(e.what)}</p>
     ${e.causes&&e.causes.length?`<h4>Likely causes</h4><ol>${e.causes.map(c=>`<li>${md(c)}</li>`).join('')}</ol>`:''}
     ${e.fixes&&e.fixes.length?`<h4>What to do</h4><ol>${e.fixes.map(c=>`<li>${md(c)}</li>`).join('')}</ol>`:''}
     ${e.check&&e.check.length?`<h4>Watch on the Inputs page</h4><div class="watch">${e.check.map(k=>`<span>${esc(labels[k]||nice(k))}</span>`).join('')}</div>`:''}
-    <p class="raw" style="margin-top:14px">ECU text: ${esc(name)}</p>`;
+    <p class="raw" style="margin-top:14px">ECU text: ${esc(fname(name))}</p>`;
   $('sheetBg').classList.add('on'); $('sheet').classList.add('on'); $('sheet').scrollTop=0;
 }
 function closeSheet(){ $('sheetBg').classList.remove('on'); $('sheet').classList.remove('on'); }
@@ -823,7 +838,7 @@ function renderLib(module){
   Object.keys(lib).forEach(n=>{ const e=lib[n]; if(!e.what) return; if(seen[e.title]) return; if(/^inj\. 6/i.test(n)) return; seen[e.title]=1;   // the Td5 has five cylinders; slot 6 is unused
     const hay=(e.title+' '+e.what+' '+e.causes.join(' ')+' '+n).toLowerCase(); if(q && !hay.includes(q)) return;
     (groups[e.severity]=groups[e.severity]||[]).push([e,n]); });
-  const order=[['stop','Do not drive'],['soon','Fix soon'],['drive','Fix when convenient']];
+  const order=[['now','Fix now'],['soon','Fix soon'],['drive','When convenient']];
   el.innerHTML=order.filter(([k])=>groups[k]).map(([k,lab])=>`<h2>${lab} · ${groups[k].length}</h2>`+groups[k].sort((a,b)=>a[0].title.localeCompare(b[0].title))
       .map(([e,n])=>`<div class="li" data-f="${encodeURIComponent(n)}" onclick="showSheet('${module}',decodeURIComponent(this.dataset.f))"><b>${esc(e.title)}</b><small>details ›</small></div>`).join('')).join('')
     || `<p class="hint" style="margin-top:12px">${Object.keys(lib).length?'Nothing matches.':'Loading the fault library…'}</p>`;
@@ -858,6 +873,17 @@ function chips(el, map, sig){
     || '<span class="chip">no switch data</span>';
 }
 
+// Connection problems in plain words, each with a code we can quote to each other when troubleshooting.
+function friendlyError(msg){
+  const m=msg.toLowerCase();
+  if(/could not open port|no such file|errno 2\b/.test(m)) return {code:'C1', title:'Cable not found', hint:'The K-line cable is not plugged into the Pi, or the Pi does not recognise it.'};
+  if(/permission denied|errno 13/.test(m)) return {code:'C2', title:'Pi cannot use the cable', hint:'The cable is there but the dashboard is not allowed to open it. Re-run the installer.'};
+  if(/busy|resource temporarily|errno 16|errno 11/.test(m)) return {code:'C3', title:'Cable in use', hint:'Another program on the Pi has the cable open.'};
+  if(/disconnect|input\/output|errno 5|device reports readiness/.test(m)) return {code:'C4', title:'Cable unplugged mid-session', hint:'The adapter dropped off the USB. Reseat the cable at the Pi.'};
+  if(/timeout|no response|no answer|not respond|init|sync|echo/.test(m)) return {code:'C5', title:'Car not answering', hint:'Ignition on? Cable in the OBD socket, switch in the right position? Give it a few seconds.'};
+  return {code:'C9', title:'Connection problem', hint:'The Pi could not talk to the car. Try again; if it stays, send the text below.'};
+}
+
 // ============ state ============
 let snap=null, lastSig={td5:{},slabs:{}}, lastFaults={td5:[],slabs:[]}, worst={lvl:'',txt:''};
 
@@ -867,7 +893,8 @@ function render(s){
   $('state').className='state '+s.status;
   $('stateTxt').textContent = s.status==='connected' ? `${mod} · ${s.stale?'stale':'live'}` : `${mod} · ${s.progress||s.status}`;
   const n=$('note');
-  if(s.status==='error'){ n.className='note bad show'; n.textContent='No ECU answering: '+(s.error||'retrying')+'. Ignition on? Cable in?'; }
+  if(s.status==='error'){ const e=friendlyError(s.error||''); n.className='note bad show';
+    n.innerHTML=`<b>${esc(e.title)}</b> <span class="code">${e.code}</span><br>${esc(e.hint)}${s.error?`<br><small class="raw">${esc(s.error)}</small>`:''}`; }
   else if(s.status!=='connected'){ n.className='note warn show'; n.textContent=s.progress||s.status; }
   else n.className='note';
 
@@ -923,35 +950,36 @@ function renderSlabs(sig){
   renderInputs($('slabsInputs'), SLABS_INPUTS, sig, sig, 'slabs');
   $('slabsSetH').innerHTML=listRow('height_left','Left current height',sig.height_left,sig)+listRow('height_right','Right current height',sig.height_right,sig);
 }
-// Top-down Discovery 2: ladder chassis, beam axles, props to the transfer box, rear air springs.
-// Wheel rims colour by sensor state; numbers are wheel speeds; rear corners show ride height.
+// Top-down Discovery 2 for the wheel speed sensors and ride height. Front on the left, so the
+// driver's RIGHT is the top of the picture (Land Rover's left/right is as seen from the driver's seat).
+// Each corner: name, live speed, sensor state. Rear air springs carry the ride height.
 function buildChassis(){
-  // [key, x, y]. Front is on the left, so the driver faces left and the driver's RIGHT is the top of the
-  // picture — Land Rover's left/right is always as seen from the driver's seat.
-  const W=[['fr',62,52],['fl',62,188],['rr',248,52],['rl',248,188]];
-  const tyre=([k,x,y])=>`<g class="wh" data-w="${k}"><rect class="tyre" x="${x-16}" y="${y-30}" width="32" height="60" rx="9"/>
-      ${[-18,-6,6,18].map(d=>`<line class="tread" x1="${x-11}" y1="${y+d}" x2="${x+11}" y2="${y+d}"/>`).join('')}
-      <circle class="glow" cx="${x}" cy="${y}" r="3"/></g>`;
-  const label=([k,x,y])=>{ const up=y<120, ty=up?y-44:y+58; return `<text class="lb" x="${x}" y="${up?ty-15:ty+15}" font-size="9" text-anchor="middle">${k.toUpperCase()}</text>
-      <text class="spd" data-w="${k}" x="${x}" y="${ty}" font-size="20" text-anchor="middle">—</text>`; };
-  $('chassis').innerHTML=`<svg viewBox="0 -26 320 298" role="img" aria-label="wheel speeds and ride height">
-    <defs><linearGradient id="gf" x1="0" x2="1"><stop offset="0" stop-color="#2a3440"/><stop offset="1" stop-color="#1c242c"/></linearGradient></defs>
-    <path class="rail" d="M38 96 H120 Q128 96 132 90 L140 82 H290"/><path class="rail" d="M38 144 H120 Q128 144 132 150 L140 158 H290"/>
-    <line class="rail2" x1="38" y1="96" x2="38" y2="144"/><line class="rail2" x1="290" y1="82" x2="290" y2="158"/>
-    <line class="rail2" x1="100" y1="96" x2="100" y2="144"/><line class="rail2" x1="200" y1="82" x2="200" y2="158"/>
-    <line class="axle" x1="62" y1="58" x2="62" y2="182"/><line class="axle" x1="248" y1="58" x2="248" y2="182"/>
-    <rect class="blockf" x="78" y="100" width="46" height="40" rx="5" fill="url(#gf)"/>
-    <rect class="blockf" x="124" y="107" width="40" height="26" rx="4"/>
-    <rect class="blockf" x="150" y="112" width="26" height="36" rx="4"/>
-    <line class="prop" x1="150" y1="130" x2="68" y2="120"/><line class="prop" x1="176" y1="130" x2="242" y2="120"/>
-    <circle class="blockf" cx="62" cy="120" r="9"/><circle class="blockf" cx="248" cy="120" r="10"/>
-    <g class="sp" data-s="R"><circle class="spring" cx="248" cy="88" r="8"/><circle class="spring" cx="248" cy="88" r="3.5"/></g>
-    <g class="sp" data-s="L"><circle class="spring" cx="248" cy="152" r="8"/><circle class="spring" cx="248" cy="152" r="3.5"/></g>
-    <text class="hgt" data-s="R" x="266" y="92" font-size="11">—</text><text class="hgt" data-s="L" x="266" y="156" font-size="11">—</text>
-    <text class="lb" x="160" y="-8" font-size="9" text-anchor="middle">RIGHT (driver's side)</text>
-    <text class="lb" x="160" y="266" font-size="9" text-anchor="middle">LEFT (passenger side)</text>
-    <text class="lb" x="14" y="122" font-size="9" text-anchor="middle" transform="rotate(-90 14 122)">FRONT</text>
-    ${W.map(tyre).join('')}${W.map(label).join('')}</svg>`;
+  const W=[['fr',84,74,'Front right',true],['rr',276,74,'Rear right',true],['fl',84,226,'Front left',false],['rl',276,226,'Rear left',false]];
+  const tyre=([k,x,y])=>`<g class="wh" data-w="${k}">
+      <rect class="halo" x="${x-21}" y="${y-37}" width="42" height="74" rx="12"/>
+      <rect class="tyre" x="${x-16}" y="${y-32}" width="32" height="64" rx="8"/>
+      <rect class="side" x="${x-12}" y="${y-28}" width="24" height="56" rx="5"/>
+      ${[-22,-14,-6,2,10,18].map(d=>`<path class="tread" d="M${x-11} ${y+d} l7 4 M${x+4} ${y+d+4} l7 -4"/>`).join('')}
+      <rect class="hub" x="${x-3}" y="${y-5}" width="6" height="10" rx="2"/></g>`;
+  const txt=([k,x,y,name,top])=>{ const n=top?y-74:y+52, v=top?y-55:y+73, t=top?y-43:y+86;
+    return `<text class="nm" x="${x}" y="${n}" text-anchor="middle">${name}</text>
+      <text class="spd" data-w="${k}" x="${x}" y="${v}" text-anchor="middle">—</text>
+      <text class="sst" data-w="${k}" x="${x}" y="${t}" text-anchor="middle">no data</text>`; };
+  $('chassis').innerHTML=`<svg viewBox="0 -10 360 330" role="img" aria-label="Wheel speeds, sensor state and ride height">
+    <rect class="body" x="36" y="40" width="288" height="220" rx="26"/>
+    <path class="rail" d="M56 124 H140 Q150 124 154 118 L160 110 H304"/><path class="rail" d="M56 176 H140 Q150 176 154 182 L160 190 H304"/>
+    ${[56,118,208,304].map(x=>`<line class="xm" x1="${x}" y1="${x>150?110:124}" x2="${x}" y2="${x>150?190:176}"/>`).join('')}
+    <line class="axle" x1="84" y1="78" x2="84" y2="222"/><line class="axle" x1="276" y1="78" x2="276" y2="222"/>
+    <rect class="blockf" x="96" y="120" width="56" height="60" rx="6"/>
+    <rect class="blockf" x="152" y="135" width="40" height="30" rx="4"/>
+    <rect class="blockf" x="186" y="128" width="26" height="44" rx="4"/>
+    <line class="prop" x1="186" y1="150" x2="92" y2="150"/><line class="prop" x1="212" y1="150" x2="268" y2="150"/>
+    <circle class="diff" cx="84" cy="150" r="10"/><circle class="diff" cx="276" cy="150" r="11"/>
+    <g class="sp" data-s="R"><circle class="spring" cx="276" cy="112" r="9"/><circle class="spring" cx="276" cy="112" r="4"/></g>
+    <g class="sp" data-s="L"><circle class="spring" cx="276" cy="188" r="9"/><circle class="spring" cx="276" cy="188" r="4"/></g>
+    <text class="hgt" data-s="R" x="293" y="116">—</text><text class="hgt" data-s="L" x="293" y="192">—</text>
+    <text class="axis" x="22" y="150" text-anchor="middle" transform="rotate(-90 22 150)">front</text>
+    ${W.map(tyre).join('')}${W.map(txt).join('')}</svg>`;
 }
 buildChassis();
 function renderChassis(sig){
@@ -959,24 +987,26 @@ function renderChassis(sig){
   const moving=ws.length===4 && Math.max(...ws)>8;
   const med=ws.length?ws.slice().sort((a,b)=>a-b)[Math.floor(ws.length/2)]:0;
   ['fl','fr','rl','rr'].forEach(k=>{
-    const v=sig['wheel_speed_'+k], s=sig['abs_sensor_'+k];
-    const g=document.querySelector(`#chassis .wh[data-w="${k}"]`), txt=document.querySelector(`#chassis .spd[data-w="${k}"]`);
+    const v=sig['wheel_speed_'+k], sn=sig['abs_sensor_'+k];
+    const g=document.querySelector(`#chassis .wh[data-w="${k}"]`), txt=document.querySelector(`#chassis .spd[data-w="${k}"]`), st=document.querySelector(`#chassis .sst[data-w="${k}"]`);
     if(!g||!txt) return;
-    const rim=g.querySelector('.tyre'), glow=g.querySelector('.glow');
-    if(!v){ rim.setAttribute('class','tyre dim'); glow.classList.remove('on'); txt.textContent='—'; txt.setAttribute('class','spd dim'); return; }
-    const n=Number(v.v); let cls='ok';
-    if(moving && med>0 && Math.abs(n-med)/med>0.15) cls='warn';
-    if(moving && n<1) cls='bad';
-    if(s && (s.s==='high'||s.s==='low')) cls='bad';
-    rim.setAttribute('class','tyre '+cls); glow.classList.toggle('on', moving && cls==='ok');
-    txt.textContent=(v.c==='candidate'?'≈':'')+Math.round(n); txt.setAttribute('class','spd '+(cls==='ok'?'':cls));
+    const halo=g.querySelector('.halo');
+    if(!v){ halo.setAttribute('class','halo'); txt.textContent='—'; txt.setAttribute('class','spd dim'); st.textContent='no data'; st.setAttribute('class','sst dim'); return; }
+    const n=Number(v.v); let cls='ok', label='sensor OK';
+    if(moving && med>0 && Math.abs(n-med)/med>0.15){ cls='warn'; label='weak signal'; }
+    if(moving && n<1){ cls='bad'; label='no signal'; }
+    if(sn && (sn.s==='high'||sn.s==='low')){ cls='bad'; label='sensor fault'; }
+    if(!moving && cls==='ok') label='stationary';
+    halo.setAttribute('class','halo '+cls);
+    txt.innerHTML=(v.c==='candidate'?'≈':'')+Math.round(n)+`<tspan class="u"> ${v.u||'km/h'}</tspan>`; txt.setAttribute('class','spd '+(cls==='ok'?'':cls));
+    st.textContent=label; st.setAttribute('class','sst '+(cls==='ok'?(moving?'ok':'dim'):cls));
   });
   [['L','height_left','height_left_mm'],['R','height_right','height_right_mm']].forEach(([side,k,km])=>{
     const v=sig[k], mm=sig[km], sp=document.querySelector(`#chassis .sp[data-s="${side}"]`), t=document.querySelector(`#chassis .hgt[data-s="${side}"]`);
     if(!v){ t.textContent='—'; sp.querySelectorAll('.spring').forEach(c=>c.setAttribute('class','spring')); return; }
     let cls=''; if(v.v<HEIGHT.warn[0]||v.v>HEIGHT.warn[1]) cls='bad'; else if(v.v<HEIGHT.band[0]||v.v>HEIGHT.band[1]) cls='warn';
     sp.querySelectorAll('.spring').forEach(c=>c.setAttribute('class','spring '+cls));
-    t.textContent=mm?Math.round(mm.v)+' mm':Math.round(v.v); t.setAttribute('class','hgt '+cls);
+    t.textContent=(mm?Math.round(mm.v)+' mm':Math.round(v.v)); t.setAttribute('class','hgt '+cls);
   });
 }
 renderSlabs({});
@@ -997,23 +1027,32 @@ function setHeight(side, sig, mm){
 }
 
 // ============ alarms + sound ============
-let audio=null, soundOn=false, snoozedUntil=0, beepTimer=null, warnedTxt='';
+// Alarm tones are pre-rendered WAV clips played through <audio>: phones treat that as media playback,
+// which (unlike Web Audio) is not silenced by the ring/silent switch and only needs one tap to unlock.
+let soundOn=false, snoozedUntil=0, beepTimer=null, warnedTxt='', clips=null, unlocked=false;
 try{ soundOn=localStorage.getItem('d2dash.sound')==='1'; }catch(e){}
-function ensureAudio(){ try{ if(!audio) audio=new (window.AudioContext||window.webkitAudioContext)(); if(audio.state==='suspended') audio.resume(); }catch(e){} }
-function tone(freq, t0, dur){ const o=audio.createOscillator(), g=audio.createGain(); o.type='square'; o.frequency.value=freq;
-  g.gain.setValueAtTime(0.0001,t0); g.gain.exponentialRampToValueAtTime(0.25,t0+0.01); g.gain.exponentialRampToValueAtTime(0.0001,t0+dur);
-  o.connect(g).connect(audio.destination); o.start(t0); o.stop(t0+dur+0.02); }
+function wavClip(notes){ // notes: [[freq, seconds], ...] square wave with a short fade, 22.05 kHz 16-bit mono
+  const sr=22050, total=notes.reduce((a,[,d])=>a+d,0), n=Math.round(total*sr), buf=new ArrayBuffer(44+n*2), v=new DataView(buf);
+  const str=(o,t)=>{ for(let i=0;i<t.length;i++) v.setUint8(o+i,t.charCodeAt(i)); };
+  str(0,'RIFF'); v.setUint32(4,36+n*2,true); str(8,'WAVEfmt '); v.setUint32(16,16,true); v.setUint16(20,1,true); v.setUint16(22,1,true);
+  v.setUint32(24,sr,true); v.setUint32(28,sr*2,true); v.setUint16(32,2,true); v.setUint16(34,16,true); str(36,'data'); v.setUint32(40,n*2,true);
+  let i=0; for(const [f,d] of notes){ const m=Math.round(d*sr); for(let k=0;k<m;k++,i++){ const env=Math.min(1,k/200,(m-k)/400); const sq=f?(Math.sin(2*Math.PI*f*k/sr)>0?1:-1):0; v.setInt16(44+i*2, sq*env*9000, true); } }
+  const a=new Audio('data:audio/wav;base64,'+btoa(String.fromCharCode(...new Uint8Array(buf)))); a.preload='auto'; a.setAttribute('playsinline',''); return a;
+}
+function ensureAudio(){ if(!clips) clips={bad:wavClip([[880,.14],[0,.04],[660,.14],[0,.04],[880,.16]]), warn:wavClip([[660,.14]])}; }
+function unlock(){ // call from a tap: lets later, untouched alarms play
+  ensureAudio(); if(unlocked) return; unlocked=true;
+  Object.values(clips).forEach(a=>{ a.muted=true; a.play().then(()=>{ a.pause(); a.currentTime=0; a.muted=false; }).catch(()=>{ a.muted=false; unlocked=false; }); });
+}
 function beep(kind){
-  if(!soundOn) return; ensureAudio(); if(!audio) return;
-  const t=audio.currentTime;
-  if(kind==='bad'){ tone(880,t,.14); tone(660,t+.17,.14); tone(880,t+.34,.14); }
-  else tone(660,t,.12);
+  if(!soundOn) return; ensureAudio();
+  const a=clips[kind==='bad'?'bad':'warn']; try{ a.currentTime=0; a.play().catch(()=>{}); }catch(e){}
   if(navigator.vibrate) navigator.vibrate(kind==='bad'?[200,100,200]:[80]);
 }
-function testBeep(){ if(!soundOn){ toggleSound(); } beep('bad'); }
+function testBeep(){ ensureAudio(); unlocked=true; if(!soundOn){ toggleSound(); return; } beep('bad'); }
 function toggleSound(){
   soundOn=!soundOn; try{ localStorage.setItem('d2dash.sound', soundOn?'1':'0'); }catch(e){}
-  if(soundOn){ ensureAudio(); beep('warn'); }
+  if(soundOn){ ensureAudio(); unlocked=true; beep('bad'); }
   $('sound').classList.toggle('on', soundOn); $('soundBtn').textContent=soundOn?'On':'Off';
   toast(soundOn?'Alarm sound on':'Alarm sound off');
 }
@@ -1085,7 +1124,7 @@ document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{
   document.querySelectorAll('main section').forEach(s=>s.classList.toggle('on',s.id==='tab-'+b.dataset.tab));
   if(b.dataset.tab==='more') loadLogs();
   if(b.dataset.tab==='trips') loadTrips();
-  window.scrollTo(0,0);
+  document.querySelector('main').scrollTop=0;
 });
 fetch('/api/health').then(r=>r.json()).then(h=>{ if(h.findings) $('nTrips').textContent=h.findings.filter(f=>f.level==='warn').length||''; }).catch(()=>{});
 document.querySelectorAll('.sub').forEach(sub=>{
@@ -1155,7 +1194,7 @@ async function loadTrips(){
   $('tripList').innerHTML = tr.trips.map(t=>`<div class="trip" onclick="openTrip('${t.id}')">
       <span class="d">${fmtDate(t.start)}</span><span class="km num">${t.distance_km} km</span>
       <span class="m">${fmtDur(t.duration_s)} · coolant ${t.coolant_max!=null?Math.round(t.coolant_max)+' °C':'—'}${t.egt_max!=null?' · EGT '+Math.round(t.egt_max)+' °C':''}${t.l_per_100km!=null?' · '+t.l_per_100km+' L/100':''}</span>
-      ${t.faults.length?`<span class="f">${t.faults.length} fault${t.faults.length>1?'s':''}: ${t.faults.join(', ')}</span>`:''}</div>`).join('')
+      ${t.faults.length?`<span class="f">${t.faults.length} fault${t.faults.length>1?'s':''} recorded</span>`:''}</div>`).join('')
     || '<p class="hint">No drives yet. Each connection to the car becomes a drive here.</p>';
   renderHealth(h);
 }
@@ -1196,9 +1235,13 @@ async function openTrip(id){
     [s.coolant_max!=null?Math.round(s.coolant_max):'—','°C','Coolant peak'],[s.egt_max!=null?Math.round(s.egt_max):'—','°C','EGT peak'],[s.boost_max!=null?s.boost_max.toFixed(2):'—','bar','Boost peak']]
     .map(([v,u,l])=>`<div class="it"><div class="rd num">${v}<small>${u}</small></div><div class="lb">${l}</div></div>`).join('');
   const r=tripData.replay;
+  const fl=$('tripFaults'); fl.className='faults'+(s.faults.length?' has':'');
+  fl.innerHTML = s.faults.length ? '<ul>'+s.faults.map(f=>{ const e=entryFor('td5',f); const m=f.match(/^(.*?)\s*\((Current|Logged[^)]*)\)\s*$/), nm=m?m[1]:f, tag=m?m[2]:'';
+      return `<li data-f="${encodeURIComponent(f)}" onclick="showSheet('td5',decodeURIComponent(this.dataset.f))"><div class="h"><span class="tag ${/Current/.test(tag)?'cur':''}">${tag||'stored'}</span><span>${fname(nm)}</span><span class="more">›</span></div>${e?`<p class="cause">${esc(e.title)}</p>`:''}</li>`; }).join('')+'</ul>'
+    : '<div class="none">No faults during this drive</div>';
   $('panels').innerHTML = REPLAY.filter(([k])=>r.cols[k]).map(([k,label,unit,lo,hi])=>panelSvg(k,label,unit,lo,hi,r)).join('');
   $('tripListBlk').style.display='none'; $('healthBlk').style.display='none'; $('tripView').style.display='';
-  setScrub(null); window.scrollTo(0,0);
+  setScrub(null); document.querySelector('main').scrollTop=0;
   bindScrub();
 }
 function closeTrip(){ $('tripView').style.display='none'; $('tripListBlk').style.display=''; $('healthBlk').style.display=''; }

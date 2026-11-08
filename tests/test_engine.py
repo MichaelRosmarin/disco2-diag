@@ -257,7 +257,7 @@ def test_fault_library_covers_every_fault(engine):
         missing = [n for n, v in lib[mod].items() if not v.get("what")]
         assert not missing, missing[:5]
     e = lib["slabs"]["Front Right Sensor — Output Low"]
-    assert e["title"].startswith("Front right") and e["severity"] in ("drive", "soon", "stop") and e["check"]
+    assert e["title"].startswith("Front right") and e["severity"] in ("drive", "soon", "now") and e["check"]
     httpd = ThreadingHTTPServer(("127.0.0.1", 0), make_handler(engine))
     httpd.daemon_threads = True
     threading.Thread(target=httpd.serve_forever, daemon=True).start()
