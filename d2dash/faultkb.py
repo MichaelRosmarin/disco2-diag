@@ -53,7 +53,7 @@ TD5: list[tuple[str, dict]] = [
         what="On 2002-on (EU3) engines the barometric sensor on the air cleaner lid also carries an ambient air "
              "temperature element (one extra wire on the plug); earlier engines have the pressure-only sensor and no AAT. "
              "If your engine is pre-2002, this fault means the ECU configuration expects a sensor that is not fitted. "
-             "This is not the climate control's own ambient sensor at the front of the vehicle, which feeds the heater system, not the engine ECU.",
+             "This is not the heater or climate system's own temperature sensor, which does not feed the engine ECU.",
         causes=["Configuration mismatch on an earlier engine or after an ECU swap", "4-wire sensor on the air cleaner lid failed or unplugged", "Wiring"],
         fixes=["Check the air cleaner lid sensor: the pressure-only type has three wires and the configuration should then have AAT off", "Check the sensor and plug on the lid"],
         severity="drive", check=["ext_temp"])),
@@ -63,7 +63,7 @@ TD5: list[tuple[str, dict]] = [
              "for EGR control (and for fuelling corrections on later engines); with it faulted the ECU uses a fixed default value, "
              "EGR is disabled and power may be reduced. A lazy MAF (reading low without a fault) is the classic cause of a flat Td5.",
         causes=["MAF meter failed or contaminated (oiled foam filters are a known killer)", "Connector or wiring", "Air leak between MAF and turbo giving an implausible reading"],
-        fixes=["Watch Air flow: hot idle should be about 50–60 kg/h (below about 40 is a lazy meter) and full load should reach 550–650 kg/h",
+        fixes=["Watch Air flow: hot idle should be about 55–65 kg/h (below about 40 is a lazy meter) and full load should reach 550–650 kg/h",
                "Unplug the MAF and drive: if the car feels better, the MAF is lazy — or the EGR it controls was the problem, since unplugging disables both", "Replace with a genuine or Bosch meter; pattern parts are poor"],
         severity="soon", check=["maf_sensor", "maf_sensor_v", "maf"])),
     (r"^manifold pressure", dict(
@@ -301,8 +301,8 @@ TD5: list[tuple[str, dict]] = [
         what="The ECU sends a multiplexed PWM 'engine data' signal (throttle position, torque, engine type and gearbox type — "
              "hence 'gearbox' in the fault name; the automatic gearbox ECU itself talks to the engine over CAN) to the SLABS ECU. Open load means the line is not loaded as "
              "expected. **When the SLABS ECU loses this signal it logs 'Engine PWM Signal Bad' and lights the TC and HDC "
-             "lamps (ABS itself stays active)**, so check it when those two come on without the ABS lamp. The SLABS treats a "
-             "throttle-signal fault as permanent, so expect to clear it with a tool after the wire is fixed.",
+             "lamps (ABS itself stays active)**, so check it when those two come on without the ABS lamp. The manual classes "
+             "throttle-position-signal faults as permanent, so expect to clear the SLABS with a tool after the wire is fixed.",
         causes=["Connector at the SLABS ECU (behind the passenger glovebox) loose or corroded", "Wire between the two ECUs chafed", "SLABS ECU failed"],
         fixes=["Read the SLABS faults for Engine PWM Signal Bad", "Check the signal wire from the engine ECU to the SLABS ECU for continuity", "Clear both ECUs and see if it returns"],
         severity="soon")),
@@ -315,7 +315,7 @@ TD5: list[tuple[str, dict]] = [
         severity="drive")),
     (r"active engine mount", dict(
         title="Active engine mounting drive",
-        what="An ECU output for a vacuum-switched engine mount that no Td5 vehicle actually uses. On this vehicle the fault "
+        what="An ECU output for a vacuum-switched engine mount that no Td5 Discovery or Defender is known to use. On this vehicle the fault "
              "is a configuration setting or a spurious bit rather than a part.",
         causes=["Configuration mismatch, typically after an ECU swap or remap", "Spurious"],
         fixes=["Have the active engine mount configuration set off if a Nanocom shows it on; otherwise ignore"],
@@ -410,7 +410,7 @@ SLABS: list[tuple[str, dict]] = [
              "permanent fault: even after a repair the lamps stay on until the fault is cleared with a tool.",
         causes=["Shuttle valve switch failed (very common; often intermittent when hot)", "Switch connector corroded",
                 "Wiring to the modulator chafed"],
-        fixes=["Check the switch circuit resistance to earth at the modulator connector: brakes off about 3.0 kΩ (Land Rover's window 2555–4088 Ω), pedal pressed about 1.0 kΩ (511–1532 Ω); out of range means the switch pack or its wiring",
+        fixes=["Check the switch circuit resistance to earth at the modulator connector: brakes off about 3.0 kΩ (Land Rover's test procedure gives 3020 ±30 Ω with a good switch pack), about 2 kΩ with one switch closed, about 1.0 kΩ with the pedal pressed; out of range means the switch pack or its wiring",
                "Check the modulator earth stud behind the left-hand headlamp — a known cause of this code",
                "Replace both shuttle valve switches on the modulator — they are cheap and fitted together",
                "Clear the fault afterwards; it does not clear itself",
@@ -494,11 +494,11 @@ SLABS: list[tuple[str, dict]] = [
         what="The engine ECU sends a multiplexed PWM signal (throttle position, torque, engine and gearbox type) to the ABS "
              "ECU, which uses it mainly for Hill Descent Control's target speed and for traction control logic. The ABS "
              "ECU is not seeing it, so **TC and HDC are disabled and their lamps lit; ABS itself keeps working**. **If the "
-             "engine ECU has logged 'gearbox/abs drive open load' as well, the wire between the two is the suspect.** Probably "
-             "stored as a permanent fault, so clear it with a tool after the repair. Can also appear after cranking with a very low battery.",
+             "engine ECU has logged 'gearbox/abs drive open load' as well, the wire between the two is the suspect.** The manual "
+             "classes throttle-position-signal faults as permanent, so expect to clear this with a tool after the repair. Can also appear after cranking with a very low battery.",
         causes=["Wire or connector between the engine ECU and the ABS ECU", "Engine ECU output fault", "Logged during a low-voltage crank"],
         fixes=["Read the engine faults for a gearbox/abs drive fault", "Check continuity of the signal wire between the two ECUs", "Clear and see if it returns while driving"],
-        severity="drive")),
+        severity="soon")),
     (r"gear info not valid", dict(
         title="Gearbox information not valid",
         what="The ABS ECU works out which gear is engaged from the engine data signal, engine speed and road speed, "
@@ -512,7 +512,7 @@ SLABS: list[tuple[str, dict]] = [
     (r"(front|rear) (left|right) (in|out) valve — open circuit", dict(
         title="{pos} {io}let valve — open circuit",
         what="The {posl} {io}let solenoid valve in the ABS modulator is not drawing current when driven. ABS, TC and HDC are "
-             "disabled and EBD is reduced; the pedal brakes work as before. The valves themselves rarely fail; the connector is the usual culprit.",
+             "disabled and EBD is reduced (all four lamps, including the red brake lamp); the pedal brakes work as before. The valves themselves rarely fail; the connector is the usual culprit.",
         causes=["Modulator connector not fully latched or corroded", "Harness to the modulator chafed", "Solenoid coil open"],
         fixes=["Unplug the modulator connector, inspect and clean, refit firmly", "Measure the coils at the modulator pins and compare like with like: the four inlets must match each other and the four outlets each other (figures quoted for the Wabco unit are roughly 6–7 Ω inlet, 3–3.5 Ω outlet)", "If all valves fault together it is the connector or the ECU relay, not the valves"],
         severity="soon")),
