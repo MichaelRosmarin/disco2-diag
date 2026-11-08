@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="theme-color" content="#0f1317">
+<meta name="theme-color" content="#000000" id="themeColor">
 <title>Disco 2</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='15' fill='%230f1317'/%3E%3Cpath d='M7 20a9 9 0 0 1 18 0' fill='none' stroke='%23eef0ec' stroke-width='3' stroke-linecap='round'/%3E%3Cpath d='M16 20l5-7' stroke='%23e8a93a' stroke-width='2.5' stroke-linecap='round'/%3E%3C/svg%3E">
 <style>
@@ -20,7 +20,22 @@
   --okbg:rgba(48,209,88,.16); --warnbg:rgba(255,159,10,.18); --badbg:rgba(255,69,58,.18); --actbg:rgba(10,132,255,.18);
   --tap:50px; --pad:16px; --r:14px; --r2:10px;
   --tabbar:calc(56px + env(safe-area-inset-bottom));
+  --ch-body:#2c2c2e; --ch-rail:#4a4a4d; --ch-xm:#3f3f42; --ch-axle:#5a5a5e; --ch-prop:#6a6a6e; --ch-block:#262628; --ch-block-s:#4a4a4d;
+  --ch-diff:#2e2e31; --ch-tyre:#151517; --ch-tyre-s:#3d3d40; --ch-side:#1e1e21; --ch-side-s:#2a2a2d; --ch-tread:#0b0b0c; --ch-hub:#4a4a4d;
+  --shadow:0 6px 24px rgba(0,0,0,.5);
+  color-scheme:dark;
   font-feature-settings:"tnum","cv11";
+}
+/* light appearance: Apple's light grouped palette. Follows the phone unless the person picks one on the More tab. */
+:root[data-theme="light"], :root:not([data-theme="dark"]):not([data-theme="auto-dark"]).light-auto{
+  --bg:#f2f2f7; --bg2:#fff; --bg3:#e9e9ee; --bg4:#d1d1d6; --rule:rgba(60,60,67,.18); --rule2:rgba(60,60,67,.3);
+  --fg:#000; --fg2:rgba(60,60,67,.62); --fg3:rgba(60,60,67,.36);
+  --ok:#248a3d; --warn:#c93400; --bad:#d70015; --act:#007aff;
+  --okbg:rgba(52,199,89,.16); --warnbg:rgba(255,149,0,.18); --badbg:rgba(255,59,48,.14); --actbg:rgba(0,122,255,.12);
+  --ch-body:#d1d1d6; --ch-rail:#8e8e93; --ch-xm:#aeaeb2; --ch-axle:#8e8e93; --ch-prop:#aeaeb2; --ch-block:#e5e5ea; --ch-block-s:#aeaeb2;
+  --ch-diff:#d1d1d6; --ch-tyre:#3a3a3c; --ch-tyre-s:#1c1c1e; --ch-side:#48484a; --ch-side-s:#2c2c2e; --ch-tread:#1c1c1e; --ch-hub:#aeaeb2;
+  --shadow:0 6px 24px rgba(0,0,0,.18);
+  color-scheme:light;
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;background:var(--bg);color:var(--fg);
@@ -77,24 +92,26 @@ section{display:none}section.on{display:block}
 .sub{display:flex;gap:2px;margin:10px var(--pad) 0;padding:2px;border-radius:9px;background:var(--bg2);overflow-x:auto;scrollbar-width:none}
 .sub::-webkit-scrollbar{display:none}
 .sub button{flex:1 0 auto;min-height:32px;padding:0 12px;border:0;border-radius:7px;background:none;color:var(--fg2);font-size:13px;font-weight:500;white-space:nowrap;position:relative;transition:background .15s,color .15s}
-.sub button.on{background:var(--bg4);color:var(--fg);font-weight:600;box-shadow:0 1px 3px rgba(0,0,0,.4)}
+.sub button.on{background:var(--bg2);color:var(--fg);font-weight:600;box-shadow:0 1px 3px rgba(0,0,0,.25)}
+.sub{background:var(--bg3)}
+:root[data-theme="dark"] .sub button.on,:root:not(.light-auto):not([data-theme="light"]) .sub button.on{background:var(--bg4)}
 .sub button .n{display:inline-block;margin-left:5px;min-width:16px;height:16px;padding:0 5px;border-radius:8px;background:var(--bad);color:#fff;font-size:10.5px;line-height:16px;text-align:center;font-weight:600}
 .sub button .n:empty{display:none}
 .cats{display:flex;gap:8px;margin:12px var(--pad) 0;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}
 .cats::-webkit-scrollbar{display:none}
 .cats button{flex:none;padding:7px 13px;border-radius:999px;border:0;background:var(--bg2);color:var(--fg2);font-size:13px;font-weight:500;white-space:nowrap}
-.cats button.on{background:var(--fg);color:#000;font-weight:600}
+.cats button.on{background:var(--fg);color:var(--bg);font-weight:600}
 .pane{display:none}.pane.on{display:block}
 
 /* ---------- notes and the alarm band ---------- */
 .note{margin:12px var(--pad) 0;padding:12px 14px;border-radius:var(--r2);background:var(--bg2);color:var(--fg2);font-size:14px;display:none;line-height:1.45}
-.note.show{display:block}.note.bad{background:var(--badbg);color:#ffb4ae}.note.warn{background:var(--warnbg);color:#ffd08a}
+.note.show{display:block}.note.bad{background:var(--badbg);color:var(--bad)}.note.warn{background:var(--warnbg);color:var(--warn)}
 .note a,.note button.link{color:var(--act);background:none;border:0;padding:0;font:inherit;font-weight:600;text-decoration:none}
 .note b{color:var(--fg);font-weight:600}
-.note .code{display:inline-block;margin-left:6px;padding:1px 7px;border-radius:6px;background:rgba(255,255,255,.12);font-size:12px;font-weight:600;color:var(--fg)}
+.note .code{display:inline-block;margin-left:6px;padding:1px 7px;border-radius:6px;background:var(--bg3);font-size:12px;font-weight:600;color:var(--fg)}
 .note small.raw{display:block;margin-top:6px;font-size:12px;opacity:.7;word-break:break-word}
 #alarm{display:none;align-items:center;gap:12px;margin:10px var(--pad) 0;padding:12px 16px;border-radius:var(--r);font-size:16px;font-weight:600;cursor:pointer}
-#alarm.warn{display:flex;background:var(--warn);color:#1a1200}
+#alarm.warn{display:flex;background:var(--warn);color:#fff}
 #alarm.bad{display:flex;background:var(--bad);color:#fff;animation:pulse 1s infinite}
 #alarm .v{font-size:22px;margin-left:auto}
 #alarm small{font-weight:500;opacity:.8;font-size:12px;display:block}
@@ -157,6 +174,7 @@ section{display:none}section.on{display:block}
 .chips{display:flex;flex-wrap:wrap;gap:8px}
 .chip{padding:7px 12px;border-radius:999px;background:var(--bg3);color:var(--fg3);font-size:13.5px;font-weight:500}
 .chip.on{background:var(--okbg);color:var(--ok);font-weight:600}
+.hero .track{stroke:var(--bg3)}
 
 .kv{display:grid;grid-template-columns:auto 1fr;gap:0 16px;font-size:14.5px;margin:0}
 .kv dt{color:var(--fg2);padding:9px 0;border-top:1px solid var(--rule)}
@@ -242,17 +260,17 @@ a{color:var(--act);text-decoration:none}
 /* chassis */
 .chassis{margin:10px var(--pad) 0;padding:8px 4px 2px;border-radius:var(--r);background:var(--bg2)}
 .chassis svg{width:100%;height:auto;display:block;max-height:360px;margin:0 auto}
-.chassis .body{fill:none;stroke:#2c2c2e;stroke-width:1.5;stroke-dasharray:4 5}
-.chassis .rail{fill:none;stroke:#4a4a4d;stroke-width:6;stroke-linecap:round;stroke-linejoin:round}
-.chassis .xm{stroke:#3f3f42;stroke-width:3;stroke-linecap:round}
-.chassis .axle{stroke:#5a5a5e;stroke-width:7;stroke-linecap:round}
-.chassis .prop{stroke:#6a6a6e;stroke-width:3.5;stroke-linecap:round;stroke-dasharray:5 5}
-.chassis .blockf{fill:#262628;stroke:#4a4a4d;stroke-width:1.5}
-.chassis .diff{fill:#2e2e31;stroke:#5a5a5e;stroke-width:1.5}
-.chassis .tyre{fill:#151517;stroke:#3d3d40;stroke-width:1.5}
-.chassis .side{fill:#1e1e21;stroke:#2a2a2d;stroke-width:1}
-.chassis .tread{fill:none;stroke:#0b0b0c;stroke-width:1.6;stroke-linecap:round}
-.chassis .hub{fill:#4a4a4d}
+.chassis .body{fill:none;stroke:var(--ch-body);stroke-width:1.5;stroke-dasharray:4 5}
+.chassis .rail{fill:none;stroke:var(--ch-rail);stroke-width:6;stroke-linecap:round;stroke-linejoin:round}
+.chassis .xm{stroke:var(--ch-xm);stroke-width:3;stroke-linecap:round}
+.chassis .axle{stroke:var(--ch-axle);stroke-width:7;stroke-linecap:round}
+.chassis .prop{stroke:var(--ch-prop);stroke-width:3.5;stroke-linecap:round;stroke-dasharray:5 5}
+.chassis .blockf{fill:var(--ch-block);stroke:var(--ch-block-s);stroke-width:1.5}
+.chassis .diff{fill:var(--ch-diff);stroke:var(--ch-axle);stroke-width:1.5}
+.chassis .tyre{fill:var(--ch-tyre);stroke:var(--ch-tyre-s);stroke-width:1.5}
+.chassis .side{fill:var(--ch-side);stroke:var(--ch-side-s);stroke-width:1}
+.chassis .tread{fill:none;stroke:var(--ch-tread);stroke-width:1.6;stroke-linecap:round}
+.chassis .hub{fill:var(--ch-hub)}
 .chassis .halo{fill:none;stroke-width:3;stroke:transparent;transition:stroke .3s}
 .chassis .halo.ok{stroke:var(--ok)}.chassis .halo.warn{stroke:var(--warn)}.chassis .halo.bad{stroke:var(--bad)}
 .chassis .spring{fill:none;stroke:var(--act);stroke-width:2.2}
@@ -359,7 +377,7 @@ a{color:var(--act);text-decoration:none}
 .modal .row{justify-content:center}
 .modal .row .btn{flex:1}
 .toast{position:fixed;left:50%;bottom:calc(var(--tabbar) + 14px);transform:translateX(-50%);background:var(--bg3);color:var(--fg);
-  padding:11px 18px;border-radius:999px;font-size:14px;font-weight:500;opacity:0;transition:opacity .2s;pointer-events:none;z-index:30;white-space:nowrap;max-width:92vw;overflow:hidden;text-overflow:ellipsis;box-shadow:0 6px 24px rgba(0,0,0,.5)}
+  padding:11px 18px;border-radius:999px;font-size:14px;font-weight:500;opacity:0;transition:opacity .2s;pointer-events:none;z-index:30;white-space:nowrap;max-width:92vw;overflow:hidden;text-overflow:ellipsis;box-shadow:var(--shadow)}
 .toast.show{opacity:1}.toast.bad{background:var(--bad);color:#fff}
 @media (min-width:720px){.toast{bottom:28px}}
 footer{padding:18px var(--pad) 10px;color:var(--fg3);font-size:12px;text-align:center}
@@ -618,6 +636,11 @@ footer{padding:18px var(--pad) 10px;color:var(--fg3);font-size:12px;text-align:c
   <!-- ================= MORE ================= -->
   <section id="tab-more">
     <div class="blk">
+      <h2>Appearance</h2>
+      <div class="set"><div>Theme<div class="d">Auto follows the phone's light or dark setting.</div></div>
+        <div class="sub" id="themePick" style="margin:0;flex:none"><button data-t="auto">Auto</button><button data-t="light">Light</button><button data-t="dark">Dark</button></div></div>
+    </div>
+    <div class="blk">
       <h2>Alarms</h2>
       <div class="set"><div>Sound on this phone<div class="d">Beeps while any value is in the red. Tap the band to snooze 5 min.</div></div><button class="btn sm" onclick="toggleSound()" id="soundBtn">Off</button></div>
       <div class="set"><div>Test<div class="d">Plays the alarm tone once.</div></div><button class="btn sm" onclick="testBeep()">Beep</button></div>
@@ -655,6 +678,21 @@ footer{padding:18px var(--pad) 10px;color:var(--fg3);font-size:12px;text-align:c
 <div class="toast" id="toast"></div>
 
 <script>
+// Appearance: 'auto' follows prefers-color-scheme; 'light'/'dark' pin it. Applied before first paint.
+(function(){
+  const mq=window.matchMedia('(prefers-color-scheme: light)');
+  function apply(){
+    let pick='auto'; try{ pick=localStorage.getItem('d2dash.theme')||'auto'; }catch(e){}
+    const root=document.documentElement; root.classList.remove('light-auto'); root.removeAttribute('data-theme');
+    const light = pick==='light' || (pick==='auto' && mq.matches);
+    if(pick!=='auto') root.setAttribute('data-theme', pick); else if(light) root.classList.add('light-auto');
+    const tc=document.getElementById('themeColor'); if(tc) tc.setAttribute('content', light?'#f2f2f7':'#000000');
+    document.querySelectorAll('#themePick button').forEach(b=>b.classList.toggle('on', b.dataset.t===pick));
+  }
+  window.setTheme=function(t){ try{ localStorage.setItem('d2dash.theme',t); }catch(e){} apply(); };
+  mq.addEventListener?mq.addEventListener('change',apply):mq.addListener(apply);
+  apply(); window.applyTheme=apply;
+})();
 // ============ gauge + alarm definitions ============
 // warn/alarm: [low, high] bounds; outside = that level. `when` gates the check.
 const G = {
@@ -1135,6 +1173,7 @@ fetch('/api/status').then(r=>r.json()).then(s=>{
 });
 
 // ============ tabs + sub-tabs ============
+document.querySelectorAll('#themePick button').forEach(b=>b.onclick=()=>setTheme(b.dataset.t)); applyTheme();
 const TAB_TITLES={drive:'Drive',engine:'Engine',slabs:'SLABS',trips:'Trips',more:'More'};
 document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{
   document.querySelectorAll('nav button').forEach(x=>x.classList.toggle('on',x===b));
