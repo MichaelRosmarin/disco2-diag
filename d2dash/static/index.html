@@ -289,9 +289,13 @@ a{color:var(--act);text-decoration:none}
 #sheet{position:fixed;left:0;right:0;bottom:0;max-height:88vh;overflow-y:auto;background:var(--bg2);border-radius:20px 20px 0 0;padding:12px var(--pad) calc(env(safe-area-inset-bottom) + 24px);z-index:21;transform:translateY(105%);transition:transform .28s cubic-bezier(.2,.8,.2,1);max-width:760px;margin:0 auto}
 #sheet.on{transform:none}
 #sheet{padding-top:0}
-#sheet .shead{position:sticky;top:0;z-index:1;background:var(--bg2);padding:10px 0 8px;display:flex;justify-content:center;min-height:44px}
+#sheet .shead{position:sticky;top:0;z-index:1;background:var(--bg2);padding:12px 0 10px;display:flex;justify-content:center;align-items:flex-start;min-height:56px}
 #sheet .grab{width:36px;height:5px;border-radius:3px;background:var(--bg4);margin:0}
-#sheet .x{position:absolute;right:0;top:10px;width:32px;height:32px;border-radius:50%;border:0;background:var(--bg3);color:var(--fg2);display:grid;place-items:center}
+#sheet .x{position:absolute;right:6px;top:16px;width:34px;height:34px;border-radius:50%;border:0;background:var(--bg3);color:var(--fg2);display:grid;place-items:center}
+#sheet .shead{position:sticky}
+#sheet{overflow:hidden;display:flex;flex-direction:column}
+#sheet .shead{flex:none;position:relative}
+#sheetBody{overflow-y:auto;-webkit-overflow-scrolling:touch;flex:1;min-height:0;padding-bottom:8px}
 #sheet h3{font-family:"Inter D";font-size:22px;font-weight:700;letter-spacing:-.03em;margin:0 0 8px;line-height:1.2;padding-right:40px}
 #sheet .meta{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px}
 #sheet .sev{font-size:12px;font-weight:600;padding:4px 10px;border-radius:999px;background:var(--bg3);color:var(--fg2)}
