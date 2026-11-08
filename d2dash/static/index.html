@@ -87,6 +87,8 @@ main{flex:1;min-height:0;width:100%;max-width:1040px;margin:0 auto;overflow-y:au
   header{order:-1}
 }
 section{display:none}section.on{display:block}
+#ptr{height:0;overflow:hidden;display:flex;align-items:flex-end;justify-content:center;color:var(--fg3);font-size:13px;transition:height .15s}
+#ptr.ready{color:var(--act)}
 
 /* ---------- segmented control (sub-sections) and filter pills ---------- */
 .sub{display:flex;gap:2px;margin:10px var(--pad) 0;padding:2px;border-radius:9px;background:var(--bg2);overflow-x:auto;scrollbar-width:none}
@@ -406,6 +408,7 @@ footer{padding:18px var(--pad) 10px;color:var(--fg3);font-size:12px;text-align:c
 </nav>
 <div id="alarm" onclick="snooze()"></div>
 <main>
+  <div id="ptr"></div>
   <div id="note" class="note"></div>
 
   <!-- ================= DRIVE ================= -->
@@ -1185,6 +1188,14 @@ fetch('/api/status').then(r=>r.json()).then(s=>{
 
 // ============ tabs + sub-tabs ============
 document.querySelectorAll('#themePick button').forEach(b=>b.onclick=()=>setTheme(b.dataset.t)); applyTheme();
+// Pull down from the top of the page to reload (the page scrolls inside main, so the browser's own gesture does not fire).
+(function(){
+  const m=document.querySelector('main'), ind=document.getElementById('ptr'); let y0=null, pulled=0;
+  m.addEventListener('touchstart',e=>{ y0 = m.scrollTop<=0 ? e.touches[0].clientY : null; pulled=0; },{passive:true});
+  m.addEventListener('touchmove',e=>{ if(y0==null) return; pulled=Math.max(0,e.touches[0].clientY-y0);
+    if(pulled>8){ ind.style.height=Math.min(72,pulled*0.6)+'px'; ind.classList.toggle('ready',pulled>110); ind.textContent=pulled>110?'Release to reload':'Pull to reload'; } },{passive:true});
+  m.addEventListener('touchend',()=>{ if(pulled>110){ ind.textContent='Reloading…'; location.reload(); } else { ind.style.height='0'; } y0=null; pulled=0; },{passive:true});
+})();
 const TAB_TITLES={drive:'Drive',engine:'Engine',slabs:'SLABS',trips:'Trips',more:'More'};
 document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{
   document.querySelectorAll('nav button').forEach(x=>x.classList.toggle('on',x===b));
