@@ -4,15 +4,15 @@
     python3 enclosure/make_enclosure.py            # writes enclosure/stl/*.stl and preview images
 
 Design: every plug lives INSIDE the box. The Pi sits at one end; the other end is a cable bay
-where the USB and power plugs sit and the cables are clamped, then leave through round exits in
-the end wall. Nothing outside can be knocked or walk out on corrugations. A cable channel along
-the power edge brings the micro-USB lead round to the same end.
+where the USB and power plugs sit. The cables leave through clamshell glands on the parting line:
+the base carries the lower half of each round exit, the lid the upper half, and the bore is a
+fraction under the cable diameter, so screwing the lid down is what clamps the cables. Nothing
+outside can be knocked or walk out on corrugations. A cable channel along the power edge brings
+the micro-USB lead round to the same end.
 
-Parts (all printed flat, no supports):
-  base.stl          Pi standoffs, cable bay with three round exits and clamp bosses, intake vents,
-                    mounting ears, posts for the lid screws
-  lid.stl           alignment lip, exhaust vents over the processor, screw holes
-  clamp_cap.stl     flat bar that pinches a cable onto its cradle; print one per cable (3)
+Parts (both printed flat, no supports):
+  base.stl   Pi standoffs, cable bay, lower gland halves, intake vents, mounting ears, lid posts
+  lid.stl    alignment lip, upper gland halves, exhaust vents over the processor, screw holes
 
 Coordinates: x along the Pi's 85 mm length (SD end at x=0, USB end at x=85), y across the 56 mm
 width (power/HDMI edge at y=0, GPIO edge at y=56), z up with the board's underside at z=0.
@@ -37,7 +37,7 @@ FLOOR = 2.4
 LID_T = 2.4
 STANDOFF_H = 6.0
 ABOVE_BOARD = 18.0          # board top to lid underside (USB stacks are 15.6)
-BAY_L = 58.0                # cable bay beyond the USB end: plug + boot (~36) + 10 mm clamp + wall
+BAY_L = 50.0                # cable bay beyond the USB end: plug + boot (~36) + room for the cable to rise to the lid line
 CHANNEL_W = 20.0            # channel along the power edge for the micro-USB plug (~17 incl. boot) and its lead
 INSERT = True
 HOLE_STANDOFF = 3.4 if INSERT else 2.2
@@ -48,13 +48,16 @@ M3_POCKET = 4.0             # square pocket for an M3 heat-set insert
 M3_CLEAR = 3.4
 VENT_W = 2.0
 
-# cable exits in the bay end wall: (y centre, bore diameter, label)
-EXITS = [(29.0, 6.0, "K-line cable (FTDI lead in USB stack 1, ~5 mm)"),   # straight behind the plug
-         (47.0, 5.2, "spare: GPS puck or USB stick in USB stack 2"),
-         (-10.0, 5.2, "power lead, coming along the channel")]
-EXIT_Z = None               # set below: mid-height of the bay
-GLAND_OD = 13.0             # round boss around each exit, outside the wall
-GLAND_LEN = 5.0
+# cable exits on the parting line of the bay end wall: (y centre, cable OD, label).
+# The bore is cable OD minus PINCH, so the closed lid compresses the jacket.
+EXITS = [(29.0, 5.0, "K-line cable (FTDI lead in USB stack 1)"),   # straight behind the plug
+         (47.0, 4.2, "spare: GPS puck or USB stick in USB stack 2"),
+         (-10.0, 4.2, "power lead, coming along the channel")]
+PINCH = 0.4
+GLAND_WALL = 2.6            # radial wall of the gland halves
+GLAND_LEN = 6.0             # how far the glands stand proud of the end wall
+GLAND_IN = 8.0              # how far the lid's upper half runs inboard of the wall as a tunnel in the lid
+RELIEF = 1.5                # the inboard part of that tunnel is this much wider, so the cable can bend down to its plug
 
 # derived
 X0, X1 = -CLEARANCE, BOARD_L + BAY_L                       # cavity in x (bay included)
@@ -66,7 +69,6 @@ ZFT = -STANDOFF_H
 ZB = 0.0
 ZT = BOARD_T
 ZW = ZT + ABOVE_BOARD
-EXIT_Z = (ZFT + ZW) / 2 + 1.0
 LID_POSTS_EXTRA = [(X1 - 4.5, Y0 + 4.5), (X1 - 4.5, Y1 - 4.5), (X0 + 4.5, Y0 + 4.5)]   # bay + channel corners
 
 SD_SLOT = (21.5, 35.5, ZB - 2.0, ZB + 2.5)   # (y0, y1, z0, z1) in the x = 0 wall
@@ -86,6 +88,24 @@ def tube_z(cx, cy, z0, z1, r_out, r_in, t, n=48):
 
 def tube_x(cy, cz, x0, x1, r_out, r_in, t, n=48):
     _tube(t, n, r_out, r_in, x0, x1, lambda u, v, w: (w, cy + u, cz + v))
+
+
+def half_tube_x(cy, cz, x0, x1, r_out, r_in, upper, t, n=32):
+    """Half of a hollow cylinder along x, cut by the horizontal plane z = cz: the upper or lower
+    half, with the two flat cut faces closed so the part is a solid."""
+    a0 = 0.0 if upper else math.pi
+    pts = [(math.cos(a0 + math.pi * i / n), math.sin(a0 + math.pi * i / n)) for i in range(n + 1)]
+    P = lambda r, p, x: (x, cy + r * p[0], cz + r * p[1])  # noqa: E731
+    for i in range(n):
+        a, b = pts[i], pts[i + 1]
+        t.append((P(r_out, a, x0), P(r_out, b, x0), P(r_out, b, x1))); t.append((P(r_out, a, x0), P(r_out, b, x1), P(r_out, a, x1)))
+        t.append((P(r_in, a, x0), P(r_in, b, x1), P(r_in, b, x0))); t.append((P(r_in, a, x0), P(r_in, a, x1), P(r_in, b, x1)))
+        t.append((P(r_out, a, x1), P(r_out, b, x1), P(r_in, b, x1))); t.append((P(r_out, a, x1), P(r_in, b, x1), P(r_in, a, x1)))
+        t.append((P(r_out, a, x0), P(r_in, b, x0), P(r_out, b, x0))); t.append((P(r_out, a, x0), P(r_in, a, x0), P(r_in, b, x0)))
+    for sgn in (1, -1):   # flat faces on the cut plane, between r_in and r_out
+        q = [(x0, cy + sgn * r_in, cz), (x1, cy + sgn * r_in, cz), (x1, cy + sgn * r_out, cz), (x0, cy + sgn * r_out, cz)]
+        t.append((q[0], q[1], q[2])); t.append((q[0], q[2], q[3]))
+        t.append((q[0], q[2], q[1])); t.append((q[0], q[3], q[2]))
 
 
 def _tube(t, n, r_out, r_in, w0, w1, m):
@@ -168,18 +188,13 @@ def part_base():
     plate_with_holes(OX0, OX1, ZFT, ZW, vents_g, lambda a0, a1, c0, c1, tt: box(a0, Y1, c0, a1, OY1, c1, tt), t)
     # end wall x = 0: SD slot
     plate_with_holes(Y0, Y1, ZFT, ZW, [SD_SLOT], lambda a0, a1, c0, c1, tt: box(OX0, a0, c0, X0, a1, c1, tt), t)
-    # bay end wall x = X1: square cut-outs just under each bore; the glands make them round
-    cuts = [(*sq(y, d - 0.3), *sq(EXIT_Z, d - 0.3)) for y, d, _ in EXITS]
-    plate_with_holes(Y0, Y1, ZFT, ZW, cuts, lambda a0, a1, c0, c1, tt: box(X1, a0, c0, OX1, a1, c1, tt), t)
-    for y, d, _ in EXITS:                                                  # glands: through the wall and 5 mm proud
-        tube_x(y, EXIT_Z, X1 - 0.5, OX1 + GLAND_LEN, GLAND_OD / 2, d / 2, t)
-
-    # cable clamps in the bay: cradle under the cable, two posts with M3 pockets either side
+    # bay end wall x = X1: a square notch down from the top edge under each cable, no wider than
+    # the bore; the lower half-gland fills the corners and leaves a half-round seat
+    notches = [(*sq(y, d - PINCH - 0.3), ZW - (d - PINCH) / 2, ZW + 1.0) for y, d, _ in EXITS]
+    plate_with_holes(Y0, Y1, ZFT, ZW, notches, lambda a0, a1, c0, c1, tt: box(X1, a0, c0, OX1, a1, c1, tt), t)
     for y, d, _ in EXITS:
-        cx0, cx1 = X1 - 16.0, X1 - 6.0                                     # 10 mm long, 6 mm back from the wall
-        box(cx0, y - 4.0, ZFT, cx1, y + 4.0, EXIT_Z - d / 2 + 0.3, t)     # cradle (cable sits 0.3 proud, cap pinches)
-        for py in (y - 8.5, y + 8.5):
-            post_with_pocket(cx0, cx1, py - 2.5, py + 2.5, ZFT, EXIT_Z + d / 2 - 0.5, M3_POCKET, 6.0, t)
+        r = (d - PINCH) / 2
+        half_tube_x(y, ZW, X1 - 0.5, OX1 + GLAND_LEN, r + GLAND_WALL, r, False, t)
 
     # mounting ears on the GPIO-side wall
     for xc in (14.0, OX1 - 16.0):
@@ -192,23 +207,24 @@ def part_lid():
     t: list = []
     vents = vent_slots(18.0, 58.0, 12.0, 44.0, 8)                          # over the SoC
     holes = vents + [(*sq(px, M3_CLEAR), *sq(py, M3_CLEAR)) for px, py in LID_POSTS_EXTRA] \
-        + [(*sq(hx, HOLE_LID_POST - 0.2), *sq(hy, HOLE_LID_POST - 0.2)) for hx, hy in HOLES]   # the post bores continue through the plate
+        + [(*sq(hx, HOLE_LID_POST - 0.2), *sq(hy, HOLE_LID_POST - 0.2)) for hx, hy in HOLES] \
+        + [(X1 - 3.0, OX1 + 0.1, *sq(y, d - PINCH - 0.3)) for y, d, _ in EXITS] \
+        + [(X1 - GLAND_IN, X1 - 3.0, *sq(y, d - PINCH + 2 * RELIEF - 0.3)) for y, d, _ in EXITS]
+    # ^ the upper half-bores run through the plate edge and on inboard as a tunnel in the lid, so the
+    #   cable sits on the parting line through the wall and then has room to bend down to its plug
     plate_with_holes(OX0, OX1, OY0, OY1, holes, lambda a0, a1, c0, c1, tt: box(a0, c0, ZW, a1, c1, ZW + LID_T, tt), t)
+    for y, d, _ in EXITS:                                                  # upper gland halves, matching the base
+        r = (d - PINCH) / 2
+        half_tube_x(y, ZW, X1 - 3.5, OX1 + GLAND_LEN, r + GLAND_WALL, r, True, t)             # the seat that clamps
+        half_tube_x(y, ZW, X1 - GLAND_IN, X1 - 3.0, r + RELIEF + GLAND_WALL, r + RELIEF, True, t)  # relieved tunnel inboard
     lip, g = 1.6, 0.3                                                     # alignment lip inside the walls
     box(X0 + g, Y0 + g, ZW - lip, X1 - g, Y0 + g + 1.6, ZW, t); box(X0 + g, Y1 - g - 1.6, ZW - lip, X1 - g, Y1 - g, ZW, t)
-    box(X0 + g, Y0 + g, ZW - lip, X0 + g + 1.6, Y1 - g, ZW, t); box(X1 - g - 1.6, Y0 + g, ZW - lip, X1 - g, Y1 - g, ZW, t)
+    box(X0 + g, Y0 + g, ZW - lip, X0 + g + 1.6, Y1 - g, ZW, t)
+    # on the bay end the lip is interrupted around each exit so the cable can sit in its seat
+    plate_with_holes(Y0 + g, Y1 - g, 0, 1, [(*sq(y, d - PINCH + 2 * GLAND_WALL), 0, 1) for y, d, _ in EXITS],
+                     lambda a0, a1, c0, c1, tt: box(X1 - g - 1.6, a0, ZW - lip, X1 - g, a1, ZW, tt), t)
     for hx, hy in HOLES:                                                   # posts down onto the Pi holes
         tube_z(hx, hy, ZT, ZW + LID_T, LID_POST_OD / 2, HOLE_LID_POST / 2, t)
-    return t
-
-
-def part_clamp_cap():
-    """Flat bar, 3 mm thick, spanning the two posts of one clamp; printed flat. Same for all three."""
-    t: list = []
-    L, W, T = 23.0, 10.0, 3.0
-    holes = [(*sq(3.0, M3_CLEAR), *sq(W / 2, M3_CLEAR)), (*sq(L - 3.0, M3_CLEAR), *sq(W / 2, M3_CLEAR))]
-    plate_with_holes(0, L, 0, W, holes, lambda a0, a1, c0, c1, tt: box(a0, c0, 0, a1, c1, T, tt), t)
-    box(L / 2 - 4.0, 1.0, T, L / 2 + 4.0, W - 1.0, T + 1.2, t)             # ridge that bites the jacket
     return t
 
 
@@ -227,20 +243,21 @@ def render(parts: dict, path: str):
                 ax.add_patch(Polygon([proj(p) for p in tri], closed=True, facecolor="#8fa3b5", edgecolor="#8fa3b5", lw=0.3))
         ax.set_aspect("equal"); ax.autoscale(); ax.set_title(title, fontsize=9); ax.grid(True, lw=.3)
 
-    flat(base, lambda p: p[0] >= X1 - 0.6, lambda p: (p[1], p[2]), axs[0, 0], "cable-bay end wall from outside: three round exits in glands (y across, z up)")
-    flat(base, lambda p: p[2] > ZFT + 0.01, lambda p: (p[0], p[1]), axs[0, 1], "base interior from above (floor hidden): Pi standoffs, channel, bay clamps, lid posts")
+    both = base + parts["lid"]
+    flat(both, lambda p: p[0] >= X1 - 0.6, lambda p: (p[1], p[2]), axs[0, 0], "cable end, lid closed: three clamshell glands on the parting line (y across, z up)")
+    flat(base, lambda p: p[2] > ZFT + 0.01, lambda p: (p[0], p[1]), axs[0, 1], "base interior from above (floor hidden): Pi standoffs, channel, bay, lid posts")
     flat(base, lambda p: p[1] <= Y0 + 0.01, lambda p: (p[0], p[2]), axs[1, 0], "power-side long wall from outside: intake vents under the board")
-    flat(parts["lid"], lambda p: True, lambda p: (p[0], p[1]), axs[1, 1], "lid from above: exhaust vents over the processor, 7 screws")
+    flat(parts["lid"], lambda p: p[2] <= ZW + 0.01, lambda p: (p[0], p[1]), axs[1, 1], "lid from below (plate hidden): lip, Pi posts, gland tunnels with relief (7 screw holes)")
     fig.tight_layout(); fig.savefig(path); plt.close(fig)
 
 
 if __name__ == "__main__":
     os.makedirs(OUT, exist_ok=True)
-    parts = {"base": part_base(), "lid": part_lid(), "clamp_cap": part_clamp_cap()}
+    parts = {"base": part_base(), "lid": part_lid()}
     for name, tri in parts.items():
         write_stl(os.path.join(OUT, f"{name}.stl"), tri)
         print(f"{name}.stl  {len(tri)} triangles")
     render(parts, os.path.join(OUT, "views.png"))
-    print("outer size: %.1f x %.1f x %.1f mm (plus 5 mm glands and 12 mm ears)" % (OX1 - OX0, OY1 - OY0, ZW + LID_T - ZF))
+    print("outer size: %.1f x %.1f x %.1f mm (plus %.0f mm glands and 12 mm ears)" % (OX1 - OX0, OY1 - OY0, ZW + LID_T - ZF, GLAND_LEN))
     for y, d, label in EXITS:
-        print(f"exit at y={y}: bore {d} mm  {label}")
+        print(f"exit at y={y}: cable {d} mm, bore {round(d - PINCH, 2)} mm  {label}")
