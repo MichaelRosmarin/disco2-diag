@@ -394,7 +394,7 @@ SLABS: list[tuple[str, dict]] = [
         causes=["Sensor not pushed fully home in its bore, or corroded in it (on the Discovery 2 the sensor is a push fit into the hub and reads a toothed ring sealed inside the wheel bearing)",
                 "Wheel bearing worn or with play, which moves the ring away from the sensor (often worse on bends); a damaged ring means a new hub bearing",
                 "Sensor tip contaminated with metal swarf", "Fly-lead damaged"],
-        fixes=["Compare the four wheel speeds on the chassis graphic while driving slowly: the bad corner reads low or drops to zero",
+        fixes=["Measure the sensor resistance at its connector: 950–1100 Ω is in specification (workshop manual)",
                "Pull the sensor, clean its tip and bore, refit fully home", "Check the wheel bearing for play"],
         severity="now", check=["wheel_speed_{k}", "abs_sensor_{k}"])),
     (r"^(front|rear) (left|right) sensor — electric fail", dict(
@@ -413,7 +413,7 @@ SLABS: list[tuple[str, dict]] = [
              "intermittent, not a dead sensor. ABS, TC and HDC switch off (all four lamps) until the next drive above "
              "15 km/h with a good signal. Known from Hawkeye readouts; the Nanocom does not list it separately.",
         causes=["Sensor fly-lead or its connector making and breaking with suspension movement", "Chafed wire where the lead crosses the axle or inner wing", "Sensor loose in its bore"],
-        fixes=["Flex the fly-lead along its length with the key on while watching the wheel speed on the chassis view", "Check the connector pins for tension and corrosion", "Replace the sensor if its lead is damaged"],
+        fixes=["Flex the fly-lead along its length while measuring the sensor resistance: a reading that jumps points to a broken lead", "Check the connector pins for tension and corrosion", "Replace the sensor if its lead is damaged"],
         severity="now", check=["wheel_speed_{k}", "abs_sensor_{k}"])),
     (r"^engine speed input — short or open", dict(
         title="Engine speed input to the ABS ECU",

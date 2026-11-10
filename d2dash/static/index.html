@@ -758,8 +758,8 @@ const TD5_INPUTS = [
   {cat:'Engine & vehicle', title:'Electrical and A/C', items:[['battery','Battery (ECU)'],['battery_direct','Battery (direct)'],[null,'A/C clutch request'],[null,'A/C clutch drive']]},
 ];
 const SLABS_INPUTS = [
-  {cat:'Braking & ABS', title:'Wheel speed sensors', items:[['wheel_speed_fl','Front left speed'],['wheel_speed_fr','Front right speed'],
-    ['wheel_speed_rl','Rear left speed'],['wheel_speed_rr','Rear right speed'],['abs_sensor_fl','Front left sensor signal (raw)'],['abs_sensor_fr','Front right sensor signal (raw)'],
+  {cat:'Braking & ABS', title:'Wheel speed sensors', items:[['wheel_speed_fl','Front left wheel signal (raw)'],['wheel_speed_fr','Front right wheel signal (raw)'],
+    ['wheel_speed_rl','Rear left wheel signal (raw)'],['wheel_speed_rr','Rear right wheel signal (raw)'],['abs_sensor_fl','Front left sensor signal (raw)'],['abs_sensor_fr','Front right sensor signal (raw)'],
     ['abs_sensor_rl','Rear left sensor signal (raw)'],['abs_sensor_rr','Rear right sensor signal (raw)']]},
   {cat:'Braking & ABS', title:'Modulator and pump', items:[[null,'Inlet valves FR/FL/RR/RL'],[null,'Outlet valves FR/FL/RR/RL'],[null,'Pump monitor'],
     [null,'Pump relay'],[null,'Shuttle valve switch'],['brake_analog','Brake pedal signal']]},
@@ -966,7 +966,9 @@ let snap=null, lastSig={td5:{},slabs:{}}, lastFaults={td5:[],slabs:[]}, worst={l
 
 // Tyre correction: the ECU's speeds assume the factory tyre; scale them for what is fitted.
 let VEH={factor:1, factory:'235/70R16', fitted:'235/70R16'};
-const SPEED_KEYS=['speed','wheel_speed_fl','wheel_speed_fr','wheel_speed_rl','wheel_speed_rr'];
+// Only road speed is in km/h. The SLABS wheel-speed fields are raw counts with unverified scaling
+// (about 124 with the car stationary), so they are never tyre-corrected or shown as km/h.
+const SPEED_KEYS=['speed'];
 function correctSpeeds(s){
   if(!s||!s.signals||Math.abs(VEH.factor-1)<1e-4) return Object.assign({},s);
   const sig=Object.assign({},s.signals);
@@ -1076,8 +1078,9 @@ function buildChassis(){
 }
 buildChassis();
 function renderChassis(sig){
+  // Raw counts: the four corners are compared with each other, not read as a speed. The SLABS only
+  // answers with the car stopped, so the wheels are drawn still.
   const ws=['fl','fr','rl','rr'].map(k=>sig['wheel_speed_'+k]).filter(Boolean).map(v=>Number(v.v));
-  const moving=ws.length===4 && Math.max(...ws)>8;
   const med=ws.length?ws.slice().sort((a,b)=>a-b)[Math.floor(ws.length/2)]:0;
   ['fl','fr','rl','rr'].forEach(k=>{
     const v=sig['wheel_speed_'+k], sn=sig['abs_sensor_'+k];
@@ -1086,15 +1089,12 @@ function renderChassis(sig){
     const halo=g.querySelector('.halo');
     if(!v){ halo.setAttribute('class','halo'); const tr=g.querySelector('.treads'); if(tr) tr.style.animationPlayState='paused'; txt.textContent='—'; txt.setAttribute('class','spd dim'); st.textContent='no data'; st.setAttribute('class','sst dim'); return; }
     const n=Number(v.v); let cls='ok', label='sensor OK';
-    if(moving && med>0 && Math.abs(n-med)/med>0.15){ cls='warn'; label='weak signal'; }
-    if(moving && n<1){ cls='bad'; label='no signal'; }
+    if(ws.length===4 && med>0 && Math.abs(n-med)/med>0.15){ cls='warn'; label='differs from the others'; }
     if(sn && (sn.s==='high'||sn.s==='low')){ cls='bad'; label='sensor fault'; }
-    if(!moving && cls==='ok') label='stationary';
     halo.setAttribute('class','halo '+cls);
-    // roll the tread: one 8 px pattern step per frame-ish at speed; stop below 1 km/h
-    const treads=g.querySelector('.treads'); if(treads){ if(n>=1){ treads.style.animationDuration=Math.max(0.12, 1.6/Math.sqrt(n)).toFixed(2)+'s'; treads.style.animationPlayState='running'; } else treads.style.animationPlayState='paused'; }
-    txt.innerHTML=(v.c==='candidate'?'≈':'')+Math.round(n)+`<tspan class="u"> ${v.u||'km/h'}</tspan>`; txt.setAttribute('class','spd '+(cls==='ok'?'':cls));
-    st.textContent=label; st.setAttribute('class','sst '+(cls==='ok'?(moving?'ok':'dim'):cls));
+    const treads=g.querySelector('.treads'); if(treads) treads.style.animationPlayState='paused';
+    txt.innerHTML=Math.round(n)+`<tspan class="u"> raw</tspan>`; txt.setAttribute('class','spd '+(cls==='ok'?'':cls));
+    st.textContent=label; st.setAttribute('class','sst '+cls);
   });
   [['L','height_left','height_left_mm'],['R','height_right','height_right_mm']].forEach(([side,k,km])=>{
     const v=sig[k], mm=sig[km], sp=document.querySelector(`#chassis .sp[data-s="${side}"]`), t=document.querySelector(`#chassis .hgt[data-s="${side}"]`);
