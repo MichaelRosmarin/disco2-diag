@@ -294,3 +294,24 @@ def test_tyre_correction(engine, cfg):
     rows = [{"time": i, "speed": 100.0, "faults": ""} for i in range(3601)]
     assert abs(T.summarize(rows)["distance_km"] - 100) < 0.2
     assert abs(T.summarize(rows, 1.0571)["distance_km"] - 105.7) < 0.2
+
+
+def test_slabs_refused_while_moving(engine):
+    wait_connected(engine, "td5")
+    engine._sim_moving_ok = False          # behave like the car, not the simulator
+    with engine._lock:
+        engine._snap.signals = {"speed": {"v": 40.0, "u": "km/h"}}
+    r = engine.request_module("slabs")
+    assert r["ok"] is False and "Stop the car" in r["error"]
+    with engine._lock:
+        engine._snap.signals = {"speed": {"v": 0.0, "u": "km/h"}}
+    assert engine.request_module("slabs")["ok"]
+
+
+def test_slabs_quiet_period(cfg):
+    import dataclasses
+    from d2dash.engine import SLABS_QUIET_S
+    e = Engine(dataclasses.replace(cfg, simulate=False), make_sim_sources())
+    assert e._slabs_quiet_left() == 0.0                    # never spoken to: try straight away
+    e._slabs_last_talk = time.monotonic() - 10
+    assert SLABS_QUIET_S - 11 < e._slabs_quiet_left() <= SLABS_QUIET_S - 10

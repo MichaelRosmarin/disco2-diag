@@ -24,6 +24,15 @@ log = logging.getLogger("d2dash.engine")
 
 MODULES = ("td5", "slabs")
 
+# The Wabco SLABS only accepts a new connection after it has heard nothing addressed to it for a while.
+# Measured in the d2diag library from reference-tool captures: every successful init came 25–28 s after the
+# last traffic to the module, and an init sent sooner restarts that wait. So: never re-try the SLABS sooner
+# than this after we last spoke to it (a session ending, a failed attempt), and show the countdown.
+SLABS_QUIET_S = 28.0
+# The SLABS stops answering diagnostics once the car is moving (library notes: comms die above 8–20 km/h).
+# Refuse a switch to SLABS while the engine ECU reports the car moving, rather than retry into the lockout.
+SLABS_MAX_SPEED = 3.0
+
 # Actions that write to an ECU or move hardware. The server refuses these unless the
 # request carries confirm=true, which the dashboard only sends after an on-screen prompt.
 WRITE_ACTIONS = {
@@ -111,6 +120,7 @@ class Engine:
         self._lock = threading.Lock()
         self._cv = threading.Condition(self._lock)
         self._stop = threading.Event()
+        self._slabs_last_talk = 0.0   # monotonic time we last sent anything to the SLABS (0 = never)
         self._thread = threading.Thread(target=self._run, name="d2dash-poller", daemon=True)
         self._log: SessionLog | None = None
         self._cmd_queue: list[tuple[str, str, dict, threading.Event, dict]] = []
@@ -167,6 +177,11 @@ class Engine:
         with self._lock:
             if module == self._module and self._requested is None:
                 return {"ok": True, "message": f"{module} already active"}
+            if module == "slabs" and self._module == "td5" and self._snap.status == "connected" \
+                    and not getattr(self, "_sim_moving_ok", self.cfg.simulate):
+                spd = (self._snap.signals.get("speed") or {}).get("v")
+                if isinstance(spd, (int, float)) and spd > SLABS_MAX_SPEED:
+                    return {"ok": False, "error": "Stop the car first: the ABS unit only answers when stationary"}
             self._requested = module
             self._snap.status = "switching"
             self._snap.progress = f"switching to {module}"
@@ -207,8 +222,16 @@ class Engine:
             self._bump()
         log.info("%s: %s", self._module, text)
 
+    def _slabs_quiet_left(self) -> float:
+        quiet = 0.0 if self.cfg.simulate else SLABS_QUIET_S
+        if not self._slabs_last_talk:
+            return 0.0
+        return max(0.0, quiet - (time.monotonic() - self._slabs_last_talk))
+
     def _disconnect_current(self) -> None:
         src = self.sources.get(self._module)
+        if self._module == "slabs":
+            self._slabs_last_talk = time.monotonic()
         try:
             if src is not None:
                 src.disconnect()
@@ -258,7 +281,16 @@ class Engine:
                 log.info("command %s on %s -> %s", action, self._module, result)
                 done.set()
 
-            # 3. poll
+            # 3. poll — but never knock on the SLABS before it has had its quiet period
+            if self._module == "slabs" and not was_connected:
+                left = self._slabs_quiet_left()
+                if left > 0:
+                    with self._lock:
+                        self._snap.status = "connecting"
+                        self._snap.progress = f"waiting for the ABS unit to be ready ({int(left + 0.99)} s)"
+                        self._bump()
+                    self._stop.wait(min(1.0, left))
+                    continue
             t0 = time.monotonic()
             try:
                 data = src.poll()
@@ -266,6 +298,8 @@ class Engine:
                 data = {"status": "error", "error": f"{type(exc).__name__}: {exc}",
                         "signals": {}, "faults": []}
             connected = data.get("status") == "connected"
+            if self._module == "slabs":
+                self._slabs_last_talk = time.monotonic()
             if connected and not was_connected:
                 extra = []
                 if self.sensors is not None:

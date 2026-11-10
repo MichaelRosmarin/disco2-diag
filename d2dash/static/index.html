@@ -955,6 +955,8 @@ function friendlyError(msg){
   if(/permission denied|errno 13/.test(m)) return {code:'C2', title:'Decoder cannot use the cable', hint:'The cable is there but the dashboard is not allowed to open it. Re-run the installer.'};
   if(/busy|resource temporarily|errno 16|errno 11/.test(m)) return {code:'C3', title:'Cable in use', hint:'Another program on the decoder has the cable open.'};
   if(/disconnect|input\/output|errno 5|device reports readiness/.test(m)) return {code:'C4', title:'Cable unplugged mid-session', hint:'The adapter dropped off the USB. Reseat the cable at the decoder.'};
+  if(/stop the car first/.test(m)) return {code:'C6', title:'Stop the car first', hint:'The ABS unit only answers diagnostics when the car is stationary.'};
+  if(snap&&snap.module==='slabs'&&/timeout|no response|no answer|not respond|init|sync|echo|kwp|lost session/.test(m)) return {code:'C7', title:'ABS unit not answering', hint:'It only answers when stationary, and needs about 30 seconds of quiet between attempts; the decoder waits that out for you. Key at position II.'};
   if(/timeout|no response|no answer|not respond|init|sync|echo/.test(m)) return {code:'C5', title:'Car not answering', hint:'Ignition on? Cable in the OBD socket, switch in the right position? Give it a few seconds.'};
   return {code:'C9', title:'Connection problem', hint:'The decoder could not talk to the car. Try again; if it stays, send the text below.'};
 }
