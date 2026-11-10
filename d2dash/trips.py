@@ -150,7 +150,8 @@ def _col(rows, k):
     return [r[k] for r in rows if r.get(k) is not None]
 
 
-def summarize(rows: list[dict]) -> dict:
+def summarize(rows: list[dict], speed_factor: float = 1.0) -> dict:
+    """speed_factor corrects the ECU's road speed for non-factory tyres (see tyres.py)."""
     if not rows:
         return {}
     t0, t1 = rows[0]["time"], rows[-1]["time"]
@@ -158,7 +159,7 @@ def summarize(rows: list[dict]) -> dict:
     for a, b in zip(rows, rows[1:]):
         v = a.get("speed")
         if v is not None:
-            dist += v / 3600.0 * max(0.0, min(5.0, b["time"] - a["time"]))
+            dist += v * speed_factor / 3600.0 * max(0.0, min(5.0, b["time"] - a["time"]))
     fuel = 0.0
     for a, b in zip(rows, rows[1:]):
         v = a.get("fuel_rate")
@@ -175,7 +176,8 @@ def summarize(rows: list[dict]) -> dict:
         "distance_km": round(dist, 1), "fuel_l": round(fuel, 2),
         "l_per_100km": round(fuel / dist * 100, 1) if dist > 1 else None,
         "coolant_max": mx("coolant_temp"), "egt_max": mx("sensor_egt"),
-        "boost_max": mx("manifold_press"), "rpm_max": mx("rpm"), "speed_max": mx("speed"),
+        "boost_max": mx("manifold_press"), "rpm_max": mx("rpm"),
+        "speed_max": round(mx("speed") * speed_factor) if mx("speed") is not None else None,
         "faults": faults,
     }
 
@@ -184,7 +186,7 @@ REPLAY_COLS = ["coolant_temp", "manifold_press", "rpm", "speed", "injection_qty"
                "air_temp", "sensor_egt", "sensor_oil_press", "sensor_oil_temp", "sensor_gearbox_temp"]
 
 
-def replay(rows: list[dict], max_points: int = 600) -> dict:
+def replay(rows: list[dict], max_points: int = 600, speed_factor: float = 1.0) -> dict:
     """Downsampled series for the chart: {t:[...], cols:{name:[...]}} with t in seconds from start."""
     if not rows:
         return {"t": [], "cols": {}}
@@ -193,7 +195,8 @@ def replay(rows: list[dict], max_points: int = 600) -> dict:
     picked = rows[::step]
     cols = {}
     for k in REPLAY_COLS:
-        vals = [r.get(k) for r in picked]
+        f = speed_factor if k == "speed" else 1.0
+        vals = [None if r.get(k) is None else r.get(k) * f for r in picked]
         if any(v is not None for v in vals):
             cols[k] = [None if v is None else round(v, 2) for v in vals]
     return {"t": [round(r["time"] - t0) for r in picked], "cols": cols,

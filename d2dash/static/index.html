@@ -376,6 +376,10 @@ a{color:var(--act);text-decoration:none}
 .set{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 0;border-top:1px solid var(--rule);font-size:15px}
 .set:first-of-type{border-top:0}
 .set .d{font-size:13px;color:var(--fg2);margin-top:2px}
+.sel,.txt{min-height:36px;padding:0 10px;border-radius:9px;border:0;background:var(--bg3);color:var(--fg);font-size:15px;font-variant-numeric:tabular-nums;flex:none}
+.txt{width:120px;text-align:right}
+.tyreout{margin-top:10px;padding:12px 14px;border-radius:var(--r2);background:var(--bg3);font-size:14px;color:var(--fg2);line-height:1.5}
+.tyreout b{color:var(--fg);font-family:"Inter D";font-size:22px;font-weight:600;letter-spacing:-.02em;display:block}
 
 /* modal / toast / footer */
 .modal{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center;z-index:20;padding:16px}
@@ -644,6 +648,14 @@ footer{padding:18px var(--pad) 10px;color:var(--fg3);font-size:12px;text-align:c
 
   <!-- ================= MORE ================= -->
   <section id="tab-more">
+    <div class="blk">
+      <h2>Tyres</h2>
+      <p class="hint">The ECU works out speed from wheel turns and the tyre the car left the factory on. Taller tyres make every speed read low; set both sizes and the dashboard corrects road speed, wheel speeds and trip distances. The logs keep the ECU's raw figures.</p>
+      <div class="set"><div>Factory size<div class="d">7J×16 came on 235/70 R16, 8J×16 on 255/65 R16, 18-inch on 255/55 R18</div></div><select id="tyreFactory" class="sel"></select></div>
+      <div class="set"><div>Fitted now</div><select id="tyreFitted" class="sel"></select></div>
+      <div class="set" id="tyreCustomRow" style="display:none"><div>Custom size<div class="d">Width/aspect R rim, e.g. 275/70R16</div></div><input id="tyreCustom" class="txt" placeholder="275/70R16" autocomplete="off" autocapitalize="characters"></div>
+      <div class="tyreout" id="tyreOut"></div>
+    </div>
     <div class="blk">
       <h2>Appearance</h2>
       <div class="set"><div>Theme<div class="d">Auto follows the phone's light or dark setting.</div></div>
@@ -950,7 +962,18 @@ function friendlyError(msg){
 // ============ state ============
 let snap=null, lastSig={td5:{},slabs:{}}, lastFaults={td5:[],slabs:[]}, worst={lvl:'',txt:''};
 
+// Tyre correction: the ECU's speeds assume the factory tyre; scale them for what is fitted.
+let VEH={factor:1, factory:'235/70R16', fitted:'235/70R16'};
+const SPEED_KEYS=['speed','wheel_speed_fl','wheel_speed_fr','wheel_speed_rl','wheel_speed_rr'];
+function correctSpeeds(s){
+  if(!s||!s.signals||Math.abs(VEH.factor-1)<1e-4) return Object.assign({},s);
+  const sig=Object.assign({},s.signals);
+  SPEED_KEYS.forEach(k=>{ if(sig[k]&&typeof sig[k].v==='number') sig[k]=Object.assign({},sig[k],{v:sig[k].v*VEH.factor}); });
+  return Object.assign({},s,{signals:sig});
+}
 function render(s){
+  const raw=s.__raw||s;
+  s=correctSpeeds(raw); s.__raw=raw;
   snap=s;
   const mod=s.module==='slabs'?'SLABS':'Engine';
   $('state').className='state '+s.status;
@@ -1188,6 +1211,32 @@ fetch('/api/status').then(r=>r.json()).then(s=>{
 
 // ============ tabs + sub-tabs ============
 document.querySelectorAll('#themePick button').forEach(b=>b.onclick=()=>setTheme(b.dataset.t)); applyTheme();
+// ---- tyres ----
+function tyreDia(z){ const m=String(z).toUpperCase().replace(/\s/g,'').match(/^(\d{3})\/(\d{2})R(\d{2})$/); return m? (+m[3]*25.4 + 2*(+m[1])*(+m[2])/100) : null; }
+function fillTyres(v){
+  const opt=(z,sel)=>`<option value="${z}" ${z===sel?'selected':''}>${z.replace('R',' R')}</option>`;
+  $('tyreFactory').innerHTML=v.factory_sizes.map(z=>opt(z,v.factory)).join('');
+  const all=[].concat(...Object.values(v.sizes)); const custom=!all.includes(v.fitted);
+  $('tyreFitted').innerHTML=Object.entries(v.sizes).map(([r,list])=>`<optgroup label="${r}-inch">${list.map(z=>opt(z,v.fitted)).join('')}</optgroup>`).join('')
+    + `<option value="custom" ${custom?'selected':''}>Other size…</option>`;
+  $('tyreCustomRow').style.display=custom?'':'none'; if(custom) $('tyreCustom').value=v.fitted;
+  showTyre(v);
+}
+function showTyre(v){
+  const pct=(v.factor-1)*100, d=v.fitted_mm-v.factory_mm;
+  $('tyreOut').innerHTML = Math.abs(pct)<0.05 ? `<b>No correction</b>Fitted and factory sizes match.`
+    : `<b>${pct>0?'+':''}${pct.toFixed(1)} %</b>${v.fitted.replace('R',' R')} is ${Math.abs(d)} mm ${d>0?'taller':'shorter'} than ${v.factory.replace('R',' R')} (${v.fitted_mm} vs ${v.factory_mm} mm). At an indicated 100 km/h you are doing ${(100*v.factor).toFixed(0)} km/h. Check it once against GPS; a worn or soft tyre shifts it by about a percent.`;
+}
+async function saveTyres(){
+  let fitted=$('tyreFitted').value;
+  $('tyreCustomRow').style.display = fitted==='custom' ? '' : 'none';
+  if(fitted==='custom'){ fitted=$('tyreCustom').value.trim(); if(!tyreDia(fitted)) return; }
+  try{ const r=await fetch('/api/vehicle',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({factory:$('tyreFactory').value, fitted})});
+    const v=await r.json(); if(!v.ok){ toast(v.error||'Could not save',true); return; }
+    VEH=v; showTyre(v); toast('Tyre sizes saved'); if(snap) render(snap.__raw||snap); }catch(e){ toast('Could not reach the decoder',true); }
+}
+$('tyreFactory').onchange=saveTyres; $('tyreFitted').onchange=saveTyres; $('tyreCustom').onchange=saveTyres;
+fetch('/api/vehicle').then(r=>r.json()).then(v=>{ VEH=v; fillTyres(v); }).catch(()=>{});
 // Pull down from the top of the page to reload (the page scrolls inside main, so the browser's own gesture does not fire).
 (function(){
   const m=document.querySelector('main'), ind=document.getElementById('ptr'); let y0=null, pulled=0;

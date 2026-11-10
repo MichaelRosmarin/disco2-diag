@@ -266,3 +266,31 @@ def test_fault_library_covers_every_fault(engine):
         assert r["td5"]["road speed missing (Logged)"]["state_note"].startswith("Seen on an earlier run")
     finally:
         httpd.shutdown()
+
+
+def test_tyre_correction(engine, cfg):
+    from d2dash import tyres
+    assert round(tyres.diameter_mm("235/70R16")) == 735 and round(tyres.diameter_mm("265/70R16")) == 777
+    assert abs(tyres.factor("235/70R16", "265/70R16") - 1.0571) < 1e-3
+    with pytest.raises(ValueError):
+        tyres.parse("265/70/16")
+    httpd = ThreadingHTTPServer(("127.0.0.1", 0), make_handler(engine))
+    httpd.daemon_threads = True
+    threading.Thread(target=httpd.serve_forever, daemon=True).start()
+    base = f"http://127.0.0.1:{httpd.server_address[1]}"
+    try:
+        v = json.load(urllib.request.urlopen(base + "/api/vehicle"))
+        assert v["factor"] == 1.0 and "265/70R16" in v["sizes"]["16"]
+        req = urllib.request.Request(base + "/api/vehicle", data=json.dumps({"factory": "235/70R16", "fitted": "265/70R16"}).encode(),
+                                     headers={"Content-Type": "application/json"}, method="POST")
+        r = json.load(urllib.request.urlopen(req))
+        assert r["ok"] and abs(r["factor"] - 1.0571) < 1e-3
+        bad = urllib.request.Request(base + "/api/vehicle", data=b'{"fitted":"999/99R99"}', headers={"Content-Type": "application/json"}, method="POST")
+        with pytest.raises(urllib.error.HTTPError):
+            urllib.request.urlopen(bad)
+    finally:
+        httpd.shutdown()
+    from d2dash import trips as T
+    rows = [{"time": i, "speed": 100.0, "faults": ""} for i in range(3601)]
+    assert abs(T.summarize(rows)["distance_km"] - 100) < 0.2
+    assert abs(T.summarize(rows, 1.0571)["distance_km"] - 105.7) < 0.2

@@ -10,6 +10,7 @@ Routes:
     POST /api/command           {"action": "...", "params": {}, "confirm": true}
     GET  /api/faults/reference  {module: {fault name: likely cause}}
     GET  /api/faults/library    {module: {fault name: full write-up}} (see faultkb.py)
+    GET  /api/vehicle           tyre sizes and the speed factor;  POST {factory, fitted} to change
     GET  /api/logs              list session CSVs
     GET  /api/logs/<name>       download one
     DELETE /api/logs/<name>     remove one
@@ -133,6 +134,34 @@ def save_thresholds(log_dir: str, ov: dict) -> None:
     os.replace(tmp, p)
 
 
+def _vehicle_path(log_dir: str) -> str:
+    return os.path.join(log_dir, "state", "vehicle.json")
+
+
+def load_vehicle(log_dir: str) -> dict:
+    """Vehicle settings that change how values are shown (tyre sizes → speed factor)."""
+    from . import tyres
+    try:
+        with open(_vehicle_path(log_dir), encoding="utf-8") as fh:
+            return tyres.validate(json.load(fh))
+    except (OSError, ValueError):
+        return dict(tyres.DEFAULT)
+
+
+def save_vehicle(log_dir: str, v: dict) -> None:
+    p = _vehicle_path(log_dir)
+    os.makedirs(os.path.dirname(p), exist_ok=True)
+    with open(p + ".tmp", "w", encoding="utf-8") as fh:
+        json.dump(v, fh, indent=1)
+    os.replace(p + ".tmp", p)
+
+
+def speed_factor(log_dir: str) -> float:
+    from . import tyres
+    v = load_vehicle(log_dir)
+    return tyres.factor(v["factory"], v["fitted"])
+
+
 def make_handler(engine: Engine):
     class Handler(BaseHTTPRequestHandler):
         server_version = f"d2dash/{__version__}"
@@ -206,13 +235,16 @@ def make_handler(engine: Engine):
                 return self._json(fault_library())
             if path == "/api/thresholds":
                 return self._json({"overrides": load_thresholds(engine.cfg.log_dir)})
+            if path == "/api/vehicle":
+                from . import tyres
+                return self._json(tyres.describe(load_vehicle(engine.cfg.log_dir)))
             if path == "/api/trips":
                 from . import trips as T
                 sessions = T.list_sessions(engine.cfg.log_dir)
                 out = []
                 for t in reversed(T.group_trips(sessions)):
                     rows = T.load_trip(engine.cfg.log_dir, t)
-                    s = T.summarize(rows)
+                    s = T.summarize(rows, speed_factor(engine.cfg.log_dir))
                     if s:
                         out.append({"id": t["id"], "sessions": t["sessions"], "slabs": t["slabs"], **s})
                 return self._json({"trips": out})
@@ -225,7 +257,8 @@ def make_handler(engine: Engine):
                 if trip is None:
                     return self._json({"error": "no such trip"}, 404)
                 rows = T.load_trip(engine.cfg.log_dir, trip)
-                return self._json({"id": tid, "summary": T.summarize(rows), "replay": T.replay(rows),
+                sf = speed_factor(engine.cfg.log_dir)
+                return self._json({"id": tid, "summary": T.summarize(rows, sf), "replay": T.replay(rows, speed_factor=sf),
                                    "fingerprint": T.fingerprint(rows)})
             if path == "/api/health":
                 from . import trips as T
@@ -288,6 +321,14 @@ def make_handler(engine: Engine):
                 res = engine.command(action, body.get("params") or {},
                                      confirm=bool(body.get("confirm", False)))
                 return self._json(res, HTTPStatus.OK if res.get("ok") else HTTPStatus.BAD_REQUEST)
+            if path == "/api/vehicle":
+                from . import tyres
+                try:
+                    v = tyres.validate(body)
+                except ValueError as exc:
+                    return self._json({"ok": False, "error": str(exc)}, HTTPStatus.BAD_REQUEST)
+                save_vehicle(engine.cfg.log_dir, v)
+                return self._json({"ok": True, **tyres.describe(v)})
             if path == "/api/thresholds":
                 try:
                     ov = validate_thresholds(body.get("overrides") or {})
